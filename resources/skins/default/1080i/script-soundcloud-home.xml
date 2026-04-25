@@ -975,14 +975,17 @@
 
                 <!-- Progress bar (controls mode — narrower) -->
                 <control type="progress">
-                    <visible>String.IsEqual(Window.Property(miniplayer),controls)</visible>
+                    <visible>String.IsEqual(Window.Property(miniplayer),controls) + Player.HasAudio</visible>
                     <left>1040</left>
                     <top>44</top>
                     <width>700</width>
-                    <height>8</height>
+                    <height>6</height>
                     <info>Player.Progress</info>
                     <texturebg border="2" colordiffuse="33FFFFFF">white.png</texturebg>
-                    <midtexture>orange.png</midtexture>
+                    <lefttexture>-</lefttexture>
+                    <midtexture border="2">orange.png</midtexture>
+                    <righttexture>-</righttexture>
+                    <overlaytexture>-</overlaytexture>
                 </control>
 
                 <!-- Duration (controls mode) -->
@@ -1015,13 +1018,17 @@
 
                     <!-- Wide progress bar -->
                     <control type="progress">
+                        <visible>Player.HasAudio</visible>
                         <left>800</left>
                         <top>44</top>
                         <width>1000</width>
-                        <height>8</height>
+                        <height>6</height>
                         <info>Player.Progress</info>
                         <texturebg border="2" colordiffuse="33FFFFFF">white.png</texturebg>
-                        <midtexture>orange.png</midtexture>
+                        <lefttexture>-</lefttexture>
+                        <midtexture border="2">orange.png</midtexture>
+                        <righttexture>-</righttexture>
+                        <overlaytexture>-</overlaytexture>
                     </control>
 
                     <!-- Duration on right -->

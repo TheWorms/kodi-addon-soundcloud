@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.5.7" provider-name="jaylinski">
+<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.5.9" provider-name="jaylinski">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.29.0"/>
@@ -27,7 +27,16 @@
         <forum>https://forum.kodi.tv/showthread.php?tid=206635</forum>
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
-        <news>5.5.7 (2026-04-25) - settings refresh fix
+        <credits>TheWorms</credits>
+        <news>5.5.9 (2026-04-25)
+Added TheWorms as a contributor (visible in Kodi's add-on info screen)
+
+5.5.8 (2026-04-25) - progress bar fix
+Fixed progress bar showing as fully filled and frozen: switched midtexture to use 9-patch border rendering and added explicit empty lefttexture/righttexture/overlaytexture so Kodi correctly interpolates the fill width
+Resized orange.png from 4x4 to 8x8 so it survives the border="2" 9-patch slicing
+Progress bar now shows in SoundCloud orange (#FF5500) and updates in real-time as the track plays
+
+5.5.7 (2026-04-25)
 Fixed: changes to OAuth token (or any setting) now take effect immediately without needing to restart Kodi
 The Settings class now creates a fresh xbmcaddon.Addon() instance on every read, bypassing Kodi's in-memory cache that was hiding the new value
 Auto-reset of the "token invalid" flag when the user changes the token — no more stuck 401 state after a paste
