@@ -299,14 +299,6 @@ msgctxt "#30130"
 msgid "Interface"
 msgstr "Interface"
 
-msgctxt "#30131"
-msgid "Use the new interface"
-msgstr "Utiliser la nouvelle interface"
-
-msgctxt "#30132"
-msgid "When ON, opening the addon launches the new full-screen interface. When OFF, opening the addon shows the classic plugin menu."
-msgstr "Activé : ouvrir l'addon lance la nouvelle interface plein écran. Désactivé : ouvrir l'addon affiche le menu plugin classique."
-
 msgctxt "#30133"
 msgid "Layout"
 msgstr "Mise en page"
@@ -512,3 +504,68 @@ msgstr "Aucun jeton configuré. Collez-en un dans le champ ci-dessus."
 msgctxt "#30245"
 msgid "Network error: {0}"
 msgstr "Erreur réseau : {0}"
+
+msgctxt "#30250"
+msgid "Widgets"
+msgstr "Widgets"
+
+msgctxt "#30251"
+msgid "Likes (widget)"
+msgstr "Likes (widget)"
+
+msgctxt "#30252"
+msgid "My playlists (widget)"
+msgstr "Mes playlists (widget)"
+
+msgctxt "#30253"
+msgid "Following (widget)"
+msgstr "Mes abonnements (widget)"
+
+msgctxt "#30254"
+msgid "Trending (widget)"
+msgstr "Tendances (widget)"
+
+msgctxt "#30255"
+msgid "Discover (widget)"
+msgstr "Découvertes (widget)"
+
+msgctxt "#30260"
+msgid "Skin home widget"
+msgstr "Widget d'accueil du skin"
+
+msgctxt "#30261"
+msgid "Widget mode"
+msgstr "Mode widget"
+
+msgctxt "#30262"
+msgid "What to display when a skin home widget points at SoundCloud's root. \"Off\" returns the normal menu (use this when no widget is configured). Otherwise, the chosen content is returned directly as a flat list."
+msgstr "Ce qui s'affiche quand un widget d'accueil pointe sur la racine de SoundCloud. « Désactivé » renvoie le menu normal (à laisser par défaut). Sinon, le contenu choisi est renvoyé directement en liste plate."
+
+msgctxt "#30263"
+msgid "Off (show full UI)"
+msgstr "Désactivé (afficher l'UI complète)"
+
+msgctxt "#30264"
+msgid "Likes"
+msgstr "Likes"
+
+msgctxt "#30265"
+msgid "My playlists"
+msgstr "Mes playlists"
+
+msgctxt "#30266"
+msgid "Following"
+msgstr "Mes abonnements"
+
+msgctxt "#30267"
+msgid "Trending"
+msgstr "Tendances"
+
+msgctxt "#30268"
+msgid "Discover"
+msgstr "Découvertes"
+
+msgctxt "#30270"
+msgid "▶ Open SoundCloud"
+msgstr "▶ Ouvrir SoundCloud"
+

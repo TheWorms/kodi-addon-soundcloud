@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.5.10" provider-name="jaylinski">
+<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.7.1" provider-name="TheWorms">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.29.0"/>
@@ -27,8 +27,35 @@
         <forum>https://forum.kodi.tv/showthread.php?tid=206635</forum>
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
-        <credits>TheWorms</credits>
-        <news>5.5.10 (2026-04-25)
+        <credits>jaylinski (original add-on), bromix, SLiX</credits>
+        <news>5.7.1 (2026-04-26) - widget compatibility fix
+Fixed: skin home widgets (Arctic Zephyr Reloaded, etc.) used to launch the full-screen UI when added — kicking the user out of their home screen. The addon root URL now returns a flat directory listing of widget shortcuts, so widgets show actual content. Users clicking on the addon from Kodi's add-on browser see a "▶ Open SoundCloud" entry as the first item to launch the full UI.
+
+5.7.0 (2026-04-26) - simplification
+Removed the classic plugin-style menu — the full-screen UI is now the only interface. Removes 75 lines of code, the "Auto-launch" setting, the ?legacy=1 escape hatch and the /launch-ui/ route. Skin home widgets continue to work via the dedicated /widget/* routes (independent of the menu). The "Off" option in Widget mode now shows the full UI instead of the classic menu.
+
+5.6.1 (2026-04-26) - widget mode for Arctic Zephyr
+Arctic Zephyr Reloaded only lets widgets point at the addon root, so the previous /widget/likes/ etc. routes weren't reachable through its UI. Added a "Widget mode" setting (Settings > Display > Skin home widget) that changes what the root returns. Pick Likes / Playlists / Following / Trending / Discover and the home widget will display that. Use ?legacy=1 to keep accessing the menu.
+
+5.6.0 (2026-04-26) - skin widgets
+Added 5 widget shortcut routes that any skin can target as a flat directory: /widget/likes/, /widget/playlists/, /widget/following/, /widget/trending/, /widget/discover/. A new "Widgets" entry in the classic plugin menu lets you browse them from a skin's "Add Widget" picker. See the readme for the Arctic Zephyr Reloaded setup procedure.
+
+5.5.14 (2026-04-25) - progress bar fix v3
+Progress bar updater is now started AFTER the GUI is built (in onInit) instead of in __init__ — that's why no setWidth() calls were being made. Added explicit logging so we can verify the thread is running and the values are being computed. Look for "ProgressUpdater" lines in kodi.log.
+
+5.5.13 (2026-04-25) - progress bar v3
+Progress bar now resized directly via Python control.setWidth() instead of relying on $INFO[Window.Property] in XML width (which Kodi doesn't re-evaluate per frame). The orange fill image has a fixed XML id and the background thread calls setWidth() every 500ms with the computed pixel width. This works regardless of skin or audio format.
+
+5.5.12 (2026-04-25) - custom progress bar
+Replaced the native Kodi progress bar (which was hijacked by Arctic Zephyr Reloaded's blue styling and frozen for HLS streams) with two stacked custom images. A background Python thread polls the player position every 500ms and updates the orange fill width via Window.Property. This fixes both the "always blue" and "never moves" issues at once.
+
+5.5.11 (2026-04-25)
+Time/Duration labels in the mini-player are now wider, brighter (white instead of grey), and use a bigger font (font12) so 1:23:45-style timestamps display fully without truncation
+Removed unnecessary border attributes from progress bar that were causing rendering issues on some skins (orange.png is now a flat 1x1 pixel that Kodi stretches reliably)
+
+NOTE: if the progress bar still doesn't move, check Settings > Playback > Audio format — set it to "Standard stable (MP3 progressive)" rather than "Standard adaptive (MP3 HLS)". HLS streams can prevent Player.Progress from updating on some Kodi builds.
+
+5.5.10 (2026-04-25)
 Updated readme.md with the new v5 interface description and a corrected, step-by-step OAuth token procedure (using the Authorization header, with explicit warnings about the cookie pitfall)
 
 5.5.9 (2026-04-25)

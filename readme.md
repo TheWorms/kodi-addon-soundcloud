@@ -27,13 +27,12 @@ the classic plugin-style menu with an "app-like" experience:
 * **Pagination**: pages show a "Next page" item at the end when there are more
   results
 * **Selection follows the playing track** during autoplay
-* **Configurable everywhere** — toggles in Settings to enable/disable each
-  feature individually (auto-launch, layout, mini-player mode, autoplay,
-  shuffle, row contents)
+* **Configurable everywhere** — toggles in Settings (layout, mini-player
+  mode, autoplay, shuffle, row contents)
 
-The classic plugin-style menu is still available — disable
-*Settings → Display → Use the new interface* to switch back, or use the
-`?legacy=1` URL parameter for widgets.
+Since v5.7 the full-screen UI is the only interface — the classic
+plugin-style menu was removed. Skin home widgets continue to work via
+the dedicated `/widget/*` routes (see "Widgets" below).
 
 ## Features
 
@@ -141,10 +140,54 @@ Legacy (will be removed in a future release):
 
 * `plugin://plugin.audio.soundcloud/play/?audio_id=1` — use `track_id=1` instead.
 
-### plugin://plugin.audio.soundcloud/?legacy=1
+### Widgets (skin home menu)
 
-Forces the classic plugin-style menu instead of the v5 full-screen UI.
-Useful for skin widgets that expect a directory listing.
+For users who want SoundCloud content directly on their Kodi home menu
+(e.g. a "My Likes" carousel on Arctic Zephyr Reloaded), the addon
+exposes flat directory routes that any skin's widget pane can target:
+
+| Route | Returns |
+|---|---|
+| `plugin://plugin.audio.soundcloud/widget/likes/` | Tracks you've liked (requires OAuth token) |
+| `plugin://plugin.audio.soundcloud/widget/playlists/` | Your own playlists (requires OAuth token) |
+| `plugin://plugin.audio.soundcloud/widget/following/` | Artists you follow (requires OAuth token) |
+| `plugin://plugin.audio.soundcloud/widget/trending/` | Worldwide trending tracks |
+| `plugin://plugin.audio.soundcloud/widget/discover/` | SoundCloud's "Discover" mix |
+| `plugin://plugin.audio.soundcloud/widgets/` | Browseable list of all the above |
+
+#### Setting up widgets in Arctic Zephyr Reloaded
+
+Arctic Zephyr Reloaded only lets widgets point at an addon's root URL —
+it doesn't let you pick a specific sub-directory like
+`/widget/likes/`. To work around this, the addon has a **Widget mode**
+setting that changes what the root URL returns:
+
+1. In Kodi, open SoundCloud's **Settings → Display**, scroll to the
+   bottom and find **Skin home widget → Widget mode**.
+2. Pick the content you want the widget to show (Likes / My playlists /
+   Following / Trending / Discover).
+3. Now go to *Settings → Interface → Skin → Configure skin →
+   Customise Home Menu* in Arctic Zephyr Reloaded.
+4. Pick a menu item and click **+ Use as widget** on SoundCloud.
+5. The widget now displays the content you chose in step 2.
+
+Important: while Widget mode is set to anything but "Off", opening
+SoundCloud from the Add-ons screen will *also* return the chosen
+content instead of the full-screen UI. To get the full UI back, set
+Widget mode to "Off (show full UI)" in the addon settings.
+
+If you want **multiple different widgets** (e.g. one for Likes and one
+for Trending), Arctic Zephyr Reloaded alone can't do it because all
+SoundCloud widgets share the same root URL. You need a more advanced
+skin that supports custom widget paths (e.g. via Skin Helper Service)
+to point each widget at a different `/widget/...` route.
+
+#### Setting up widgets in Estuary / Estuary MOD
+
+Estuary lets you navigate sub-directories when picking a widget. Go to
+*Customise Home Menu → choose item → Add Widget* and navigate to
+*Add-ons → Music add-ons → SoundCloud → Widgets* — pick the widget you
+want directly without needing the Widget mode workaround.
 
 ## Development
 
@@ -173,11 +216,15 @@ Run `pipenv run test`.
 
 ## Attributions
 
-This add-on is strongly inspired by the [original add-on](https://github.com/SLiX69/plugin.audio.soundcloud)
-developed by [bromix](https://kodi.tv/addon-author/bromix) and [SLiX](https://github.com/SLiX69).
+This v5+ release is maintained by **TheWorms**, who contributed the
+full-screen interface, OAuth token integration, the widget routes and
+many UX improvements.
 
-The v5 full-screen interface, OAuth token integration and many UX
-improvements were contributed by **TheWorms**.
+It is built on top of the [Kodi SoundCloud add-on by jaylinski](https://github.com/jaylinski/kodi-addon-soundcloud),
+which itself was strongly inspired by the
+[original add-on](https://github.com/SLiX69/plugin.audio.soundcloud)
+developed by [bromix](https://kodi.tv/addon-author/bromix) and
+[SLiX](https://github.com/SLiX69).
 
 ## Copyright and license
 

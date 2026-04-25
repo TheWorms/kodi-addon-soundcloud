@@ -12,48 +12,6 @@ class Items:
         self.search_history = search_history
         self.api = api
 
-    def root(self):
-        items = []
-
-        # Search
-        list_item = xbmcgui.ListItem(label=self.addon.getLocalizedString(30101))
-        url = self.addon_base + PATH_SEARCH
-        items.append((url, list_item, True))
-
-        # Charts
-        list_item = xbmcgui.ListItem(label=self.addon.getLocalizedString(30102))
-        url = self.addon_base + PATH_CHARTS
-        items.append((url, list_item, True))
-
-        # Discover
-        list_item = xbmcgui.ListItem(label=self.addon.getLocalizedString(30103))
-        url = self.addon_base + PATH_DISCOVER
-        items.append((url, list_item, True))
-
-        # My profile (requires OAuth token; when missing the handler
-        # shows a helpful dialog pointing to the settings screen)
-        list_item = xbmcgui.ListItem(label=self.addon.getLocalizedString(30110))
-        url = self.addon_base + PATH_ME
-        items.append((url, list_item, True))
-
-        # New full-screen UI (beta) — opens a custom WindowXML script.
-        list_item = xbmcgui.ListItem(label=self.addon.getLocalizedString(30120))
-        list_item.setArt({"icon": "DefaultAddonSkin.png"})
-        url = self.addon_base + PATH_LAUNCH_UI
-        items.append((url, list_item, False))
-
-        # Settings
-        list_item = xbmcgui.ListItem(label=self.addon.getLocalizedString(30108))
-        url = self.addon_base + "/?action=settings"
-        items.append((url, list_item, False))
-
-        # Sign in TODO
-        # list_item = xbmcgui.ListItem(label=addon.getLocalizedString(30109))
-        # url = addon_base + "/action=signin"
-        # items.append((url, list_item, False))
-
-        return items
-
     def me(self):
         """
         Returns the sub-menu for the authenticated user (likes, playlists, etc.).
@@ -106,6 +64,93 @@ class Items:
             "call": "/stream/users/{id}/reposts".format(id=user_id)
         })
         items.append((url, list_item, True))
+
+        return items
+
+    def widgets(self, include_ui_launcher=False):
+        """
+        Returns a menu of widget shortcuts. Each entry points to a flat
+        directory route (PATH_WIDGET_*) that returns playable items
+        directly — perfect for skin widget panes that expect a flat list.
+
+        This menu is what the addon root URL returns: skin widget pickers
+        will see these entries when browsing the addon, and so will users
+        clicking on the addon from Kodi's add-on browser.
+
+        :param include_ui_launcher: when True, prepend a "▶ Open
+            SoundCloud" entry that launches the full-screen UI. We use
+            this on the root listing so users coming from the add-on
+            browser still have a way into the full UI; we omit it from
+            the deep /widgets/ listing where the launcher item would be
+            confusing inside a widget pane.
+        """
+        items = []
+
+        if include_ui_launcher:
+            # Entry point to the full-screen UI. Lives at the top of
+            # the root listing so it's the first thing users see when
+            # they click the addon from Kodi's add-on browser.
+            list_item = xbmcgui.ListItem(
+                label=format_bold(self.addon.getLocalizedString(30270))
+            )
+            list_item.setArt({
+                "icon": "DefaultAddonSkin.png",
+                "thumb": "DefaultAddonSkin.png",
+            })
+            url = self.addon_base + "/?action=launch_ui"
+            # isFolder=False because clicking it triggers an action
+            # (launch the script), not a directory navigation.
+            items.append((url, list_item, False))
+
+        # Likes (tracks the user has liked)
+        list_item = xbmcgui.ListItem(
+            label=format_bold(self.addon.getLocalizedString(30251))
+        )
+        list_item.setArt({
+            "icon": "DefaultMusicSongs.png",
+            "thumb": "DefaultMusicSongs.png",
+        })
+        items.append((self.addon_base + PATH_WIDGET_LIKES, list_item, True))
+
+        # My playlists
+        list_item = xbmcgui.ListItem(
+            label=format_bold(self.addon.getLocalizedString(30252))
+        )
+        list_item.setArt({
+            "icon": "DefaultMusicPlaylists.png",
+            "thumb": "DefaultMusicPlaylists.png",
+        })
+        items.append((self.addon_base + PATH_WIDGET_PLAYLISTS, list_item, True))
+
+        # Following
+        list_item = xbmcgui.ListItem(
+            label=format_bold(self.addon.getLocalizedString(30253))
+        )
+        list_item.setArt({
+            "icon": "DefaultArtist.png",
+            "thumb": "DefaultArtist.png",
+        })
+        items.append((self.addon_base + PATH_WIDGET_FOLLOWING, list_item, True))
+
+        # Trending
+        list_item = xbmcgui.ListItem(
+            label=format_bold(self.addon.getLocalizedString(30254))
+        )
+        list_item.setArt({
+            "icon": "DefaultMusicTop100.png",
+            "thumb": "DefaultMusicTop100.png",
+        })
+        items.append((self.addon_base + PATH_WIDGET_TRENDING, list_item, True))
+
+        # Discover
+        list_item = xbmcgui.ListItem(
+            label=format_bold(self.addon.getLocalizedString(30255))
+        )
+        list_item.setArt({
+            "icon": "DefaultMusicCompilations.png",
+            "thumb": "DefaultMusicCompilations.png",
+        })
+        items.append((self.addon_base + PATH_WIDGET_DISCOVER, list_item, True))
 
         return items
 

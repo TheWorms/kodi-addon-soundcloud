@@ -17,11 +17,6 @@
         <!-- ============================================================ -->
         <category id="display" label="30200" help="">
             <group id="1" label="30230">
-                <setting id="ui.auto_launch" type="boolean" label="30131" help="30132">
-                    <level>0</level>
-                    <default>true</default>
-                    <control type="toggle"/>
-                </setting>
                 <setting id="ui.layout" type="integer" label="30133" help="30134">
                     <level>0</level>
                     <default>1</default>
@@ -99,6 +94,28 @@
                             <option label="30155">trending</option>
                             <option label="30153">playlists</option>
                             <option label="30154">following</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                </setting>
+            </group>
+
+            <!-- Widget mode: changes what the plugin's root URL returns,
+                 so skin home widgets (Arctic Zephyr, Estuary, etc.) that
+                 only support pointing at the addon root can still show
+                 a useful flat list instead of the menu. -->
+            <group id="3" label="30260">
+                <setting id="widget.mode" type="string" label="30261" help="30262">
+                    <level>0</level>
+                    <default>off</default>
+                    <constraints>
+                        <options>
+                            <option label="30263">off</option>
+                            <option label="30264">likes</option>
+                            <option label="30265">playlists</option>
+                            <option label="30266">following</option>
+                            <option label="30267">trending</option>
+                            <option label="30268">discover</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
