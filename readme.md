@@ -8,7 +8,32 @@
 [![Link to Kodi wiki](https://img.shields.io/badge/Kodi-Wiki-informational.svg)](https://kodi.wiki/view/Add-on:SoundCloud)
 [![Link to Kodi releases](https://img.shields.io/badge/Kodi-v19%20%22Matrix%22-green.svg)](https://kodi.wiki/view/Releases)
 
-This [Kodi](https://github.com/xbmc/xbmc) Add-on provides a minimal interface for SoundCloud.
+This [Kodi](https://github.com/xbmc/xbmc) Add-on provides a full-screen, modern
+interface for SoundCloud, with a sidebar, horizontal carousel rows on the home
+screen, autoplay, and an integrated mini-player.
+
+## What's new in v5
+
+The v5 release introduces a **brand-new full-screen interface** that replaces
+the classic plugin-style menu with an "app-like" experience:
+
+* **Sidebar navigation** — Home, Search, Likes, My playlists, Following, Settings
+* **Home screen with up to 4 horizontal rows** (configurable order and content):
+  Likes, Trending, My playlists, Following
+* **Mini-player** at the bottom showing cover, title, artist, time and a
+  SoundCloud-orange progress bar — with optional play/pause/next/prev controls
+* **Auto-play next track**: clicking a track queues all visible tracks so Kodi
+  plays them in sequence automatically
+* **Pagination**: pages show a "Next page" item at the end when there are more
+  results
+* **Selection follows the playing track** during autoplay
+* **Configurable everywhere** — toggles in Settings to enable/disable each
+  feature individually (auto-launch, layout, mini-player mode, autoplay,
+  shuffle, row contents)
+
+The classic plugin-style menu is still available — disable
+*Settings → Display → Use the new interface* to switch back, or use the
+`?legacy=1` URL parameter for widgets.
 
 ## Features
 
@@ -16,6 +41,7 @@ This [Kodi](https://github.com/xbmc/xbmc) Add-on provides a minimal interface fo
 * Discover new music
 * Play tracks, albums and playlists
 * Optional sign-in via OAuth token to access your likes, playlists, following and reposts
+* New full-screen interface with sidebar, carousel rows and mini-player (v5)
 
 ## Installation
 
@@ -32,32 +58,66 @@ Follow the instructions on [https://kodi.wiki/view/Add-on:SoundCloud](https://ko
 
 ## Authentication (optional)
 
-The add-on can access your personal SoundCloud data (likes, playlists, following, reposts)
-by authenticating with an OAuth token that you paste into the settings.
+The add-on can access your personal SoundCloud data (likes, playlists,
+following, reposts) by authenticating with an OAuth token that you paste
+into the settings.
 
-There is no "Sign in" button: SoundCloud's public API registration has been closed since 2021,
-so we reuse the token the SoundCloud website itself uses. The token is stored locally in
-Kodi's addon settings and sent only to `api-v2.soundcloud.com`.
+There is no "Sign in" button: SoundCloud's public API registration has
+been closed since 2021, so we reuse the token the SoundCloud website
+itself uses. The token is stored locally in Kodi's addon settings and
+sent only to `api-v2.soundcloud.com`.
 
 ### How to get your OAuth token
 
-1. Open [https://soundcloud.com](https://soundcloud.com) in a web browser and sign in.
-2. Open the developer tools (press `F12`).
-3. Go to the **Application** tab (Chrome/Edge) or **Storage** tab (Firefox).
-4. In the left sidebar, expand **Cookies** and select `https://soundcloud.com`.
-5. Find the cookie named `oauth_token` and copy its value
-   (looks like `1-12345-67890-abcdefghijklmno`).
-6. In Kodi, go to the addon settings → **Account** → paste the value into **OAuth token**.
+The recommended way is to read the **`Authorization` header** of any
+authenticated request your browser makes to the SoundCloud API.
 
-**Alternative method** (if the cookie is HttpOnly or not visible):
-open the **Network** tab of the developer tools, find any request to `api-v2.soundcloud.com`,
-look at the `Authorization` request header, and copy the value after `OAuth `.
+1. Open [https://soundcloud.com](https://soundcloud.com) in Chrome or
+   Firefox and **sign in** (verify your avatar shows top-right — important).
+2. Press `F12` to open the developer tools.
+3. Go to the **Network** tab.
+4. In the filter box, type: `api-v2`
+5. Reload the page (`F5`) so requests appear in the list.
+6. Click on any request in the list (e.g. `me`, `featured-tracks`, etc.).
+7. In the right panel, scroll to **Request Headers**.
+8. Find the line: `Authorization: OAuth XXXXXXXXX`
+9. Copy **only what comes after** `OAuth ` (the token itself, no prefix,
+   no leading space).
+10. In Kodi, go to the addon settings → **Account** → paste the value
+    into the **OAuth token** field.
+11. Click **Test OAuth token**. You should see "Token valid: <yourname>".
+
+#### Common pitfalls
+
+* **Do not** copy the cookie named `oauth_token` (under
+  *Application → Cookies* in DevTools). It looks similar but is rejected
+  by the API and will silently break authentication.
+* **Do not** include the word `OAuth` or any leading/trailing space in the
+  pasted value (the addon will strip them defensively, but it's cleaner
+  to copy just the token).
+* If your token starts with `2-` it's a recent format; older accounts may
+  see `1-` — both are valid.
+* If you can't find the `Authorization` header, you're probably not
+  signed in — check the avatar in the top-right of soundcloud.com.
+
+### Test your token
+
+The settings page has a **Test OAuth token** button right below the
+token field. Click it after pasting to verify the token actually works:
+the dialog will show your username on success, or the exact HTTP error
+returned by SoundCloud on failure (with a token-length preview to help
+spot truncated pastes).
 
 ### Token expiration
 
-The token expires occasionally (usually after several months, or if you sign out from the
-SoundCloud website). When that happens, lists under "My profile" come back empty and you
-see a warning notification in Kodi. Just repeat the steps above to get a fresh token.
+The token expires occasionally (usually after several months, or if you
+sign out from the SoundCloud website). When that happens, lists under
+"My profile", "Likes", etc. come back empty and you see a warning
+notification in Kodi. Just repeat the steps above to get a fresh token,
+paste it into the settings and click **Test OAuth token** to confirm.
+
+The addon now picks up token changes immediately — no need to restart
+Kodi after pasting a new token.
 
 ### Privacy
 
@@ -77,9 +137,14 @@ Examples:
 * `plugin://plugin.audio.soundcloud/play/?playlist_id=1`
 * `plugin://plugin.audio.soundcloud/play/?url=https%3A%2F%2Fsoundcloud.com%2Fpslwave%2Fallwithit`
 
-Legacy (will be removed in v5.0):
+Legacy (will be removed in a future release):
 
-* `plugin://plugin.audio.soundcloud/play/?audio_id=1` Use `track_id=1` instead.
+* `plugin://plugin.audio.soundcloud/play/?audio_id=1` — use `track_id=1` instead.
+
+### plugin://plugin.audio.soundcloud/?legacy=1
+
+Forces the classic plugin-style menu instead of the v5 full-screen UI.
+Useful for skin widgets that expect a directory listing.
 
 ## Development
 
@@ -110,6 +175,9 @@ Run `pipenv run test`.
 
 This add-on is strongly inspired by the [original add-on](https://github.com/SLiX69/plugin.audio.soundcloud)
 developed by [bromix](https://kodi.tv/addon-author/bromix) and [SLiX](https://github.com/SLiX69).
+
+The v5 full-screen interface, OAuth token integration and many UX
+improvements were contributed by **TheWorms**.
 
 ## Copyright and license
 
