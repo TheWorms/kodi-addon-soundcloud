@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.7.1" provider-name="TheWorms">
+<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.7.3" provider-name="TheWorms">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.29.0"/>
@@ -28,7 +28,13 @@
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
         <credits>jaylinski (original add-on), bromix, SLiX</credits>
-        <news>5.7.1 (2026-04-26) - widget compatibility fix
+        <news>5.7.3 (2026-04-26) - diagnostic
+Logs detailed window/context info on every root call so we can identify why the widget/UI auto-detection fails on Arctic Zephyr Reloaded. Look for "ROOT context diag" lines in kodi.log.
+
+5.7.2 (2026-04-26) - smart UI auto-launch
+Auto-detect whether the addon is being called by a skin home widget (data fetch — return a directory) or by the user clicking the addon (open the full UI). Detection is based on whether the Kodi Home screen is active. Fixes the regression where users had to click "▶ Open SoundCloud" every time after 5.7.1.
+
+5.7.1 (2026-04-26) - widget compatibility fix
 Fixed: skin home widgets (Arctic Zephyr Reloaded, etc.) used to launch the full-screen UI when added — kicking the user out of their home screen. The addon root URL now returns a flat directory listing of widget shortcuts, so widgets show actual content. Users clicking on the addon from Kodi's add-on browser see a "▶ Open SoundCloud" entry as the first item to launch the full UI.
 
 5.7.0 (2026-04-26) - simplification
