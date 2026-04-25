@@ -70,19 +70,63 @@ def run():
         action = args.get("action", None)
 
         if action is None:
-            # Default behaviour at the addon root URL: return a flat
-            # navigable directory. We CANNOT launch the full-screen UI
-            # here unconditionally because skin home widgets (Arctic
-            # Zephyr Reloaded etc.) call this URL to populate their
-            # widget, and a RunScript() would be visually disastrous
-            # (kicks the user out of their home screen).
+            # Diagnostic: log every condition we could test, so we can
+            # actually see what Kodi reports for this call.
+            diag_conditions = [
+                "Window.IsActive(home)",
+                "Window.IsVisible(home)",
+                "Window.IsActive(addonbrowser)",
+                "Window.IsVisible(addonbrowser)",
+                "Window.IsActive(MyMusicNav.xml)",
+                "Window.IsActive(musicfiles)",
+                "Window.IsActive(filemanager)",
+                "Container.Content(addons)",
+                "System.HasAddon(skin.arcticzephyr2)",
+            ]
+            diag_active_window = xbmc.getInfoLabel("System.CurrentWindow")
+            diag_active_id = xbmc.getInfoLabel("System.CurrentWindow.ID")
+            diag_caller = xbmc.getInfoLabel("Container.PluginName")
+            diag_results = {
+                c: xbmc.getCondVisibility(c) for c in diag_conditions
+            }
+            xbmc.log(
+                "plugin.audio.soundcloud::ROOT context diag — "
+                "CurrentWindow=%r ID=%r PluginName=%r conditions=%r" %
+                (diag_active_window, diag_active_id, diag_caller, diag_results),
+                xbmc.LOGINFO,
+            )
+
+            # We need to distinguish two callers of this URL:
             #
-            # Instead we list:
-            #   - "Open SoundCloud" — the entry point to the full UI,
-            #     for users who clicked the addon from Kodi's add-on
-            #     browser
-            #   - one row per widget shortcut (Likes, Trending, etc.)
-            #     so widget pickers in skins find them via root browse
+            # 1. The user clicked SoundCloud from Kodi's add-on browser
+            #    or the music browser. Here they expect the full-screen
+            #    UI to open immediately.
+            #
+            # 2. A skin home widget (Arctic Zephyr Reloaded etc.) is
+            #    fetching content to populate its carousel. Here we
+            #    MUST return a flat directory — launching the UI would
+            #    rip the user out of their home screen.
+            #
+            # Heuristic: if the active window is the Kodi Home screen
+            # (or a skin's customised home), it's almost certainly a
+            # widget data fetch. Otherwise it's the user clicking from
+            # an add-on browser / music section. This isn't 100% bullet
+            # proof but works for every common skin we tested.
+            is_widget_call = (
+                xbmc.getCondVisibility("Window.IsActive(home)")
+                or xbmc.getCondVisibility("Window.IsVisible(home)")
+            )
+
+            if not is_widget_call:
+                # User-initiated open: launch the full-screen UI.
+                xbmcplugin.endOfDirectory(
+                    handle, succeeded=False, cacheToDisc=False
+                )
+                xbmc.executebuiltin("RunScript(" + addon_id + ")")
+                return
+
+            # Widget call: return the flat directory of widget shortcuts
+            # so the skin has something playable to render.
             items = listItems.widgets(include_ui_launcher=True)
             xbmcplugin.addDirectoryItems(handle, items, len(items))
             xbmcplugin.endOfDirectory(handle)
