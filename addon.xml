@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.5.9" provider-name="jaylinski">
+<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.5.10" provider-name="jaylinski">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.29.0"/>
@@ -28,7 +28,10 @@
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
         <credits>TheWorms</credits>
-        <news>5.5.9 (2026-04-25)
+        <news>5.5.10 (2026-04-25)
+Updated readme.md with the new v5 interface description and a corrected, step-by-step OAuth token procedure (using the Authorization header, with explicit warnings about the cookie pitfall)
+
+5.5.9 (2026-04-25)
 Added TheWorms as a contributor (visible in Kodi's add-on info screen)
 
 5.5.8 (2026-04-25) - progress bar fix
