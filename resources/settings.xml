@@ -1,42 +1,198 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--
+    SoundCloud add-on settings — reorganized in 5.5.0 into 3 user-friendly
+    sections:
+      - Display       (interface, layout, mini-player, home rows)
+      - Playback      (audio format, autoplay, shuffle, page size)
+      - Account       (OAuth, cache, advanced API knobs)
+
+    Setting IDs are kept for backward compatibility with existing user
+    profiles (no resets).
+-->
 <settings version="1">
     <section id="plugin.audio.soundcloud">
-        <category id="general" label="30001" help="">
-            <group id="1" label="30002">
-                <setting id="audio.format" type="integer" label="30003" help="">
+
+        <!-- ============================================================ -->
+        <!-- DISPLAY                                                      -->
+        <!-- ============================================================ -->
+        <category id="display" label="30200" help="">
+            <group id="1" label="30230">
+                <setting id="ui.auto_launch" type="boolean" label="30131" help="30132">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="ui.layout" type="integer" label="30133" help="30134">
+                    <level>0</level>
+                    <default>1</default>
+                    <constraints>
+                        <options>
+                            <option label="30135">0</option>
+                            <option label="30136">1</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                </setting>
+                <setting id="ui.miniplayer" type="integer" label="30137" help="30138">
                     <level>0</level>
                     <default>2</default>
                     <constraints>
                         <options>
-                            <option label="Opus (HLS)">0</option>
-                            <option label="mp3 (HLS)">1</option>
-                            <option label="mp3 (progressive)">2</option>
+                            <option label="30139">0</option>
+                            <option label="30181">1</option>
+                            <option label="30141">2</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
                 </setting>
             </group>
-            <group id="2" label="30011">
-                <setting id="search.items.size" type="string" label="30012" help="">
+            <group id="2" label="30170">
+                <setting id="row1.type" type="string" label="30171" help="">
+                    <level>0</level>
+                    <default>likes</default>
+                    <constraints>
+                        <options>
+                            <option label="30172">off</option>
+                            <option label="30152">likes</option>
+                            <option label="30155">trending</option>
+                            <option label="30153">playlists</option>
+                            <option label="30154">following</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                </setting>
+                <setting id="row2.type" type="string" label="30173" help="">
+                    <level>0</level>
+                    <default>trending</default>
+                    <constraints>
+                        <options>
+                            <option label="30172">off</option>
+                            <option label="30152">likes</option>
+                            <option label="30155">trending</option>
+                            <option label="30153">playlists</option>
+                            <option label="30154">following</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                </setting>
+                <setting id="row3.type" type="string" label="30174" help="">
+                    <level>0</level>
+                    <default>playlists</default>
+                    <constraints>
+                        <options>
+                            <option label="30172">off</option>
+                            <option label="30152">likes</option>
+                            <option label="30155">trending</option>
+                            <option label="30153">playlists</option>
+                            <option label="30154">following</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                </setting>
+                <setting id="row4.type" type="string" label="30175" help="">
+                    <level>0</level>
+                    <default>following</default>
+                    <constraints>
+                        <options>
+                            <option label="30172">off</option>
+                            <option label="30152">likes</option>
+                            <option label="30155">trending</option>
+                            <option label="30153">playlists</option>
+                            <option label="30154">following</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                </setting>
+            </group>
+        </category>
+
+        <!-- ============================================================ -->
+        <!-- PLAYBACK                                                     -->
+        <!-- ============================================================ -->
+        <category id="playback" label="30210" help="">
+            <group id="1" label="30231">
+                <setting id="audio.format" type="integer" label="30232" help="30233">
+                    <level>0</level>
+                    <default>2</default>
+                    <constraints>
+                        <options>
+                            <option label="30234">0</option>
+                            <option label="30235">1</option>
+                            <option label="30236">2</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                </setting>
+                <setting id="ui.autoplay" type="boolean" label="30142" help="30143">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="ui.shuffle" type="boolean" label="30144" help="30145">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="search.items.size" type="string" label="30237" help="30238">
                     <level>0</level>
                     <default>20</default>
                     <constraints>
                         <options>
-                            <option>5</option>
                             <option>10</option>
-                            <option>15</option>
                             <option>20</option>
-                            <option>25</option>
                             <option>30</option>
-                            <option>40</option>
                             <option>50</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
                 </setting>
-                <setting id="search.history.size" type="string" label="30013" help="">
+            </group>
+        </category>
+
+        <!-- ============================================================ -->
+        <!-- ACCOUNT & ADVANCED                                           -->
+        <!-- ============================================================ -->
+        <category id="account" label="30220" help="">
+            <group id="1" label="30020">
+                <setting id="auth.oauth_token" type="string" label="30021" help="30023">
                     <level>0</level>
-                    <default>10</default>
+                    <default/>
+                    <constraints>
+                        <allowempty>true</allowempty>
+                    </constraints>
+                    <control type="edit" format="string">
+                        <heading>30021</heading>
+                        <hidden>true</hidden>
+                    </control>
+                </setting>
+                <setting id="auth.test" type="action" label="30240" help="30241">
+                    <level>0</level>
+                    <data>RunPlugin(plugin://plugin.audio.soundcloud/settings/auth/test/)</data>
+                    <control type="button" format="action">
+                        <close>false</close>
+                    </control>
+                </setting>
+                <setting id="auth.help" type="action" label="30022" help="">
+                    <level>0</level>
+                    <data>RunPlugin(plugin://plugin.audio.soundcloud/settings/auth/help/)</data>
+                    <control type="button" format="action">
+                        <close>false</close>
+                    </control>
+                </setting>
+            </group>
+            <group id="2" label="30070">
+                <setting id="cache.clear" type="action" label="30071" help="">
+                    <level>0</level>
+                    <data>RunPlugin(plugin://plugin.audio.soundcloud/settings/cache/clear/)</data>
+                    <control type="button" format="action">
+                        <close>true</close>
+                    </control>
+                </setting>
+            </group>
+            <group id="3" label="30221">
+                <setting id="search.history.size" type="string" label="30013" help="">
+                    <level>2</level>
+                    <default>15</default>
                     <constraints>
                         <options>
                             <option>0</option>
@@ -45,15 +201,12 @@
                             <option>15</option>
                             <option>20</option>
                             <option>30</option>
-                            <option>50</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
                 </setting>
-            </group>
-            <group id="3" label="30060">
                 <setting id="apiv2.client_id" type="string" label="30061" help="">
-                    <level>3</level>
+                    <level>2</level>
                     <default/>
                     <constraints>
                         <allowempty>true</allowempty>
@@ -74,15 +227,7 @@
                     <control type="spinner" format="string"/>
                 </setting>
             </group>
-            <group id="4" label="30070">
-                <setting id="cache.clear" type="action" label="30071" help="">
-                    <level>1</level>
-                    <data>RunPlugin(plugin://plugin.audio.soundcloud/settings/cache/clear/)</data>
-                    <control type="button" format="action">
-                        <close>true</close>
-                    </control>
-                </setting>
-            </group>
         </category>
+
     </section>
 </settings>

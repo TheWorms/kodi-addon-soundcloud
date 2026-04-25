@@ -229,3 +229,298 @@ class ApiV2TestCase(TestCase):
 
         client_id = self.api.fetch_client_id()
         self.assertEqual(client_id, "1XduoqV99lROqCMpijtDo5WnJmpaLuYm")
+
+    @mock.patch("requests.get")
+    def test_do_request_without_oauth_token_sends_no_auth_header(self, mock_get):
+        """When no OAuth token is configured, no Authorization header is sent."""
+        self.api.api_client_id_cache_key = "unused"
+        self.api.cache.get = Mock(return_value="fake_client_id")
+        self.api.settings.get_oauth_token = Mock(return_value=None)
+
+        response = Mock()
+        response.status_code = 200
+        response.text = '{"collection": []}'
+        response.json.return_value = {"collection": []}
+        mock_get.return_value = response
+
+        self.api._do_request("/search/tracks", {"q": "foo"})
+
+        _, kwargs = mock_get.call_args
+        headers = kwargs.get("headers", {})
+        self.assertNotIn("Authorization", headers)
+
+    @mock.patch("requests.get")
+    def test_do_request_with_oauth_token_sends_auth_header(self, mock_get):
+        """When an OAuth token is configured, an Authorization: OAuth <token>
+        header is sent and the client_id is OMITTED (sending both can cause
+        /me/* endpoints to return empty collections)."""
+        self.api.cache.get = Mock(return_value="fake_client_id")
+        self.api.settings.get_oauth_token = Mock(return_value="1-12345-67890-abcdef")
+
+        response = Mock()
+        response.status_code = 200
+        response.text = '{"collection": []}'
+        response.json.return_value = {"collection": []}
+        mock_get.return_value = response
+
+        self.api._do_request("/me/likes/tracks", {})
+
+        _, kwargs = mock_get.call_args
+        headers = kwargs.get("headers", {})
+        params = kwargs.get("params", {})
+        self.assertEqual(headers.get("Authorization"), "OAuth 1-12345-67890-abcdef")
+        self.assertNotIn("client_id", params)
+
+    @mock.patch("requests.get")
+    def test_map_unwraps_like_envelope(self, mock_get):
+        """Items returned by /me/likes/tracks are wrapped in a {kind: 'like',
+        track: {...}} envelope. The mapper should unwrap them so they appear
+        as regular tracks."""
+        self.api.cache.get = Mock(return_value="fake_client_id")
+        self.api.settings.get_oauth_token = Mock(return_value="any-token")
+
+        # Realistic shape (trimmed) of a /me/likes/tracks response.
+        with open("./tests/mocks/api_v2_search_tracks.json") as f:
+            inner_tracks = json.load(f)["collection"]
+        wrapped = {
+            "collection": [
+                {"kind": "like", "created_at": "2024-01-01", "track": t}
+                for t in inner_tracks
+            ]
+        }
+        response = Mock()
+        response.status_code = 200
+        response.text = json.dumps(wrapped)
+        response.json.return_value = wrapped
+        mock_get.return_value = response
+
+        res = self.api.call("/me/likes/tracks")
+        self.assertEqual(len(res.items), len(inner_tracks))
+        self.assertEqual(type(res.items[0]).__name__, "Track")
+
+    @mock.patch("requests.get")
+    def test_do_request_handles_empty_body_without_crashing(self, mock_get):
+        """Some endpoints return an empty body (204, or 200 with no body).
+        Don't crash with JSONDecodeError — return an empty collection."""
+        self.api.cache.get = Mock(return_value="fake_client_id")
+        self.api.settings.get_oauth_token = Mock(return_value=None)
+
+        response = Mock()
+        response.status_code = 200
+        response.text = ""
+        # Configure .json() to raise like requests would on empty body.
+        response.json = Mock(side_effect=ValueError("Expecting value"))
+        mock_get.return_value = response
+
+        result = self.api._do_request("/charts", {})
+        self.assertEqual(result, {"collection": []})
+
+    @mock.patch("requests.get")
+    def test_do_request_handles_401_without_crashing(self, mock_get):
+        """A 401 from an authenticated request returns an empty collection
+        instead of crashing on JSON parse — this is the regression we
+        were fixing for /me/* endpoints."""
+        self.api.cache.get = Mock(return_value="fake_client_id")
+        self.api.settings.get_oauth_token = Mock(return_value="bad-token")
+
+        response = Mock()
+        response.status_code = 401
+        response.text = ""
+        response.json = Mock(side_effect=ValueError("Expecting value"))
+        mock_get.return_value = response
+
+        result = self.api._do_request("/me/likes/tracks", {})
+        self.assertEqual(result, {"collection": []})
+
+    @mock.patch("requests.get")
+    def test_do_request_handles_non_json_response(self, mock_get):
+        """If the server returns HTML or plain text, don't crash."""
+        self.api.cache.get = Mock(return_value="fake_client_id")
+        self.api.settings.get_oauth_token = Mock(return_value=None)
+
+        response = Mock()
+        response.status_code = 200
+        response.text = "<html>Maintenance</html>"
+        response.json = Mock(side_effect=ValueError("Expecting value"))
+        mock_get.return_value = response
+
+        result = self.api._do_request("/charts", {})
+        self.assertEqual(result, {"collection": []})
+
+    @mock.patch("requests.get")
+    def test_get_me_returns_profile_when_authenticated(self, mock_get):
+        """GET /me with a valid token returns the user profile dict."""
+        self.api.cache.get = Mock(return_value=None)  # no cache hit
+        self.api.cache.add = Mock()
+        self.api.settings.get_oauth_token = Mock(return_value="valid-token")
+
+        profile = {"id": 123456, "username": "testuser", "kind": "user"}
+        response = Mock()
+        response.status_code = 200
+        response.text = json.dumps(profile)
+        response.json.return_value = profile
+        mock_get.return_value = response
+
+        me = self.api.get_me()
+        self.assertEqual(me["id"], 123456)
+        self.assertEqual(self.api.get_my_user_id(), 123456)
+
+    @mock.patch("requests.get")
+    def test_get_me_returns_none_without_token(self, mock_get):
+        """Without a token we don't even attempt the request."""
+        self.api.settings.get_oauth_token = Mock(return_value=None)
+        self.assertIsNone(self.api.get_me())
+        self.assertIsNone(self.api.get_my_user_id())
+        mock_get.assert_not_called()
+
+    @mock.patch("requests.get")
+    def test_get_me_returns_none_on_failure(self, mock_get):
+        """A 401 returning {"collection": []} should be treated as failure."""
+        self.api.cache.get = Mock(return_value=None)
+        self.api.settings.get_oauth_token = Mock(return_value="bad-token")
+
+        response = Mock()
+        response.status_code = 401
+        response.text = ""
+        response.json = Mock(side_effect=ValueError())
+        mock_get.return_value = response
+
+        self.assertIsNone(self.api.get_me())
+
+    @mock.patch("requests.get")
+    def test_resolve_media_url_returns_none_on_404(self, mock_get):
+        """Expired transcoding URLs return 404 — resolve_media_url should
+        return None instead of crashing, so the play handler can tell Kodi
+        to skip the track via setResolvedUrl(succeeded=False)."""
+        self.api.cache.get = Mock(return_value="fake_client_id")
+        self.api.settings.get_oauth_token = Mock(return_value=None)
+
+        response = Mock()
+        response.status_code = 404
+        response.text = "{}"
+        response.json.return_value = {}
+        mock_get.return_value = response
+
+        resolved = self.api.resolve_media_url(
+            "https://api-v2.soundcloud.com/media/soundcloud:tracks:1/abc/stream/hls"
+        )
+        self.assertIsNone(resolved)
+
+    @mock.patch("requests.get")
+    def test_do_request_strips_whitespace_in_oauth_token(self, mock_get):
+        """Leading/trailing whitespace in the token is stripped (common copy-paste artifact)."""
+        self.api.cache.get = Mock(return_value="fake_client_id")
+
+        # Settings now creates a fresh xbmcaddon.Addon() instance for every
+        # read, so we patch xbmcaddon.Addon at module level rather than
+        # passing a mock to Settings().
+        mock_addon = MagicMock()
+        mock_addon.getAddonInfo = Mock(return_value="plugin.audio.soundcloud")
+        with mock.patch(
+            "resources.lib.kodi.settings.xbmcaddon.Addon",
+            return_value=mock_addon,
+        ):
+            mock_addon.getSetting = Mock(return_value="   1-12345-67890-abcdef   ")
+            settings = Settings(mock_addon)
+            self.assertEqual(settings.get_oauth_token(), "1-12345-67890-abcdef")
+
+            mock_addon.getSetting = Mock(return_value="   ")
+            self.assertIsNone(settings.get_oauth_token())
+
+            mock_addon.getSetting = Mock(return_value="")
+            self.assertIsNone(settings.get_oauth_token())
+
+    def test_oauth_token_strips_oauth_prefix(self):
+        """If user pastes the full Authorization header value
+        ('OAuth 1-12345-...' or 'Bearer ...'), strip the prefix
+        automatically to avoid silent 401s."""
+        from resources.lib.kodi.settings import Settings
+        mock_addon = MagicMock()
+        mock_addon.getAddonInfo = Mock(return_value="plugin.audio.soundcloud")
+
+        with mock.patch(
+            "resources.lib.kodi.settings.xbmcaddon.Addon",
+            return_value=mock_addon,
+        ):
+            for raw, expected in [
+                ("OAuth 2-12345-67890-abc", "2-12345-67890-abc"),
+                ("oauth 2-12345-67890-abc", "2-12345-67890-abc"),  # lowercase
+                ("Bearer abc123", "abc123"),
+                ("  OAuth   spaces-token  ", "spaces-token"),
+                ('"2-12345-67890-abc"', "2-12345-67890-abc"),  # with quotes
+                ("2-12345-67890-abc", "2-12345-67890-abc"),  # already clean
+            ]:
+                mock_addon.getSetting = Mock(return_value=raw)
+                self.assertEqual(
+                    Settings(mock_addon).get_oauth_token(),
+                    expected,
+                    f"Failed for input: {raw!r}",
+                )
+
+    @mock.patch("requests.get")
+    def test_do_request_falls_back_to_anonymous_on_401(self, mock_get):
+        """When a stale OAuth token causes a 401, the API should:
+          1. Mark the token as invalid for the rest of the session
+          2. Retry the request anonymously (with client_id) and return that
+          3. Never include the bad token in subsequent requests
+        Without this, every endpoint (even public ones like /charts) would
+        fail with 401 until the user manually clears the token."""
+        self.api.cache.get = Mock(return_value="fake_client_id")
+        self.api.settings.get_oauth_token = Mock(return_value="stale-token")
+
+        # First call: 401. Second call (retry without token): 200 with data.
+        bad = Mock()
+        bad.status_code = 401
+        bad.text = ""
+        bad.json = Mock(side_effect=ValueError())
+
+        good = Mock()
+        good.status_code = 200
+        good.text = '{"collection": [{"id": 1, "kind": "track"}]}'
+        good.json.return_value = {"collection": [{"id": 1, "kind": "track"}]}
+
+        mock_get.side_effect = [bad, good]
+
+        result = self.api._do_request("/charts", {})
+        self.assertEqual(result, {"collection": [{"id": 1, "kind": "track"}]})
+        self.assertTrue(self.api._token_invalid)
+
+        # Subsequent call should NOT use the token (since _token_invalid is set)
+        good2 = Mock()
+        good2.status_code = 200
+        good2.text = '{"collection": []}'
+        good2.json.return_value = {"collection": []}
+        mock_get.side_effect = [good2]
+        self.api._do_request("/some/other/endpoint", {})
+        # Verify the second call's headers don't include Authorization
+        call_args = mock_get.call_args_list[-1]
+        sent_headers = call_args.kwargs.get("headers", {})
+        self.assertNotIn("Authorization", sent_headers)
+
+
+    def test_track_handles_missing_date(self):
+        """
+        Regression test: tracks without a display_date used to crash the plugin
+        with `TypeError: 'NoneType' object is not subscriptable` when trying
+        to extract the year. This happens on some tracks returned by /me/*
+        endpoints. The fix should result in a track without year/date info
+        but no crash.
+        """
+        from resources.lib.models.track import Track
+        track = Track(id=1, label="No date track")
+        track.thumb = "https://example.com/t.jpg"
+        track.media = "https://example.com/m.mp3"
+        track.info = {
+            "artist": "Anon",
+            "album": None,
+            "genre": "Electronic",
+            "date": None,                     # <-- the trigger
+            "description": None,
+            "duration": 100,
+            "playback_count": 0,
+        }
+
+        # Must not raise.
+        url, list_item, is_folder = track.to_list_item("plugin://plugin.audio.soundcloud")
+        self.assertIsNotNone(list_item)
+        self.assertFalse(is_folder)

@@ -82,6 +82,49 @@ class ApiV2(ApiInterface):
         res = self._do_request(url.path, urllib.parse.parse_qs(url.query))
         return self._map_json_to_collection(res)
 
+    def get_me(self):
+        """
+        Returns the authenticated user's profile object (or None if the
+        request fails — e.g. no token, expired token, network error).
+
+        Cached for 24h so we don't hit /me on every menu navigation.
+        """
+        # If we've already detected an invalid token earlier this session,
+        # short-circuit to avoid the double round-trip (auth fail + retry
+        # which also fails because /me requires a user). The user must
+        # update the token in settings to recover.
+        if getattr(self, "_token_invalid", False):
+            return None
+
+        if not self.settings.get_oauth_token():
+            return None
+
+        cache_key = "api-me-profile"
+        cached = self.cache.get(cache_key, 1440)  # 24h
+        if cached:
+            try:
+                return json.loads(cached)
+            except ValueError:
+                pass
+
+        res = self._do_request("/me", {})
+        # _do_request returns {"collection": []} on errors, so a real /me
+        # response is recognisable by the presence of an "id" key.
+        if isinstance(res, dict) and "id" in res:
+            try:
+                self.cache.add(cache_key, json.dumps(res))
+            except Exception:
+                pass
+            return res
+        return None
+
+    def get_my_user_id(self):
+        """Convenience wrapper — returns just the user id, or None."""
+        me = self.get_me()
+        if me:
+            return me.get("id")
+        return None
+
     def resolve_id(self, id):
         res = self._do_request("/tracks", {"ids": id})
         return self._map_json_to_collection({"collection": res})
@@ -92,20 +135,85 @@ class ApiV2(ApiInterface):
         return self._map_json_to_collection(res)
 
     def resolve_media_url(self, url):
+        """
+        Resolves a transcoding URL (e.g. /media/.../stream/hls) to the actual
+        playable stream URL.
+
+        Note: SoundCloud HLS/progressive transcoding URLs are short-lived
+        (typically 30 minutes after the parent track was fetched). If the
+        URL has expired, the API responds 404 and we return None — the
+        caller (plugin.py play handler) is responsible for telling Kodi
+        the resolution failed via setResolvedUrl(succeeded=False).
+        """
         url = urllib.parse.urlparse(url)
         res = self._do_request(url.path, urllib.parse.parse_qs(url.query))
-        return res.get("url")
+        resolved = res.get("url") if isinstance(res, dict) else None
+        if not resolved:
+            xbmc.log(
+                "plugin.audio.soundcloud::ApiV2() Could not resolve stream URL %s "
+                "(probably expired transcoding token)" % url.path,
+                xbmc.LOGWARNING,
+            )
+        return resolved
 
-    def _do_request(self, path, payload, cache=0):
-        payload["client_id"] = self.api_client_id
+    def _do_request(self, path, payload, cache=0, _retry_after_401=False):
+        # Read the current token from settings. We always re-read because
+        # the user might have just edited it (Settings now creates a fresh
+        # Addon() per call to bypass Kodi's in-memory caching).
+        current_token = self.settings.get_oauth_token()
+
+        # If the token has changed since we last marked it invalid, reset
+        # the flag so the new token gets a fresh chance. This way the user
+        # doesn't have to restart Kodi after pasting a new token.
+        if (
+            getattr(self, "_token_invalid", False)
+            and current_token
+            and current_token != getattr(self, "_last_invalid_token", None)
+        ):
+            xbmc.log(
+                "plugin.audio.soundcloud::ApiV2() OAuth token changed since "
+                "last 401 — re-enabling auth for this session",
+                xbmc.LOGINFO,
+            )
+            self._token_invalid = False
+            self._last_invalid_token = None
+
+        # Inject OAuth token when the user has configured one in the settings.
+        # However, if we've previously seen the token rejected with 401, we
+        # disable it for the rest of this session — otherwise we keep getting
+        # 401s on EVERY endpoint (even public ones like /charts) because
+        # SoundCloud refuses any request bearing an invalid token.
+        oauth_token = (
+            current_token
+            if not getattr(self, "_token_invalid", False)
+            else None
+        )
+        authenticated = bool(oauth_token)
+
+        # The client_id is required for unauthenticated calls. When we have
+        # an OAuth token we leave it out — sending both can cause some /me/*
+        # endpoints to return empty collections (the API arbitrates between
+        # the two and the client_id "wins" the user context, giving back the
+        # client_id app's empty profile instead of the user's data).
+        if not authenticated:
+            payload["client_id"] = self.api_client_id
         payload["app_locale"] = self.api_lang
+
         headers = {"Accept-Encoding": "gzip", "User-Agent": self.api_user_agent}
+        if authenticated:
+            headers["Authorization"] = "OAuth " + oauth_token
+
         path = self.api_host + path
         cache_key = hashlib.sha1((path + str(payload)).encode()).hexdigest()
 
+        # Redact the token before logging the headers.
+        log_headers = dict(headers)
+        if "Authorization" in log_headers:
+            log_headers["Authorization"] = "OAuth <redacted>"
+
         xbmc.log(
             "plugin.audio.soundcloud::ApiV2() Calling %s with header %s and payload %s" %
-            (path, str(headers), str(payload)),
+            (path, str(log_headers), str(payload)),
             xbmc.LOGDEBUG
         )
 
@@ -117,13 +225,98 @@ class ApiV2(ApiInterface):
                 return json.loads(cached_response)
 
         # Send the request.
-        response = requests.get(path, headers=headers, params=payload).json()
+        raw = requests.get(path, headers=headers, params=payload)
+
+        # Status-code-aware handling. We log the body on errors (truncated)
+        # so debug logs reveal the real cause without crashing the addon.
+        body_preview = (raw.text or "")[:200]
+
+        if authenticated and raw.status_code in (401, 403) and not _retry_after_401:
+            xbmc.log(
+                "plugin.audio.soundcloud::ApiV2() Authentication failed (HTTP %d) on %s. "
+                "Body: %r. The OAuth token is missing, invalid or expired. "
+                "Disabling token for the rest of this session — "
+                "update it in Settings > Account > OAuth token to fix." %
+                (raw.status_code, path, body_preview),
+                xbmc.LOGWARNING
+            )
+            self._notify_auth_error()
+            # Mark the token as invalid for the rest of this Python session
+            # so subsequent calls don't keep failing with 401 on every
+            # endpoint (including public ones like /charts).
+            # We also remember WHICH token was rejected, so when the user
+            # pastes a new one we can detect the change and try again.
+            self._token_invalid = True
+            self._last_invalid_token = current_token
+            # Retry the same request immediately, this time anonymously.
+            # The _retry_after_401 flag prevents infinite recursion if the
+            # endpoint somehow returns 401 even unauthenticated.
+            retry_path = path.replace(self.api_host, "", 1)
+            # Drop any auth-side payload key we may have added (defensive,
+            # currently none). The recursive call adds client_id itself.
+            payload.pop("oauth_token", None)
+            return self._do_request(
+                retry_path, payload, cache, _retry_after_401=True
+            )
+
+        if raw.status_code >= 400:
+            xbmc.log(
+                "plugin.audio.soundcloud::ApiV2() HTTP %d on %s. Body: %r" %
+                (raw.status_code, path, body_preview),
+                xbmc.LOGWARNING
+            )
+            return {"collection": []}
+
+        # Some endpoints can return an empty body (204 No Content, or even
+        # a successful 200 with no body for empty user lists). Don't crash.
+        if not raw.text or not raw.text.strip():
+            xbmc.log(
+                "plugin.audio.soundcloud::ApiV2() Empty body on %s (status %d)" %
+                (path, raw.status_code),
+                xbmc.LOGDEBUG
+            )
+            return {"collection": []}
+
+        try:
+            response = raw.json()
+        except ValueError as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::ApiV2() Non-JSON response on %s (status %d): %s. "
+                "Body: %r" %
+                (path, raw.status_code, str(e), body_preview),
+                xbmc.LOGWARNING
+            )
+            return {"collection": []}
 
         # If caching is active, cache the response.
         if cache:
             self.cache.add(cache_key, json.dumps(response))
 
         return response
+
+    _auth_error_notified = False
+
+    def _notify_auth_error(self):
+        """
+        Shows a non-blocking notification about an invalid OAuth token.
+        Guarded so we only bother the user once per plugin invocation.
+        """
+        if ApiV2._auth_error_notified:
+            return
+        ApiV2._auth_error_notified = True
+        try:
+            import xbmcaddon
+            import xbmcgui
+            addon = xbmcaddon.Addon()
+            xbmcgui.Dialog().notification(
+                addon.getAddonInfo("name"),
+                addon.getLocalizedString(30024),
+                xbmcgui.NOTIFICATION_WARNING,
+                5000
+            )
+        except Exception:
+            # Never let a notification failure break playback.
+            pass
 
     def _extract_media_url(self, transcodings):
         setting = self.settings.get("audio.format")
@@ -161,6 +354,37 @@ class ApiV2(ApiInterface):
             for item in json_obj["collection"]:
                 kind = item.get("kind", None)
 
+                # /me/* endpoints wrap the actual content in a "like" / "repost" /
+                # "playlist-like" envelope with the real object nested inside.
+                # Unwrap so the rest of the code sees the underlying track / playlist.
+                if kind in ("like", "track-like"):
+                    if isinstance(item.get("track"), dict):
+                        item = item["track"]
+                        kind = item.get("kind", "track")
+                    elif isinstance(item.get("playlist"), dict):
+                        item = item["playlist"]
+                        kind = item.get("kind", "playlist")
+                    else:
+                        continue
+                elif kind in ("track-repost", "repost"):
+                    if isinstance(item.get("track"), dict):
+                        item = item["track"]
+                        kind = item.get("kind", "track")
+                    else:
+                        continue
+                elif kind == "playlist-like":
+                    if isinstance(item.get("playlist"), dict):
+                        item = item["playlist"]
+                        kind = item.get("kind", "playlist")
+                    else:
+                        continue
+                elif kind == "playlist-repost":
+                    if isinstance(item.get("playlist"), dict):
+                        item = item["playlist"]
+                        kind = item.get("kind", "playlist")
+                    else:
+                        continue
+
                 if kind == "track":
                     if "title" not in item:
                         # Track not fully returned by API
@@ -174,6 +398,7 @@ class ApiV2(ApiInterface):
                     user = User(id=item["id"], label=item["username"])
                     user.label2 = item.get("full_name", "")
                     user.thumb = self._get_thumbnail(item, self.thumbnail_size)
+                    user.fanart = self._get_user_banner(item)
                     user.info = {
                         "description": item.get("description", ""),
                         "followers": item.get("followers_count", 0)
@@ -185,10 +410,12 @@ class ApiV2(ApiInterface):
                     playlist.is_album = item.get("is_album", False)
                     playlist.label2 = item.get("label_name", "")
                     playlist.thumb = self._get_thumbnail(item, self.thumbnail_size)
+                    playlist.fanart = playlist.thumb
                     playlist.info = {
                         "artist": item["user"]["username"],
                         "description": item.get("description", ""),
-                        "likes": item.get("likes_count", 0)
+                        "likes": item.get("likes_count", 0),
+                        "track_count": item.get("track_count", 0),
                     }
                     collection.items.append(playlist)
 
@@ -239,8 +466,10 @@ class ApiV2(ApiInterface):
         return collection
 
     def _build_track(self, item):
+        album = None
         if type(item.get("publisher_metadata")) is dict:
             artist = item["publisher_metadata"].get("artist", item["user"]["username"])
+            album = item["publisher_metadata"].get("album_title")
         else:
             artist = item["user"]["username"]
 
@@ -248,9 +477,11 @@ class ApiV2(ApiInterface):
         track.blocked = True if item.get("policy") == "BLOCK" else False
         track.preview = True if item.get("policy") == "SNIP" else False
         track.thumb = self._get_thumbnail(item, self.thumbnail_size)
+        track.fanart = track.thumb  # Artwork doubles as fanart for detail views.
         track.media = self._extract_media_url(item["media"]["transcodings"])
         track.info = {
             "artist": artist,
+            "album": album,
             "genre": item.get("genre", None),
             "date": item.get("display_date", None),
             "description": item.get("description", None),
@@ -315,6 +546,25 @@ class ApiV2(ApiInterface):
             r"\1\2-\3-t{x}x{y}.\5".format(x=size, y=size),
             url
         ) if url else None
+
+    @staticmethod
+    def _get_user_banner(item):
+        """
+        SoundCloud user objects can include a `visuals` section with the
+        profile-page banner (usually 2480x520 px). We use it as fanart so
+        the detail view of an artist looks rich instead of showing the
+        addon's default fanart.
+
+        Structure:
+          "visuals": {"visuals": [{"visual_url": "https://..."}]}
+        """
+        visuals = item.get("visuals") or {}
+        inner = visuals.get("visuals") or []
+        if inner and isinstance(inner, list):
+            url = inner[0].get("visual_url")
+            if url:
+                return url
+        return None
 
     @staticmethod
     def _chunks(lst, size):

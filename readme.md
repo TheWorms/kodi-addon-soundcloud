@@ -15,6 +15,7 @@ This [Kodi](https://github.com/xbmc/xbmc) Add-on provides a minimal interface fo
 * Search
 * Discover new music
 * Play tracks, albums and playlists
+* Optional sign-in via OAuth token to access your likes, playlists, following and reposts
 
 ## Installation
 
@@ -28,6 +29,41 @@ Follow the instructions on [https://kodi.wiki/view/Add-on:SoundCloud](https://ko
 * Copy the zip file to your Kodi system
 * Open Kodi, go to Add-ons and select "Install from zip file"
 * Select the file `plugin.audio.soundcloud.zip`
+
+## Authentication (optional)
+
+The add-on can access your personal SoundCloud data (likes, playlists, following, reposts)
+by authenticating with an OAuth token that you paste into the settings.
+
+There is no "Sign in" button: SoundCloud's public API registration has been closed since 2021,
+so we reuse the token the SoundCloud website itself uses. The token is stored locally in
+Kodi's addon settings and sent only to `api-v2.soundcloud.com`.
+
+### How to get your OAuth token
+
+1. Open [https://soundcloud.com](https://soundcloud.com) in a web browser and sign in.
+2. Open the developer tools (press `F12`).
+3. Go to the **Application** tab (Chrome/Edge) or **Storage** tab (Firefox).
+4. In the left sidebar, expand **Cookies** and select `https://soundcloud.com`.
+5. Find the cookie named `oauth_token` and copy its value
+   (looks like `1-12345-67890-abcdefghijklmno`).
+6. In Kodi, go to the addon settings → **Account** → paste the value into **OAuth token**.
+
+**Alternative method** (if the cookie is HttpOnly or not visible):
+open the **Network** tab of the developer tools, find any request to `api-v2.soundcloud.com`,
+look at the `Authorization` request header, and copy the value after `OAuth `.
+
+### Token expiration
+
+The token expires occasionally (usually after several months, or if you sign out from the
+SoundCloud website). When that happens, lists under "My profile" come back empty and you
+see a warning notification in Kodi. Just repeat the steps above to get a fresh token.
+
+### Privacy
+
+* The token is stored **only** on your device, in Kodi's addon profile folder.
+* It is sent **only** to `api-v2.soundcloud.com` as the `Authorization` request header.
+* It is **redacted** from debug logs (the header value is replaced by `<redacted>` in `kodi.log`).
 
 ## API
 
