@@ -9,17 +9,17 @@ msgstr ""
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Kodi Translation Team\n"
-"Language-Team: German (http://www.transifex.com/projects/p/xbmc-addons/language/de/)\n"
+"Language-Team: French (http://www.transifex.com/projects/p/xbmc-addons/language/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: de\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 # Settings - General
 msgctxt "#30001"
 msgid "General"
-msgstr "Allgemein"
+msgstr "Général"
 
 msgctxt "#30002"
 msgid "Audio"
@@ -31,40 +31,40 @@ msgstr "Format"
 
 msgctxt "#30011"
 msgid "Search"
-msgstr "Suche"
+msgstr "Recherche"
 
 msgctxt "#30012"
 msgid "Items per page"
-msgstr "Einträge pro Seite"
+msgstr "Éléments par page"
 
 msgctxt "#30013"
 msgid "History size"
-msgstr "Größe der Suchhistorie"
+msgstr "Taille de l'historique"
 
 # Settings - Account
 msgctxt "#30020"
 msgid "Account"
-msgstr "Konto"
+msgstr "Compte"
 
 msgctxt "#30021"
 msgid "OAuth token"
-msgstr "OAuth-Token"
+msgstr "Jeton OAuth"
 
 msgctxt "#30022"
 msgid "How to get a token"
-msgstr "Wie bekomme ich ein Token"
+msgstr "Comment obtenir un jeton"
 
 msgctxt "#30023"
 msgid "Paste your SoundCloud OAuth token here to access your likes, playlists, following and reposts. See \"How to get a token\" below."
-msgstr "Füge hier dein SoundCloud-OAuth-Token ein, um auf deine Likes, Playlists, abonnierten Nutzer und Reposts zuzugreifen. Siehe \"Wie bekomme ich ein Token\" unten."
+msgstr "Collez votre jeton OAuth SoundCloud ici pour accéder à vos likes, playlists, abonnements et reposts. Voir « Comment obtenir un jeton » ci-dessous."
 
 msgctxt "#30024"
 msgid "OAuth token is invalid or expired. Please update it in Settings."
-msgstr "OAuth-Token ist ungültig oder abgelaufen. Bitte aktualisiere es in den Einstellungen."
+msgstr "Le jeton OAuth est invalide ou expiré. Veuillez le mettre à jour dans les paramètres."
 
 msgctxt "#30025"
 msgid "You need to configure an OAuth token to access your profile. Opening settings now..."
-msgstr "Du musst ein OAuth-Token konfigurieren, um auf dein Profil zuzugreifen. Einstellungen werden geöffnet..."
+msgstr "Vous devez configurer un jeton OAuth pour accéder à votre profil. Ouverture des paramètres..."
 
 msgctxt "#30026"
 msgid "To get your OAuth token:
@@ -95,34 +95,34 @@ Common pitfalls:
 - Do NOT copy the cookie named \"oauth_token\" (under Application > Cookies). It looks similar but is rejected by the API.
 - Do NOT include the word \"OAuth\" or any space at the start.
 - The token expires periodically — when it does, repeat the steps to get a fresh one."
-msgstr "OAuth-Token erhalten:
+msgstr "Pour obtenir votre jeton OAuth :
 
-1. Öffne https://soundcloud.com in Chrome oder Firefox und melde dich an (prüfe, ob dein Avatar oben rechts angezeigt wird).
+1. Ouvrez https://soundcloud.com dans Chrome ou Firefox et connectez-vous (vérifiez que votre avatar apparaît en haut à droite).
 
-2. Drücke F12, um die Entwicklertools zu öffnen.
+2. Appuyez sur F12 pour ouvrir les outils de développement.
 
-3. Gehe zum Tab \"Network\" (Netzwerk).
+3. Allez dans l'onglet « Network » (Réseau).
 
-4. Tippe im Filter: api-v2
+4. Dans le filtre, tapez : api-v2
 
-5. Lade die Seite neu (F5).
+5. Rechargez la page (F5).
 
-6. Klicke auf irgendeine Anfrage in der Liste (z.B. \"me\" oder \"featured-tracks\").
+6. Cliquez sur n'importe quelle requête de la liste (ex. « me » ou « featured-tracks »).
 
-7. Scrolle im rechten Panel zu \"Request Headers\".
+7. Dans le panneau de droite, descendez jusqu'à « Request Headers » (En-têtes de requête).
 
-8. Suche die Zeile: Authorization: OAuth XXXXXXXXX
+8. Trouvez la ligne : Authorization: OAuth XXXXXXXXX
 
-9. Kopiere NUR den Teil nach \"OAuth \" (das Token selbst, ohne Präfix, ohne Leerzeichen).
+9. Copiez UNIQUEMENT ce qui suit « OAuth » (le jeton lui-même, sans préfixe, sans espace).
 
-10. Füge es in das Feld \"OAuth-Token\" der Addon-Einstellungen ein.
+10. Collez-le dans le champ « Jeton OAuth » des paramètres de l'addon.
 
-11. Klicke auf \"OAuth-Token testen\" zur Überprüfung.
+11. Cliquez sur « Tester le jeton OAuth » pour vérifier.
 
-Häufige Fehler:
-- Verwende NICHT das Cookie \"oauth_token\" (unter Application > Cookies). Es sieht ähnlich aus, wird aber von der API abgelehnt.
-- Lass das Wort \"OAuth\" und Leerzeichen am Anfang weg.
-- Das Token läuft regelmäßig ab — wiederhole dann die Schritte für ein neues."Anwendung\" (Chrome/Edge) oder \"Speicher\" (Firefox).\n\n4. Klappe in der linken Seitenleiste \"Cookies\" auf und wähle \"https://soundcloud.com\".\n\n5. Suche das Cookie namens \"oauth_token\" und kopiere seinen Wert.\n\n6. Füge den Wert in das Feld \"OAuth-Token\" in den Addon-Einstellungen ein.\n\nAlternative Methode: Suche im Tab \"Netzwerk\" der Entwicklertools eine beliebige Anfrage an api-v2.soundcloud.com, schau in den \"Authorization\"-Request-Header und kopiere den Wert nach \"OAuth \".\n\nHinweis: Das Token läuft gelegentlich ab — in dem Fall wiederhole die Schritte, um ein frisches zu erhalten."
+Pièges fréquents :
+- N'utilisez PAS le cookie « oauth_token » (dans Application > Cookies). Il y ressemble mais est rejeté par l'API.
+- N'incluez PAS le mot « OAuth » ni d'espace au début.
+- Le jeton expire de temps en temps — dans ce cas, refaites la procédure pour en obtenir un nouveau."
 
 msgctxt "#30060"
 msgid "API v2"
@@ -134,15 +134,15 @@ msgstr "Client-ID"
 
 msgctxt "#30062"
 msgid "Localization"
-msgstr "Sprache"
+msgstr "Langue"
 
 msgctxt "#30063"
 msgid "auto"
-msgstr "automatisch"
+msgstr "automatique"
 
 msgctxt "#30064"
 msgid "disabled"
-msgstr "deaktiviert"
+msgstr "désactivée"
 
 msgctxt "#30070"
 msgid "Cache"
@@ -150,75 +150,75 @@ msgstr "Cache"
 
 msgctxt "#30071"
 msgid "Clear cache"
-msgstr "Cache leeren"
+msgstr "Vider le cache"
 
 # GUI - Root
 msgctxt "#30101"
 msgid "Search"
-msgstr "Suche"
+msgstr "Rechercher"
 
 msgctxt "#30102"
 msgid "Charts"
-msgstr "Charts"
+msgstr "Classements"
 
 msgctxt "#30103"
 msgid "Discover"
-msgstr "Discover"
+msgstr "Découvrir"
 
 msgctxt "#30108"
 msgid "Settings"
-msgstr "Einstellungen"
+msgstr "Paramètres"
 
 msgctxt "#30109"
 msgid "Sign in"
-msgstr "Anmelden"
+msgstr "Connexion"
 
 msgctxt "#30110"
 msgid "My profile"
-msgstr "Mein Profil"
+msgstr "Mon profil"
 
 # GUI - New UI (beta)
 msgctxt "#30120"
 msgid "New interface (beta)"
-msgstr "Neue Oberfläche (Beta)"
+msgstr "Nouvelle interface (bêta)"
 
 msgctxt "#30121"
 msgid "Nothing playing — pick a track above"
-msgstr "Keine Wiedergabe — wähle oben einen Titel"
+msgstr "Aucune lecture — choisissez une piste au-dessus"
 
 msgctxt "#30122"
 msgid "↩ Back to close"
-msgstr "↩ Zurück zum Schließen"
+msgstr "↩ Retour pour fermer"
 
 msgctxt "#30123"
 msgid "Press Back to close"
-msgstr "Zurück zum Schließen"
+msgstr "Retour pour fermer"
 
 msgctxt "#30124"
 msgid "Your recent likes"
-msgstr "Deine letzten Likes"
+msgstr "Vos likes récents"
 
 msgctxt "#30125"
 msgid "What the world is listening to right now"
-msgstr "Was die Welt gerade hört"
+msgstr "Ce que le monde écoute en ce moment"
 
 msgctxt "#30126"
 msgid "Failed to play track"
-msgstr "Wiedergabe fehlgeschlagen"
+msgstr "Échec de la lecture"
 
 
 # GUI - Search
 msgctxt "#30201"
 msgid "New search"
-msgstr "Neue Suche"
+msgstr "Nouvelle recherche"
 
 msgctxt "#30211"
 msgid "People"
-msgstr "Leute"
+msgstr "Personnes"
 
 msgctxt "#30212"
 msgid "Albums"
-msgstr "Alben"
+msgstr "Albums"
 
 msgctxt "#30213"
 msgid "Playlists"
@@ -226,7 +226,7 @@ msgstr "Playlists"
 
 msgctxt "#30214"
 msgid "Spotlight"
-msgstr "Spotlight"
+msgstr "Épinglés"
 
 # GUI - Charts
 msgctxt "#30301"
@@ -235,7 +235,7 @@ msgstr "Top 50"
 
 msgctxt "#30302"
 msgid "New & hot"
-msgstr "Neu und angesagt"
+msgstr "Nouveautés & tendances"
 
 # GUI - My profile
 msgctxt "#30401"
@@ -244,11 +244,11 @@ msgstr "Likes"
 
 msgctxt "#30402"
 msgid "My playlists"
-msgstr "Meine Playlists"
+msgstr "Mes playlists"
 
 msgctxt "#30403"
 msgid "Following"
-msgstr "Abonniert"
+msgstr "Abonnements"
 
 msgctxt "#30404"
 msgid "Reposts"
@@ -257,258 +257,258 @@ msgstr "Reposts"
 # GUI - Settings
 msgctxt "#30501"
 msgid "Cache cleared"
-msgstr "Cache gelöscht"
+msgstr "Cache vidé"
 
 # GUI - Context menus
 msgctxt "#30601"
 msgid "Remove"
-msgstr "Entfernen"
+msgstr "Supprimer"
 
 msgctxt "#30602"
 msgid "Clear"
-msgstr "Leeren"
+msgstr "Effacer"
 
 # GUI - Generic
 msgctxt "#30901"
 msgid "Next page"
-msgstr "Nächste Seite"
+msgstr "Page suivante"
 
 msgctxt "#30902"
 msgid "Not available in your country"
-msgstr "In deinem Land nicht verfügbar"
+msgstr "Indisponible dans votre pays"
 
 msgctxt "#30903"
 msgid "Preview"
-msgstr "Vorschau"
+msgstr "Aperçu"
 
 msgctxt "#30904"
 msgid "followers"
-msgstr "Follower"
+msgstr "abonnés"
 
 msgctxt "#30905"
 msgid "likes"
-msgstr "Likes"
+msgstr "likes"
 
 msgctxt "#30906"
 msgid "tracks"
-msgstr "Titel"
+msgstr "pistes"
 
 # V2 interface
 
 msgctxt "#30130"
 msgid "Interface"
-msgstr "Oberfläche"
+msgstr "Interface"
 
 msgctxt "#30131"
 msgid "Use the new interface"
-msgstr "Neue Oberfläche verwenden"
+msgstr "Utiliser la nouvelle interface"
 
 msgctxt "#30132"
 msgid "When ON, opening the addon launches the new full-screen interface. When OFF, opening the addon shows the classic plugin menu."
-msgstr "Aktiviert: Beim Öffnen des Addons wird die neue Vollbild-Oberfläche gestartet. Deaktiviert: Beim Öffnen des Addons wird das klassische Plugin-Menü angezeigt."
+msgstr "Activé : ouvrir l'addon lance la nouvelle interface plein écran. Désactivé : ouvrir l'addon affiche le menu plugin classique."
 
 msgctxt "#30133"
 msgid "Layout"
-msgstr "Layout"
+msgstr "Mise en page"
 
 msgctxt "#30134"
 msgid "Choose between a simple home with horizontal rows, or a sidebar + home view."
-msgstr "Wähle zwischen einer einfachen Startseite mit horizontalen Zeilen oder einer Seitenleisten-Ansicht."
+msgstr "Choisissez entre un accueil simple avec rangées horizontales, ou une vue avec barre latérale + accueil."
 
 msgctxt "#30135"
 msgid "Rows only"
-msgstr "Nur Zeilen"
+msgstr "Rangées uniquement"
 
 msgctxt "#30136"
 msgid "Sidebar + rows"
-msgstr "Seitenleiste + Zeilen"
+msgstr "Barre latérale + rangées"
 
 msgctxt "#30137"
 msgid "Mini-player"
-msgstr "Mini-Player"
+msgstr "Mini-lecteur"
 
 msgctxt "#30138"
 msgid "Choose how the mini-player is shown at the bottom of the new interface."
-msgstr "Wähle, wie der Mini-Player am unteren Rand angezeigt wird."
+msgstr "Choisissez comment le mini-lecteur s'affiche en bas de la nouvelle interface."
 
 msgctxt "#30139"
 msgid "Hidden"
-msgstr "Versteckt"
+msgstr "Masqué"
 
 msgctxt "#30140"
 msgid "Display only (no controls)"
-msgstr "Nur Anzeige (ohne Bedienelemente)"
+msgstr "Affichage seul (sans contrôles)"
 
 msgctxt "#30141"
 msgid "Display + controls"
-msgstr "Anzeige + Bedienelemente"
+msgstr "Affichage + contrôles"
 
 msgctxt "#30150"
 msgid "Home"
-msgstr "Startseite"
+msgstr "Accueil"
 
 msgctxt "#30151"
 msgid "Resume listening"
-msgstr "Wiedergabe fortsetzen"
+msgstr "Reprendre l'écoute"
 
 msgctxt "#30152"
 msgid "Your likes"
-msgstr "Deine Likes"
+msgstr "Vos likes"
 
 msgctxt "#30153"
 msgid "Your playlists"
-msgstr "Deine Playlists"
+msgstr "Vos playlists"
 
 msgctxt "#30154"
 msgid "You follow"
-msgstr "Du folgst"
+msgstr "Vos abonnements"
 
 msgctxt "#30155"
 msgid "Trending"
-msgstr "Trending"
+msgstr "Tendances"
 
 msgctxt "#30156"
 msgid "Loading..."
-msgstr "Lädt..."
+msgstr "Chargement..."
 
 msgctxt "#30157"
 msgid "Nothing here yet"
-msgstr "Hier gibt es noch nichts"
+msgstr "Rien à afficher pour le moment"
 
 msgctxt "#30158"
 msgid "Open classic interface"
-msgstr "Klassische Oberfläche öffnen"
+msgstr "Ouvrir l'interface classique"
 
 msgctxt "#30159"
 msgid "Press Back to close"
-msgstr "Zurück zum Schließen"
+msgstr "Retour pour fermer"
 
 msgctxt "#30160"
 msgid "Search..."
-msgstr "Suchen..."
+msgstr "Rechercher..."
 
 msgctxt "#30142"
 msgid "Auto-play next track"
-msgstr "Nächsten Titel automatisch abspielen"
+msgstr "Lecture automatique du titre suivant"
 
 msgctxt "#30143"
 msgid "When enabled, clicking a track queues all tracks visible in the row/page and Kodi plays them in sequence automatically."
-msgstr "Wenn aktiviert, werden beim Anklicken eines Titels alle Titel der Zeile/Seite in die Warteschlange gestellt und automatisch nacheinander abgespielt."
+msgstr "Quand activé, cliquer sur un titre ajoute toutes les pistes visibles à la file et Kodi les lit en séquence automatiquement."
 
 msgctxt "#30144"
 msgid "Shuffle playback"
-msgstr "Zufallswiedergabe"
+msgstr "Lecture aléatoire"
 
 msgctxt "#30145"
 msgid "When ON, queued tracks are played in random order. The track you clicked still plays first."
-msgstr "Aktiviert: Titel in der Warteschlange werden in zufälliger Reihenfolge wiedergegeben. Der angeklickte Titel wird zuerst gespielt."
+msgstr "Activé : les pistes mises en file sont lues dans un ordre aléatoire. Le titre cliqué est lu en premier."
 
 msgctxt "#30170"
 msgid "Home rows"
-msgstr "Startseiten-Zeilen"
+msgstr "Rangées de l'accueil"
 
 msgctxt "#30171"
 msgid "Row 1"
-msgstr "Zeile 1"
+msgstr "Rangée 1"
 
 msgctxt "#30172"
 msgid "(off)"
-msgstr "(aus)"
+msgstr "(désactivée)"
 
 msgctxt "#30173"
 msgid "Row 2"
-msgstr "Zeile 2"
+msgstr "Rangée 2"
 
 msgctxt "#30174"
 msgid "Row 3"
-msgstr "Zeile 3"
+msgstr "Rangée 3"
 
 msgctxt "#30175"
 msgid "Row 4"
-msgstr "Zeile 4"
+msgstr "Rangée 4"
 
 msgctxt "#30180"
 msgid "Now playing"
-msgstr "Wiedergabe läuft"
+msgstr "Lecture en cours"
 
 msgctxt "#30181"
 msgid "Compact bar (cover + title + progress)"
-msgstr "Kompaktleiste (Cover + Titel + Fortschritt)"
+msgstr "Barre compacte (pochette + titre + progression)"
 
 # 5.5.0 settings reorganization (safe IDs)
 msgctxt "#30200"
 msgid "Display"
-msgstr "Anzeige"
+msgstr "Affichage"
 
 msgctxt "#30210"
 msgid "Playback"
-msgstr "Wiedergabe"
+msgstr "Lecture"
 
 msgctxt "#30220"
 msgid "Account"
-msgstr "Konto"
+msgstr "Compte"
 
 msgctxt "#30221"
 msgid "Advanced"
-msgstr "Erweitert"
+msgstr "Avancé"
 
 msgctxt "#30230"
 msgid "Interface"
-msgstr "Oberfläche"
+msgstr "Interface"
 
 msgctxt "#30231"
 msgid "Playback options"
-msgstr "Wiedergabeoptionen"
+msgstr "Options de lecture"
 
 msgctxt "#30232"
 msgid "Audio format"
-msgstr "Audioformat"
+msgstr "Format audio"
 
 msgctxt "#30233"
 msgid "Choose how tracks are streamed. \"Stable\" is recommended for the most reliable playback. \"Light\" uses less bandwidth."
-msgstr "Wähle, wie Titel gestreamt werden. „Stabil\" wird für die zuverlässigste Wiedergabe empfohlen. „Leicht\" verwendet weniger Bandbreite."
+msgstr "Choisissez comment les pistes sont diffusées. « Stable » est recommandé pour la lecture la plus fiable. « Léger » utilise moins de bande passante."
 
 msgctxt "#30234"
 msgid "Light (Opus, lower bitrate)"
-msgstr "Leicht (Opus, niedrigere Bitrate)"
+msgstr "Léger (Opus, débit réduit)"
 
 msgctxt "#30235"
 msgid "Standard adaptive (MP3 HLS)"
-msgstr "Standard adaptiv (MP3 HLS)"
+msgstr "Standard adaptatif (MP3 HLS)"
 
 msgctxt "#30236"
 msgid "Standard stable (MP3 progressive)"
-msgstr "Standard stabil (MP3 progressiv)"
+msgstr "Standard stable (MP3 progressif)"
 
 msgctxt "#30237"
 msgid "Tracks per page"
-msgstr "Titel pro Seite"
+msgstr "Pistes par page"
 
 msgctxt "#30238"
 msgid "How many tracks to load per request. Higher values mean fewer page loads but slower initial loading."
-msgstr "Wie viele Titel pro Anfrage geladen werden. Höhere Werte bedeuten weniger Seitenladungen, aber langsameres Initialladen."
+msgstr "Combien de pistes charger par requête. Plus élevé = moins de pages mais chargement initial plus long."
 
 # 5.5.2 token tester button
 msgctxt "#30240"
 msgid "Test OAuth token"
-msgstr "OAuth-Token testen"
+msgstr "Tester le jeton OAuth"
 
 msgctxt "#30241"
 msgid "Verifies the token by calling /me. Shows your username on success, or the error reason on failure."
-msgstr "Überprüft das Token durch Aufruf von /me. Zeigt bei Erfolg deinen Benutzernamen, sonst den Fehlergrund."
+msgstr "Vérifie le jeton en appelant /me. Affiche votre nom d'utilisateur en cas de succès, ou la raison de l'échec."
 
 msgctxt "#30242"
 msgid "Token valid: {0}"
-msgstr "Token gültig: {0}"
+msgstr "Jeton valide : {0}"
 
 msgctxt "#30243"
 msgid "Token rejected (HTTP {0}). Get a fresh one — see the help button."
-msgstr "Token abgelehnt (HTTP {0}). Hol dir ein neues — siehe Hilfe-Button."
+msgstr "Jeton rejeté (HTTP {0}). Obtenez-en un nouveau — voir le bouton d'aide."
 
 msgctxt "#30244"
 msgid "No token configured. Paste one in the field above."
-msgstr "Kein Token konfiguriert. Füge eines im obigen Feld ein."
+msgstr "Aucun jeton configuré. Collez-en un dans le champ ci-dessus."
 
 msgctxt "#30245"
 msgid "Network error: {0}"
-msgstr "Netzwerkfehler: {0}"
+msgstr "Erreur réseau : {0}"

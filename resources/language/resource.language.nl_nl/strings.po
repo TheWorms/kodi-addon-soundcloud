@@ -40,6 +40,89 @@ msgctxt "#30013"
 msgid "History size"
 msgstr "Zoekgeschiedenis grootte"
 
+# Settings - Account
+msgctxt "#30020"
+msgid "Account"
+msgstr "Account"
+
+msgctxt "#30021"
+msgid "OAuth token"
+msgstr "OAuth-token"
+
+msgctxt "#30022"
+msgid "How to get a token"
+msgstr "Een token verkrijgen"
+
+msgctxt "#30023"
+msgid "Paste your SoundCloud OAuth token here to access your likes, playlists, following and reposts. See \"How to get a token\" below."
+msgstr "Plak hier je SoundCloud OAuth-token om toegang te krijgen tot je likes, afspeellijsten, volgenden en reposts. Zie \"Een token verkrijgen\" hieronder."
+
+msgctxt "#30024"
+msgid "OAuth token is invalid or expired. Please update it in Settings."
+msgstr "OAuth-token is ongeldig of verlopen. Werk het bij in de instellingen."
+
+msgctxt "#30025"
+msgid "You need to configure an OAuth token to access your profile. Opening settings now..."
+msgstr "Je moet een OAuth-token configureren om toegang te krijgen tot je profiel. Instellingen worden geopend..."
+
+msgctxt "#30026"
+msgid "To get your OAuth token:
+
+1. Open https://soundcloud.com in Chrome or Firefox and sign in (verify your avatar shows top-right).
+
+2. Press F12 to open the developer tools.
+
+3. Go to the \"Network\" tab.
+
+4. In the filter box, type: api-v2
+
+5. Reload the page (F5).
+
+6. Click on any request in the list (e.g. \"me\" or \"featured-tracks\").
+
+7. In the right panel, scroll to \"Request Headers\".
+
+8. Find the line: Authorization: OAuth XXXXXXXXX
+
+9. Copy ONLY what comes after \"OAuth \" (the token itself, no prefix, no space).
+
+10. Paste it in the \"OAuth token\" field of the addon settings.
+
+11. Click \"Test OAuth token\" to verify.
+
+Common pitfalls:
+- Do NOT copy the cookie named \"oauth_token\" (under Application > Cookies). It looks similar but is rejected by the API.
+- Do NOT include the word \"OAuth\" or any space at the start.
+- The token expires periodically — when it does, repeat the steps to get a fresh one."
+msgstr "OAuth-token verkrijgen:
+
+1. Open https://soundcloud.com in Chrome of Firefox en log in (controleer dat je avatar rechtsboven verschijnt).
+
+2. Druk op F12 om de ontwikkelaarstools te openen.
+
+3. Ga naar het tabblad \"Network\" (Netwerk).
+
+4. Typ in het filter: api-v2
+
+5. Vernieuw de pagina (F5).
+
+6. Klik op een willekeurig verzoek in de lijst (bijv. \"me\" of \"featured-tracks\").
+
+7. Scroll in het rechterpaneel naar \"Request Headers\".
+
+8. Zoek de regel: Authorization: OAuth XXXXXXXXX
+
+9. Kopieer ALLEEN wat na \"OAuth \" komt (het token zelf, zonder prefix, zonder spatie).
+
+10. Plak het in het veld \"OAuth-token\" van de addon-instellingen.
+
+11. Klik op \"OAuth-token testen\" om te controleren.
+
+Veelvoorkomende valkuilen:
+- Gebruik NIET de cookie \"oauth_token\" (onder Application > Cookies). Het lijkt erop maar wordt door de API geweigerd.
+- Gebruik NIET het woord \"OAuth\" of spatie aan het begin.
+- Het token verloopt periodiek — herhaal dan de stappen voor een nieuw token."
+
 msgctxt "#30060"
 msgid "API v2"
 msgstr ""
@@ -89,6 +172,40 @@ msgctxt "#30109"
 msgid "Sign in"
 msgstr "Inloggen"
 
+msgctxt "#30110"
+msgid "My profile"
+msgstr "Mijn profiel"
+
+# GUI - New UI (beta)
+msgctxt "#30120"
+msgid "New interface (beta)"
+msgstr "Nieuwe interface (bèta)"
+
+msgctxt "#30121"
+msgid "Nothing playing — pick a track above"
+msgstr "Geen weergave — kies hierboven een nummer"
+
+msgctxt "#30122"
+msgid "↩ Back to close"
+msgstr "↩ Terug om te sluiten"
+
+msgctxt "#30123"
+msgid "Press Back to close"
+msgstr "Terug om te sluiten"
+
+msgctxt "#30124"
+msgid "Your recent likes"
+msgstr "Je recente likes"
+
+msgctxt "#30125"
+msgid "What the world is listening to right now"
+msgstr "Wat de wereld nu luistert"
+
+msgctxt "#30126"
+msgid "Failed to play track"
+msgstr "Afspelen mislukt"
+
+
 # GUI - Search
 msgctxt "#30201"
 msgid "New search"
@@ -118,6 +235,23 @@ msgstr ""
 msgctxt "#30302"
 msgid "New & hot"
 msgstr "Nieuw & Populair"
+
+# GUI - My profile
+msgctxt "#30401"
+msgid "Likes"
+msgstr "Likes"
+
+msgctxt "#30402"
+msgid "My playlists"
+msgstr "Mijn afspeellijsten"
+
+msgctxt "#30403"
+msgid "Following"
+msgstr "Volgend"
+
+msgctxt "#30404"
+msgid "Reposts"
+msgstr "Reposts"
 
 # GUI - Settings
 msgctxt "#30501"
@@ -153,3 +287,227 @@ msgstr "volgers"
 msgctxt "#30905"
 msgid "likes"
 msgstr ""
+
+msgctxt "#30906"
+msgid "tracks"
+msgstr "nummers"
+
+# V2 interface
+
+msgctxt "#30130"
+msgid "Interface"
+msgstr "Interface"
+
+msgctxt "#30131"
+msgid "Use the new interface"
+msgstr "Nieuwe interface gebruiken"
+
+msgctxt "#30132"
+msgid "When ON, opening the addon launches the new full-screen interface. When OFF, opening the addon shows the classic plugin menu."
+msgstr "Aan: bij het openen van de addon wordt de nieuwe schermvullende interface gestart. Uit: bij het openen van de addon wordt het klassieke plugin-menu getoond."
+
+msgctxt "#30133"
+msgid "Layout"
+msgstr "Indeling"
+
+msgctxt "#30134"
+msgid "Choose between a simple home with horizontal rows, or a sidebar + home view."
+msgstr "Kies tussen een eenvoudige startpagina met horizontale rijen, of een zijbalk + startpagina-weergave."
+
+msgctxt "#30135"
+msgid "Rows only"
+msgstr "Alleen rijen"
+
+msgctxt "#30136"
+msgid "Sidebar + rows"
+msgstr "Zijbalk + rijen"
+
+msgctxt "#30137"
+msgid "Mini-player"
+msgstr "Miniplayer"
+
+msgctxt "#30138"
+msgid "Choose how the mini-player is shown at the bottom of the new interface."
+msgstr "Kies hoe de miniplayer onderaan wordt weergegeven."
+
+msgctxt "#30139"
+msgid "Hidden"
+msgstr "Verborgen"
+
+msgctxt "#30140"
+msgid "Display only (no controls)"
+msgstr "Alleen weergave (geen besturing)"
+
+msgctxt "#30141"
+msgid "Display + controls"
+msgstr "Weergave + besturing"
+
+msgctxt "#30150"
+msgid "Home"
+msgstr "Startpagina"
+
+msgctxt "#30151"
+msgid "Resume listening"
+msgstr "Hervatten"
+
+msgctxt "#30152"
+msgid "Your likes"
+msgstr "Je likes"
+
+msgctxt "#30153"
+msgid "Your playlists"
+msgstr "Je afspeellijsten"
+
+msgctxt "#30154"
+msgid "You follow"
+msgstr "Je volgt"
+
+msgctxt "#30155"
+msgid "Trending"
+msgstr "Trending"
+
+msgctxt "#30156"
+msgid "Loading..."
+msgstr "Laden..."
+
+msgctxt "#30157"
+msgid "Nothing here yet"
+msgstr "Hier is nog niets"
+
+msgctxt "#30158"
+msgid "Open classic interface"
+msgstr "Klassieke interface openen"
+
+msgctxt "#30159"
+msgid "Press Back to close"
+msgstr "Terug om te sluiten"
+
+msgctxt "#30160"
+msgid "Search..."
+msgstr "Zoeken..."
+
+msgctxt "#30142"
+msgid "Auto-play next track"
+msgstr "Volgend nummer automatisch afspelen"
+
+msgctxt "#30143"
+msgid "When enabled, clicking a track queues all tracks visible in the row/page and Kodi plays them in sequence automatically."
+msgstr "Indien ingeschakeld, worden bij het klikken op een nummer alle zichtbare nummers in de rij/pagina in de wachtrij geplaatst en automatisch achter elkaar afgespeeld."
+
+msgctxt "#30144"
+msgid "Shuffle playback"
+msgstr "Willekeurig afspelen"
+
+msgctxt "#30145"
+msgid "When ON, queued tracks are played in random order. The track you clicked still plays first."
+msgstr "Aan: nummers in de wachtrij worden in willekeurige volgorde afgespeeld. Het aangeklikte nummer wordt als eerste gespeeld."
+
+msgctxt "#30170"
+msgid "Home rows"
+msgstr "Startpagina rijen"
+
+msgctxt "#30171"
+msgid "Row 1"
+msgstr "Rij 1"
+
+msgctxt "#30172"
+msgid "(off)"
+msgstr "(uit)"
+
+msgctxt "#30173"
+msgid "Row 2"
+msgstr "Rij 2"
+
+msgctxt "#30174"
+msgid "Row 3"
+msgstr "Rij 3"
+
+msgctxt "#30175"
+msgid "Row 4"
+msgstr "Rij 4"
+
+msgctxt "#30180"
+msgid "Now playing"
+msgstr "Nu speelt"
+
+msgctxt "#30181"
+msgid "Compact bar (cover + title + progress)"
+msgstr "Compacte balk (cover + titel + voortgang)"
+
+# 5.5.0 settings reorganization (safe IDs)
+msgctxt "#30200"
+msgid "Display"
+msgstr "Weergave"
+
+msgctxt "#30210"
+msgid "Playback"
+msgstr "Afspelen"
+
+msgctxt "#30220"
+msgid "Account"
+msgstr "Account"
+
+msgctxt "#30221"
+msgid "Advanced"
+msgstr "Geavanceerd"
+
+msgctxt "#30230"
+msgid "Interface"
+msgstr "Interface"
+
+msgctxt "#30231"
+msgid "Playback options"
+msgstr "Afspeelopties"
+
+msgctxt "#30232"
+msgid "Audio format"
+msgstr "Audioformaat"
+
+msgctxt "#30233"
+msgid "Choose how tracks are streamed. \"Stable\" is recommended for the most reliable playback. \"Light\" uses less bandwidth."
+msgstr "Kies hoe nummers worden gestreamd. „Stabiel\" wordt aanbevolen voor de meest betrouwbare weergave. „Licht\" gebruikt minder bandbreedte."
+
+msgctxt "#30234"
+msgid "Light (Opus, lower bitrate)"
+msgstr "Licht (Opus, lagere bitrate)"
+
+msgctxt "#30235"
+msgid "Standard adaptive (MP3 HLS)"
+msgstr "Standaard adaptief (MP3 HLS)"
+
+msgctxt "#30236"
+msgid "Standard stable (MP3 progressive)"
+msgstr "Standaard stabiel (MP3 progressief)"
+
+msgctxt "#30237"
+msgid "Tracks per page"
+msgstr "Nummers per pagina"
+
+msgctxt "#30238"
+msgid "How many tracks to load per request. Higher values mean fewer page loads but slower initial loading."
+msgstr "Hoeveel nummers per verzoek worden geladen. Hogere waarden betekenen minder pagina-laadbeurten maar tragere initiële belasting."
+
+# 5.5.2 token tester button
+msgctxt "#30240"
+msgid "Test OAuth token"
+msgstr "OAuth-token testen"
+
+msgctxt "#30241"
+msgid "Verifies the token by calling /me. Shows your username on success, or the error reason on failure."
+msgstr "Verifieert het token door /me aan te roepen. Toont je gebruikersnaam bij succes, of de foutreden bij falen."
+
+msgctxt "#30242"
+msgid "Token valid: {0}"
+msgstr "Token geldig: {0}"
+
+msgctxt "#30243"
+msgid "Token rejected (HTTP {0}). Get a fresh one — see the help button."
+msgstr "Token geweigerd (HTTP {0}). Haal een nieuwe — zie de hulpknop."
+
+msgctxt "#30244"
+msgid "No token configured. Paste one in the field above."
+msgstr "Geen token geconfigureerd. Plak er een in het bovenstaande veld."
+
+msgctxt "#30245"
+msgid "Network error: {0}"
+msgstr "Netwerkfout: {0}"

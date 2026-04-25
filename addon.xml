@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.audio.soundcloud" name="SoundCloud" version="4.1.0" provider-name="jaylinski">
+<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.5.7" provider-name="jaylinski">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.29.0"/>
@@ -7,21 +7,139 @@
     <extension point="xbmc.python.pluginsource" library="addon.py">
         <provides>audio</provides>
     </extension>
+    <extension point="xbmc.python.script" library="script.py">
+        <provides>audio</provides>
+    </extension>
     <extension point="xbmc.addon.metadata">
         <summary lang="de_DE">SoundCloud – Musik- und Podcast-Streaming-Plattform</summary>
         <summary lang="en_GB">SoundCloud – Music and podcast streaming platform</summary>
+        <summary lang="fr_FR">SoundCloud – Plateforme de streaming musical et de podcasts</summary>
         <summary lang="nl_NL">SoundCloud – Muziek- en podcaststreamingplatform</summary>
         <description lang="de_DE">SoundCloud ist eine Musik- und Podcast-Streaming-Plattform, mit der Du Millionen von Songs aus der ganzen Welt anhören kannst.</description>
 		<description lang="en_GB">SoundCloud is a music and podcast streaming platform that lets you listen to millions of songs from around the world.</description>
+        <description lang="fr_FR">SoundCloud est une plateforme de streaming musical et de podcasts qui vous permet d'écouter des millions de titres du monde entier.</description>
         <description lang="nl_NL">SoundCloud is een muziek- en podcaststreamingplatform waarmee je naar miljoenen nummers van over de hele wereld kunt luisteren.</description>
         <disclaimer lang="en_GB">This plugin is not official, approved or endorsed by SoundCloud.</disclaimer>
+        <disclaimer lang="fr_FR">Ce plugin n'est pas officiel, approuvé ou soutenu par SoundCloud.</disclaimer>
         <disclaimer lang="nl_NL">Deze plugin is niet officieel, goedgekeurd of gesteund door SoundCloud.</disclaimer>
         <platform>all</platform>
         <license>MIT</license>
         <forum>https://forum.kodi.tv/showthread.php?tid=206635</forum>
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
-        <news>4.1.0 (2025-10-06)
+        <news>5.5.7 (2026-04-25) - settings refresh fix
+Fixed: changes to OAuth token (or any setting) now take effect immediately without needing to restart Kodi
+The Settings class now creates a fresh xbmcaddon.Addon() instance on every read, bypassing Kodi's in-memory cache that was hiding the new value
+Auto-reset of the "token invalid" flag when the user changes the token — no more stuck 401 state after a paste
+
+5.5.6 (2026-04-24) - diagnostic
+"Test OAuth token" now shows the actual error body from SoundCloud (not just the HTTP code), and logs the full request + response details to kodi.log for debugging.
+
+5.5.5 (2026-04-24)
+OAuth token cleaning is now much more aggressive: strips ALL whitespace and non-printable characters anywhere in the token (not just leading/trailing). Catches Windows clipboard \r\n, zero-width spaces, BOM, etc. that were silently breaking authentication.
+"Test OAuth token" now displays a token preview (length + first/last chars) so you can verify the paste was clean.
+
+5.5.4 (2026-04-24)
+Rewrote "How to get a token" help text — now correctly recommends the Authorization HTTP header (not the cookie). The cookie method silently fails, which is what was causing persistent 401 errors.
+
+5.5.3 (2026-04-24)
+After closing SoundCloud (Back), now go straight to Kodi home instead of bouncing back to the Music files / add-ons window
+OAuth token field auto-strips "OAuth " or "Bearer " prefix if pasted by mistake (and surrounding quotes)
+
+5.5.2 (2026-04-24)
+Added "Test OAuth token" button in Settings > Account, right below the token field — verifies the token by calling /me and shows your username on success
+Optimized /me handling: when the token is known invalid, skip the call entirely instead of doing 2 round-trips per UI page
+
+5.5.1 (2026-04-24)
+Fixed cascade of HTTP 401 errors on public endpoints when an OAuth token is expired/invalid: the API now drops the bad token after the first 401 and retries anonymously, so charts/discover/trending keep working until the user updates the token
+
+5.5.0 (2026-04-24) - settings reorganization
+Settings reorganized into 3 user-friendly categories: Display / Playback / Account
+Audio format options renamed to friendlier labels (Light Opus / Standard adaptive MP3 / Standard stable MP3)
+"Tracks per page" replaces the old "Search items size" wording (used by both search and pagination)
+Advanced API options (custom Client-ID, locale, search history size) moved to Expert level (use Kodi's Settings level slider to see them)
+
+5.4.1 (2026-04-24)
+Fixed first card of each row being clipped on the left
+Fixed orange focus border persisting on rows that no longer have focus (now only the focused row shows the orange highlight)
+Fixed mini-player buttons rendering as empty squares (replaced Unicode chars with ASCII)
+Fixed progress bar showing in cyan instead of orange (dedicated orange texture instead of colordiffuse)
+
+5.4.0 (2026-04-24)
+Home now has 4 configurable rows (Likes / Trending / Playlists / Following) in a vertically scrollable container
+Each row can be configured/reordered/disabled in Settings > Home rows
+Added pagination: pages now show a "Next page" item at the end when there are more results
+Page size honors the existing "Items per page" setting
+Selection now follows the playing track when autoplay moves to the next song
+Mini-player has a new "Compact" mode (cover + title + wide progress bar, no controls)
+Progress bar made thicker (8px) and properly themed in SoundCloud orange
+
+5.3.0 (2026-04-24)
+Removed "Classic interface" button from sidebar — switching back to the classic UI is now done via Settings > Interface > "Use the new interface" toggle (turn it off)
+Sidebar now has 6 buttons: Home, Search, Likes, My playlists, Following, Settings
+
+5.2.3 (2026-04-24)
+Fixed all addon-localized labels using $ADDON[plugin.audio.soundcloud XXXXX] instead of $LOCALIZE[XXXXX] (which was looking up Kodi core strings, not ours)
+Widened sidebar from 180px to 240px so French labels like "Vos abonnements" and "Interface classique" fit without truncation
+
+5.2.2 (2026-04-24)
+DIAGNOSTIC: hardcoded sidebar labels (no $LOCALIZE) to determine why text was invisible
+
+5.2.1 (2026-04-24)
+Fixed all text being invisible in the new UI (sidebar buttons, page titles, mini-player labels): removed broken custom Font.xml and switched to Kodi's standard font names guaranteed by every skin
+
+5.2.0 (2026-04-24)
+Added auto-play next track: clicking a track now queues all visible tracks so Kodi plays them in sequence
+Added "Auto-play next track" toggle in Settings > Interface (on by default)
+
+5.1.4 (2026-04-24)
+Fixed sidebar buttons appearing as solid white blocks (removed broken transparent texture)
+Fixed last sidebar button being cut off by the mini-player (tightened vertical layout)
+
+5.1.3 (2026-04-24)
+Fixed sidebar text being invisible (explicit text positioning + better focus contrast)
+
+5.1.2 (2026-04-24)
+Fixed playback interruption caused by a window reload loop after auto-launching the new UI
+Added re-entrancy guard to prevent stacking multiple WindowXML instances
+Made focus assignment defensive (no more "Control X cannot focus" warnings)
+
+5.1.1 (2026-04-24)
+Fixed audio decoder crash when SoundCloud transcoding URLs expire (now properly tells Kodi to skip the track instead of feeding it a None path)
+Improved logging when stream URL resolution fails
+
+5.1.0 (2026-04-24)
+New full-screen interface (V2): sidebar navigation, horizontal carousel rows, mini-player with controls
+Auto-launches by default — disable in Settings > Interface
+Layout (rows-only or sidebar+rows) and mini-player mode (off/display/controls) configurable in Settings
+Classic plugin still accessible via plugin://plugin.audio.soundcloud/?legacy=1 for widgets and fallback
+
+5.0.3 (2026-04-24)
+Fixed 404 on Mon profil sub-menus: api-v2 doesn't expose /me/* sub-resources, now resolves user_id via /me and uses /users/{id}/* paths
+
+5.0.2 (2026-04-24)
+Fixed crash on empty/non-JSON API responses (was crashing /me/* with JSONDecodeError on auth failure)
+HTTP errors and empty bodies now return an empty collection and log a clear warning instead of crashing
+401/403 responses now properly trigger the "OAuth token invalid or expired" notification
+
+5.0.1 (2026-04-24)
+Fixed authenticated /me/* endpoints returning empty collections (no client_id when authenticated)
+Fixed likes/reposts/playlist-likes envelope unwrapping for authenticated endpoints
+
+4.3.0 (2026-04-24)
+Added experimental full-screen UI (WindowXML script) with horizontal track carousel and mini-player
+Launch via "New interface (beta)" from the root menu, or via RunScript(plugin.audio.soundcloud)
+
+4.2.0 (2026-04-24)
+Added optional OAuth token login to access likes, playlists, following and reposts
+Added French translation
+Added proper content types per view (songs/albums/artists) so skins pick the right layout
+Added per-item fanart (artwork for tracks/playlists, profile banners for artists)
+Added sort methods on song views (title, artist, duration, playcount)
+Improved playlist and artist metadata (track count, follower count, mediatype)
+Fixed crash on tracks without a display_date
+
+4.1.0 (2025-10-06)
 Fixed error when using addon
 Added description and follower-counts to user profiles
 Added description and likes to playlists
