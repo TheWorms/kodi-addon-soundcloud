@@ -23,8 +23,132 @@ subtitle, page_empty, row1_title, row2_title.
 Control IDs used here MUST match those in the XML file. They are listed
 at the top of the XML for reference.
 """
+import threading
+
 import xbmc
 import xbmcgui
+
+
+class _ProgressUpdater(threading.Thread):
+    """
+    Background thread that polls xbmc.Player position 2x per second and
+    resizes the orange progress bar images directly via the Python control
+    API.
+
+    Why not use the native <progress> control with <info>Player.Progress</info>?
+      1. Some skins (e.g. Arctic Zephyr Reloaded) override the native
+         progress control's textures with their own (typically blue),
+         making colordiffuse and texture overrides ineffective.
+      2. For HLS streams Player.Progress can stay frozen at 0% for the
+         entire track.
+
+    Why not use $INFO[Window.Property(...)] inside the XML <width>?
+      That's a documented Kodi feature but it doesn't actually re-evaluate
+      the width on every frame in all Kodi versions — the width gets
+      sampled once at window init and stays fixed afterwards.
+
+    So we go fully manual: define the orange image with a placeholder
+    width=1 in the XML, then call control.setWidth() from Python every
+    500ms with a freshly-computed pixel value.
+    """
+    # Bar widths in pixels — must match the XML <width> for the bg track.
+    CONTROLS_BAR_WIDTH = 700
+    COMPACT_BAR_WIDTH = 1000
+
+    # Control IDs of the orange fill images (set in the XML).
+    ID_FILL_CONTROLS = 530
+    ID_FILL_COMPACT = 531
+
+    def __init__(self, window):
+        super().__init__(daemon=True)
+        self._player = xbmc.Player()
+        self._stop_event = threading.Event()
+        self._window = window  # needed for getControl()
+        self._tick_count = 0  # for logging cadence
+
+    def stop(self):
+        self._stop_event.set()
+
+    def run(self):
+        xbmc.log(
+            "plugin.audio.soundcloud::ProgressUpdater thread started",
+            xbmc.LOGINFO,
+        )
+        while not self._stop_event.is_set():
+            try:
+                self._tick()
+            except Exception as e:
+                xbmc.log(
+                    "plugin.audio.soundcloud::ProgressUpdater error: %s" % str(e),
+                    xbmc.LOGWARNING,
+                )
+            self._stop_event.wait(0.5)
+        xbmc.log(
+            "plugin.audio.soundcloud::ProgressUpdater thread stopped",
+            xbmc.LOGINFO,
+        )
+
+    def _set_width(self, control_id, width):
+        """Resize an Image control. Width must be >= 1 for setWidth()
+        to be accepted; we clamp to that minimum."""
+        try:
+            control = self._window.getControl(control_id)
+            control.setWidth(max(1, int(width)))
+            return True
+        except Exception as e:
+            # Log only every ~10 seconds to avoid spam
+            if self._tick_count % 20 == 0:
+                xbmc.log(
+                    "plugin.audio.soundcloud::ProgressUpdater setWidth(%d, %d) "
+                    "failed: %s" % (control_id, width, str(e)),
+                    xbmc.LOGINFO,
+                )
+            return False
+
+    def _tick(self):
+        self._tick_count += 1
+
+        if not self._player.isPlayingAudio():
+            self._set_width(self.ID_FILL_CONTROLS, 1)
+            self._set_width(self.ID_FILL_COMPACT, 1)
+            return
+
+        try:
+            elapsed = self._player.getTime()
+            duration = self._player.getTotalTime()
+        except Exception as e:
+            if self._tick_count % 20 == 0:
+                xbmc.log(
+                    "plugin.audio.soundcloud::ProgressUpdater getTime failed: %s" %
+                    str(e), xbmc.LOGINFO,
+                )
+            return
+
+        if not duration or duration <= 0:
+            if self._tick_count % 20 == 0:
+                xbmc.log(
+                    "plugin.audio.soundcloud::ProgressUpdater duration=%s, "
+                    "elapsed=%s — bar can't be computed" % (duration, elapsed),
+                    xbmc.LOGINFO,
+                )
+            return
+
+        ratio = max(0.0, min(1.0, elapsed / duration))
+        controls_w = int(self.CONTROLS_BAR_WIDTH * ratio)
+        compact_w = int(self.COMPACT_BAR_WIDTH * ratio)
+
+        # Log progress every ~5 seconds (every 10 ticks at 500ms)
+        if self._tick_count % 10 == 0:
+            xbmc.log(
+                "plugin.audio.soundcloud::ProgressUpdater tick: "
+                "elapsed=%.1fs, duration=%.1fs, ratio=%.2f, "
+                "controls_width=%d, compact_width=%d" %
+                (elapsed, duration, ratio, controls_w, compact_w),
+                xbmc.LOGINFO,
+            )
+
+        self._set_width(self.ID_FILL_CONTROLS, controls_w)
+        self._set_width(self.ID_FILL_COMPACT, compact_w)
 
 
 class _PlayerObserver(xbmc.Player):
@@ -117,6 +241,12 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         # We keep a reference so it doesn't get garbage-collected.
         self._player_observer = _PlayerObserver(self)
 
+        # Progress bar updater — created here, started in onInit() once
+        # the controls actually exist in the GUI tree. Starting it from
+        # __init__ would be too early: getControl() would fail because
+        # Kodi hasn't built the window yet.
+        self._progress_updater = _ProgressUpdater(self)
+
     # =====================================================================
     # Lifecycle
     # =====================================================================
@@ -156,6 +286,22 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 xbmc.LOGDEBUG,
             )
 
+        # Now that the GUI tree is fully built, start the progress
+        # bar updater thread. It needs getControl() to work, which
+        # requires onInit() to have run.
+        try:
+            self._progress_updater.start()
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow progress updater started",
+                xbmc.LOGINFO,
+            )
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow progress updater failed to start: %s" %
+                str(e),
+                xbmc.LOGWARNING,
+            )
+
     # =====================================================================
     # Input handling
     # =====================================================================
@@ -163,6 +309,12 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
     def onAction(self, action):
         action_id = action.getId()
         if action_id in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK, ACTION_PARENT_DIR):
+            # Stop the background progress updater before closing the
+            # window so it doesn't keep polling the player after we're gone.
+            try:
+                self._progress_updater.stop()
+            except Exception:
+                pass
             self.close()
             # After closing the WindowXMLDialog, Kodi would normally return
             # to whichever window the user came from (often "Music files /

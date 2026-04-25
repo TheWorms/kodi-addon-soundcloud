@@ -33,34 +33,64 @@ def run():
     handle = int(sys.argv[1])
     args = urllib.parse.parse_qs(sys.argv[2][1:])
 
+    # Widget mode redirection (must happen BEFORE the main dispatch).
+    # When the user has set widget.mode to something other than "off",
+    # any call to the plugin root returns directly the items for that
+    # source instead of launching the UI. This lets skins like
+    # Arctic Zephyr Reloaded — which only let widgets point at the
+    # addon root — show a flat list of tracks as a home widget.
+    if path == PATH_ROOT:
+        widget_mode = (settings.get("widget.mode") or "off").strip()
+        action_param = args.get("action", None)
+        if (
+            action_param is None
+            and widget_mode not in ("", "off")
+        ):
+            redirect_to = {
+                "likes": PATH_WIDGET_LIKES,
+                "playlists": PATH_WIDGET_PLAYLISTS,
+                "following": PATH_WIDGET_FOLLOWING,
+                "trending": PATH_WIDGET_TRENDING,
+                "discover": PATH_WIDGET_DISCOVER,
+            }.get(widget_mode)
+            if redirect_to:
+                xbmc.log(
+                    addon_id + ": widget.mode='%s' — redirecting / to %s" %
+                    (widget_mode, redirect_to),
+                    xbmc.LOGINFO,
+                )
+                path = redirect_to
+            else:
+                xbmc.log(
+                    addon_id + ": unknown widget.mode '%s', falling through" %
+                    widget_mode, xbmc.LOGWARNING,
+                )
+
     if path == PATH_ROOT:
         action = args.get("action", None)
-        legacy = args.get("legacy", [None])[0]
-
-        # Auto-launch the new full-screen UI if:
-        #  - the user hasn't passed ?legacy=1 (escape hatch for widgets / fallback)
-        #  - and there's no other action being requested
-        #  - and the setting is enabled (default true)
-        if (
-            action is None
-            and not legacy
-            and settings.get("ui.auto_launch") in ("true", "", None)
-        ):
-            # Tell Kodi immediately that the directory is "failed" so it
-            # doesn't try to render anything. THEN launch the script.
-            # Doing it in this order minimizes the brief flash of the
-            # Music window before our WindowXML appears on top.
-            xbmcplugin.endOfDirectory(handle, succeeded=False, cacheToDisc=False)
-            xbmc.executebuiltin("RunScript(" + addon_id + ")")
-            return
 
         if action is None:
-            items = listItems.root()
+            # Default behaviour at the addon root URL: return a flat
+            # navigable directory. We CANNOT launch the full-screen UI
+            # here unconditionally because skin home widgets (Arctic
+            # Zephyr Reloaded etc.) call this URL to populate their
+            # widget, and a RunScript() would be visually disastrous
+            # (kicks the user out of their home screen).
+            #
+            # Instead we list:
+            #   - "Open SoundCloud" — the entry point to the full UI,
+            #     for users who clicked the addon from Kodi's add-on
+            #     browser
+            #   - one row per widget shortcut (Likes, Trending, etc.)
+            #     so widget pickers in skins find them via root browse
+            items = listItems.widgets(include_ui_launcher=True)
             xbmcplugin.addDirectoryItems(handle, items, len(items))
             xbmcplugin.endOfDirectory(handle)
         elif "call" in action:
-            # Generic "call" action — we don't know what it returns, so we
-            # inspect the resulting collection and set content accordingly.
+            # Generic "call" action — used by the full-screen UI to
+            # navigate inside the plugin's data tree. We don't know what
+            # the call returns, so we inspect the resulting collection
+            # and set content accordingly.
             collection = api.call(args.get("call")[0])
             _set_content_for_collection(handle, collection)
             list_items = listItems.from_collection(collection)
@@ -68,7 +98,15 @@ def run():
             xbmcplugin.addDirectoryItems(handle, list_items, len(list_items))
             xbmcplugin.endOfDirectory(handle)
         elif "settings" in action:
+            # Used by the sidebar Settings button in the full-screen UI.
             addon.openSettings()
+        elif "launch_ui" in action:
+            # Explicit launcher: clicked from the root directory listing.
+            # Launches the full-screen UI as a separate Kodi script so
+            # the directory handler returns cleanly.
+            xbmcplugin.endOfDirectory(handle, succeeded=False, cacheToDisc=False)
+            xbmc.executebuiltin("RunScript(" + addon_id + ")")
+            return
         else:
             xbmc.log(addon_id + ": Invalid root action", xbmc.LOGERROR)
 
@@ -228,13 +266,6 @@ def run():
             xbmcplugin.addDirectoryItems(handle, items, len(items))
             xbmcplugin.endOfDirectory(handle)
 
-    elif path == PATH_LAUNCH_UI:
-        # Opens the custom WindowXML home screen (V1 beta).
-        # We go through a plugin route rather than calling doModal()
-        # directly from inside the plugin handler — Kodi gets confused
-        # if a plugin handler blocks. RunScript runs in its own slot.
-        xbmc.executebuiltin("RunScript(" + addon_id + ")")
-
     elif path == PATH_SETTINGS_AUTH_HELP:
         dialog = xbmcgui.Dialog()
         dialog.textviewer(
@@ -313,6 +344,93 @@ def run():
                     addon.getLocalizedString(30245).format(str(e)) +
                     "\n\n" + preview
                 )
+
+    elif path == PATH_WIDGETS:
+        # Browseable list of all widget shortcuts. Use this in skin widget
+        # pickers (Arctic Zephyr Reloaded > Customise Home > Add Widget):
+        # navigate into "SoundCloud > Widgets > <choice>" and the skin
+        # remembers the path.
+        items = listItems.widgets()
+        xbmcplugin.addDirectoryItems(handle, items, len(items))
+        xbmcplugin.endOfDirectory(handle)
+
+    elif path == PATH_WIDGET_LIKES:
+        # Tracks the user has liked. Requires OAuth.
+        xbmcplugin.setContent(handle, "songs")
+        try:
+            user_id = api.get_my_user_id()
+            if user_id:
+                limit = int(settings.get("search.items.size") or 20)
+                api_result = api.call(
+                    "/users/%d/track_likes?limit=%d" % (user_id, limit)
+                )
+                collection = listItems.from_collection(api_result)
+                _add_song_sort_methods(handle)
+                xbmcplugin.addDirectoryItems(handle, collection, len(collection))
+        except Exception as e:
+            xbmc.log(addon_id + ": widget/likes failed: %s" % str(e), xbmc.LOGERROR)
+        xbmcplugin.endOfDirectory(handle)
+
+    elif path == PATH_WIDGET_PLAYLISTS:
+        # User's own playlists. Requires OAuth.
+        xbmcplugin.setContent(handle, "albums")
+        try:
+            user_id = api.get_my_user_id()
+            if user_id:
+                limit = int(settings.get("search.items.size") or 20)
+                api_result = api.call(
+                    "/users/%d/playlists_without_albums?limit=%d" % (user_id, limit)
+                )
+                collection = listItems.from_collection(api_result)
+                xbmcplugin.addDirectoryItems(handle, collection, len(collection))
+        except Exception as e:
+            xbmc.log(addon_id + ": widget/playlists failed: %s" % str(e), xbmc.LOGERROR)
+        xbmcplugin.endOfDirectory(handle)
+
+    elif path == PATH_WIDGET_FOLLOWING:
+        # Artists the user follows. Requires OAuth.
+        xbmcplugin.setContent(handle, "artists")
+        try:
+            user_id = api.get_my_user_id()
+            if user_id:
+                limit = int(settings.get("search.items.size") or 20)
+                api_result = api.call(
+                    "/users/%d/followings?limit=%d" % (user_id, limit)
+                )
+                collection = listItems.from_collection(api_result)
+                xbmcplugin.addDirectoryItems(handle, collection, len(collection))
+        except Exception as e:
+            xbmc.log(addon_id + ": widget/following failed: %s" % str(e), xbmc.LOGERROR)
+        xbmcplugin.endOfDirectory(handle)
+
+    elif path == PATH_WIDGET_TRENDING:
+        # Worldwide trending tracks (no OAuth required).
+        xbmcplugin.setContent(handle, "songs")
+        try:
+            limit = int(settings.get("search.items.size") or 20)
+            api_result = api.charts({
+                "kind": "trending",
+                "genre": "soundcloud:genres:all-music",
+                "limit": limit,
+            })
+            collection = listItems.from_collection(api_result)
+            _add_song_sort_methods(handle)
+            xbmcplugin.addDirectoryItems(handle, collection, len(collection))
+        except Exception as e:
+            xbmc.log(addon_id + ": widget/trending failed: %s" % str(e), xbmc.LOGERROR)
+        xbmcplugin.endOfDirectory(handle)
+
+    elif path == PATH_WIDGET_DISCOVER:
+        # SoundCloud's "Discover" / mixed-selections endpoint.
+        # No OAuth required but quality of results is better when authenticated
+        # (personalisation by SoundCloud).
+        xbmcplugin.setContent(handle, "songs")
+        try:
+            collection = listItems.from_collection(api.discover(None))
+            xbmcplugin.addDirectoryItems(handle, collection, len(collection))
+        except Exception as e:
+            xbmc.log(addon_id + ": widget/discover failed: %s" % str(e), xbmc.LOGERROR)
+        xbmcplugin.endOfDirectory(handle)
 
     elif path == PATH_SETTINGS_CACHE_CLEAR:
         vfs_cache.destroy()
