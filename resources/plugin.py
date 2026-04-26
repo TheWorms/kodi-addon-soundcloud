@@ -119,6 +119,12 @@ def run():
 
             if not is_widget_call:
                 # User-initiated open: launch the full-screen UI.
+                # We use ReplaceWindow(home) to replace the music browser
+                # (which Kodi opened to host the plugin) with the home
+                # screen — this minimises the visible flash of the music
+                # window and means hitting Back from our UI returns
+                # straight to home rather than to the music browser.
+                xbmc.executebuiltin("ReplaceWindow(home)")
                 xbmcplugin.endOfDirectory(
                     handle, succeeded=False, cacheToDisc=False
                 )
