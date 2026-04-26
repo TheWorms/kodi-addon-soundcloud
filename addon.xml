@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.7.3" provider-name="TheWorms">
+<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.7.4" provider-name="TheWorms">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.29.0"/>
@@ -28,7 +28,10 @@
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
         <credits>jaylinski (original add-on), bromix, SLiX</credits>
-        <news>5.7.3 (2026-04-26) - diagnostic
+        <news>5.7.4 (2026-04-26) - hide music window flash
+When opening the addon from Music > Add-ons, Kodi briefly shows the music browser before our full-screen UI takes over. Now we call ReplaceWindow(home) right before launching the script, so the music window is replaced (not stacked) — the flash is invisible and Back from the UI goes straight to home instead of bouncing back to the music browser.
+
+5.7.3 (2026-04-26) - diagnostic
 Logs detailed window/context info on every root call so we can identify why the widget/UI auto-detection fails on Arctic Zephyr Reloaded. Look for "ROOT context diag" lines in kodi.log.
 
 5.7.2 (2026-04-26) - smart UI auto-launch
