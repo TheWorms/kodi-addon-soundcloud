@@ -96,38 +96,49 @@ def run():
                 xbmc.LOGINFO,
             )
 
-            # We need to distinguish two callers of this URL:
+            # Heuristic to distinguish "user clicked the addon" from
+            # "skin home widget is fetching content":
             #
-            # 1. The user clicked SoundCloud from Kodi's add-on browser
-            #    or the music browser. Here they expect the full-screen
-            #    UI to open immediately.
+            # - User clicks: Kodi opened MyMusicNav.xml (Music > Add-ons)
+            #   or addonbrowser to host the plugin call. These windows
+            #   are visible during the call.
+            # - Widget fetch: the active window stays "home" (the user is
+            #   on the Kodi/skin home screen and the widget panel is
+            #   loading content in the background).
             #
-            # 2. A skin home widget (Arctic Zephyr Reloaded etc.) is
-            #    fetching content to populate its carousel. Here we
-            #    MUST return a flat directory — launching the UI would
-            #    rip the user out of their home screen.
-            #
-            # Heuristic: if the active window is the Kodi Home screen
-            # (or a skin's customised home), it's almost certainly a
-            # widget data fetch. Otherwise it's the user clicking from
-            # an add-on browser / music section. This isn't 100% bullet
-            # proof but works for every common skin we tested.
-            is_widget_call = (
-                xbmc.getCondVisibility("Window.IsActive(home)")
-                or xbmc.getCondVisibility("Window.IsVisible(home)")
+            # We log everything so it's easy to debug skin-specific cases.
+            diag_active_window = xbmc.getInfoLabel("System.CurrentWindow")
+            is_user_browsing = (
+                xbmc.getCondVisibility("Window.IsActive(MyMusicNav.xml)")
+                or xbmc.getCondVisibility("Window.IsActive(musicfiles)")
+                or xbmc.getCondVisibility("Window.IsActive(addonbrowser)")
+                or xbmc.getCondVisibility("Window.IsActive(filemanager)")
             )
+            is_widget_call = not is_user_browsing
 
             if not is_widget_call:
                 # User-initiated open: launch the full-screen UI.
-                # We use ReplaceWindow(home) to replace the music browser
-                # (which Kodi opened to host the plugin) with the home
-                # screen — this minimises the visible flash of the music
-                # window and means hitting Back from our UI returns
-                # straight to home rather than to the music browser.
-                xbmc.executebuiltin("ReplaceWindow(home)")
+                #
+                # The order here matters for hiding the music-window flash:
+                #
+                # 1. endOfDirectory(succeeded=False) tells Kodi "this
+                #    plugin call returns nothing to display" — it stops
+                #    Kodi from trying to populate the music browser with
+                #    anything.
+                #
+                # 2. Dialog.Close(all,true) closes any modal dialog (like
+                #    the "loading directory" spinner) immediately.
+                #
+                # 3. ReplaceWindow(home) swaps the music browser for the
+                #    home screen WITHOUT keeping music in the back stack
+                #    — Back from our UI returns to home, not to music.
+                #
+                # 4. RunScript launches our full-screen UI on top of home.
                 xbmcplugin.endOfDirectory(
                     handle, succeeded=False, cacheToDisc=False
                 )
+                xbmc.executebuiltin("Dialog.Close(all,true)")
+                xbmc.executebuiltin("ReplaceWindow(home)")
                 xbmc.executebuiltin("RunScript(" + addon_id + ")")
                 return
 

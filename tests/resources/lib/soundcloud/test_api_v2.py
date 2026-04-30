@@ -459,16 +459,15 @@ class ApiV2TestCase(TestCase):
 
     @mock.patch("requests.get")
     def test_do_request_falls_back_to_anonymous_on_401(self, mock_get):
-        """When a stale OAuth token causes a 401, the API should:
-          1. Mark the token as invalid for the rest of the session
-          2. Retry the request anonymously (with client_id) and return that
-          3. Never include the bad token in subsequent requests
-        Without this, every endpoint (even public ones like /charts) would
-        fail with 401 until the user manually clears the token."""
+        """When a stale OAuth token causes a 401, the API should retry the
+        request anonymously and return its result. The token is NOT marked
+        as invalid on the first 401 (since SoundCloud occasionally returns
+        transient 401s for valid tokens) — only after 2 consecutive 401s.
+        See _do_request consecutive_401 logic."""
         self.api.cache.get = Mock(return_value="fake_client_id")
         self.api.settings.get_oauth_token = Mock(return_value="stale-token")
 
-        # First call: 401. Second call (retry without token): 200 with data.
+        # First call: 401. Retry (anonymous): 200 with data.
         bad = Mock()
         bad.status_code = 401
         bad.text = ""
@@ -483,18 +482,48 @@ class ApiV2TestCase(TestCase):
 
         result = self.api._do_request("/charts", {})
         self.assertEqual(result, {"collection": [{"id": 1, "kind": "track"}]})
+        # After ONE 401, token is NOT marked invalid (transient handling)
+        self.assertFalse(getattr(self.api, "_token_invalid", False))
+        self.assertEqual(self.api._consecutive_401, 1)
+
+    @mock.patch("requests.get")
+    def test_do_request_disables_token_after_two_consecutive_401(self, mock_get):
+        """After 2 consecutive 401s on authenticated calls, the token is
+        marked invalid and won't be sent on subsequent requests."""
+        self.api.cache.get = Mock(return_value="fake_client_id")
+        self.api.settings.get_oauth_token = Mock(return_value="stale-token")
+
+        bad = Mock()
+        bad.status_code = 401
+        bad.text = ""
+        bad.json = Mock(side_effect=ValueError())
+
+        anon_good = Mock()
+        anon_good.status_code = 200
+        anon_good.text = '{"collection": []}'
+        anon_good.json.return_value = {"collection": []}
+
+        # Sequence: auth 401 -> anon 200 (call 1)
+        #           auth 401 -> anon 200 (call 2; token gets disabled now)
+        #           anon 200 only      (call 3; token already disabled)
+        mock_get.side_effect = [
+            bad, anon_good,
+            bad, anon_good,
+            anon_good,
+        ]
+
+        # Call 1: triggers first 401
+        self.api._do_request("/endpoint1", {})
+        self.assertFalse(getattr(self.api, "_token_invalid", False))
+
+        # Call 2: triggers second 401, token now disabled
+        self.api._do_request("/endpoint2", {})
         self.assertTrue(self.api._token_invalid)
 
-        # Subsequent call should NOT use the token (since _token_invalid is set)
-        good2 = Mock()
-        good2.status_code = 200
-        good2.text = '{"collection": []}'
-        good2.json.return_value = {"collection": []}
-        mock_get.side_effect = [good2]
-        self.api._do_request("/some/other/endpoint", {})
-        # Verify the second call's headers don't include Authorization
-        call_args = mock_get.call_args_list[-1]
-        sent_headers = call_args.kwargs.get("headers", {})
+        # Call 3: token already disabled, should send no Authorization
+        self.api._do_request("/endpoint3", {})
+        last_call = mock_get.call_args_list[-1]
+        sent_headers = last_call.kwargs.get("headers", {})
         self.assertNotIn("Authorization", sent_headers)
 
 

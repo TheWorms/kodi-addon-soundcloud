@@ -224,30 +224,105 @@ class ApiV2(ApiInterface):
                 xbmc.log("plugin.audio.soundcloud::ApiV2() Cache hit", xbmc.LOGDEBUG)
                 return json.loads(cached_response)
 
-        # Send the request.
+        # Send the request, measuring how long it took.
+        import time
+        t_start = time.time()
         raw = requests.get(path, headers=headers, params=payload)
+        elapsed_ms = int((time.time() - t_start) * 1000)
 
         # Status-code-aware handling. We log the body on errors (truncated)
         # so debug logs reveal the real cause without crashing the addon.
         body_preview = (raw.text or "")[:200]
 
+        # Verbose log of every authenticated call so we can correlate
+        # any 401 with the chain of requests that led up to it.
+        # Token is never logged (already redacted in log_headers).
+        if authenticated:
+            xbmc.log(
+                "plugin.audio.soundcloud::ApiV2() AUTH GET %s -> %d in %dms "
+                "(token_len=%d)" %
+                (path, raw.status_code, elapsed_ms, len(oauth_token or "")),
+                xbmc.LOGINFO,
+            )
+
+            # Token lifetime tracking: remember when this specific token
+            # value first started working, and the most recent successful
+            # call. When we hit a 401 we'll log how long the token lived.
+            # Note: we skip the reset/tracking when this call is itself
+            # the anonymous retry of a previous 401 (_retry_after_401),
+            # because that retry's 200 doesn't prove the token works —
+            # only that the underlying endpoint is reachable.
+            if 200 <= raw.status_code < 300 and not _retry_after_401:
+                # Reset consecutive-401 counter on AUTHENTICATED success.
+                if getattr(self, "_consecutive_401", 0) > 0:
+                    xbmc.log(
+                        "plugin.audio.soundcloud::ApiV2() Resetting 401 "
+                        "counter (was %d) — token works again." %
+                        self._consecutive_401,
+                        xbmc.LOGINFO,
+                    )
+                self._consecutive_401 = 0
+
+                if (
+                    not hasattr(self, "_token_first_ok_ts")
+                    or getattr(self, "_token_tracked", None) != oauth_token
+                ):
+                    self._token_first_ok_ts = time.time()
+                    self._token_tracked = oauth_token
+                    self._token_call_count = 0
+                self._token_last_ok_ts = time.time()
+                self._token_call_count = getattr(self, "_token_call_count", 0) + 1
+
         if authenticated and raw.status_code in (401, 403) and not _retry_after_401:
+            # Lifetime diagnostic: how long did this token actually work?
+            lifetime_diag = ""
+            if hasattr(self, "_token_first_ok_ts"):
+                lived_s = int(time.time() - self._token_first_ok_ts)
+                idle_s = int(time.time() - getattr(self, "_token_last_ok_ts", 0))
+                calls = getattr(self, "_token_call_count", 0)
+                lifetime_diag = (
+                    " | TOKEN LIFETIME: worked for %d seconds across %d "
+                    "calls, last success %d seconds ago" %
+                    (lived_s, calls, idle_s)
+                )
+
+            # Count consecutive 401s. We only mark the token invalid
+            # after 2 in a row, because SoundCloud occasionally returns
+            # a transient 401 even for valid tokens (network glitch,
+            # backend deploy, rate limit window). Marking it dead on
+            # the first 401 was way too aggressive and likely the cause
+            # of the "token disconnects all the time" complaint.
+            self._consecutive_401 = getattr(self, "_consecutive_401", 0) + 1
+
             xbmc.log(
                 "plugin.audio.soundcloud::ApiV2() Authentication failed (HTTP %d) on %s. "
-                "Body: %r. The OAuth token is missing, invalid or expired. "
-                "Disabling token for the rest of this session — "
-                "update it in Settings > Account > OAuth token to fix." %
-                (raw.status_code, path, body_preview),
+                "Body: %r. Consecutive 401s: %d.%s" %
+                (raw.status_code, path, body_preview,
+                 self._consecutive_401, lifetime_diag),
                 xbmc.LOGWARNING
             )
-            self._notify_auth_error()
-            # Mark the token as invalid for the rest of this Python session
-            # so subsequent calls don't keep failing with 401 on every
-            # endpoint (including public ones like /charts).
-            # We also remember WHICH token was rejected, so when the user
-            # pastes a new one we can detect the change and try again.
-            self._token_invalid = True
-            self._last_invalid_token = current_token
+
+            if self._consecutive_401 >= 2:
+                xbmc.log(
+                    "plugin.audio.soundcloud::ApiV2() %d consecutive 401s — "
+                    "disabling token for the rest of this session. Update it in "
+                    "Settings > Account > OAuth token to fix." %
+                    self._consecutive_401,
+                    xbmc.LOGWARNING,
+                )
+                self._notify_auth_error()
+                self._token_invalid = True
+                self._last_invalid_token = current_token
+            else:
+                xbmc.log(
+                    "plugin.audio.soundcloud::ApiV2() Treating this 401 as "
+                    "transient — token NOT disabled yet. Will retry "
+                    "anonymously this time but keep the token armed for "
+                    "next call.",
+                    xbmc.LOGINFO,
+                )
+                # Don't mark token invalid yet, but still retry this
+                # specific call anonymously so the user gets some content.
             # Retry the same request immediately, this time anonymously.
             # The _retry_after_401 flag prevents infinite recursion if the
             # endpoint somehow returns 401 even unauthenticated.
@@ -486,7 +561,10 @@ class ApiV2(ApiInterface):
             "date": item.get("display_date", None),
             "description": item.get("description", None),
             "duration": int(item["duration"]) / 1000,
-            "playback_count": item.get("playback_count", 0)
+            "playback_count": item.get("playback_count", 0),
+            # Stashed here for the fullscreen "now playing" overlay
+            # (waveform style); harmless for other consumers.
+            "waveform_url": item.get("waveform_url", ""),
         }
 
         return track

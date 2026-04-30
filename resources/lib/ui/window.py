@@ -29,6 +29,13 @@ import xbmc
 import xbmcgui
 
 
+# Kodi action IDs (used by both NowPlayingDialog and SoundCloudHomeWindow,
+# defined here at module top so both classes can reference them).
+ACTION_PREVIOUS_MENU = 10
+ACTION_NAV_BACK = 92
+ACTION_PARENT_DIR = 9
+
+
 class _ProgressUpdater(threading.Thread):
     """
     Background thread that polls xbmc.Player position 2x per second and
@@ -154,12 +161,21 @@ class _ProgressUpdater(threading.Thread):
 class _PlayerObserver(xbmc.Player):
     """
     Subclass of xbmc.Player that gets notified when playback changes.
-    We use it to highlight the currently-playing track in the visible list,
-    so the focus follows the song as autoplay moves through the queue.
+    We use it to:
+      1. highlight the currently-playing track in the visible list
+         (so focus follows the song as autoplay moves through the queue)
+      2. open the "Now Playing" fullscreen dialog (Cinema/Waveform/etc.)
+         on top of the home UI when audio starts, if the user enabled it
+         in Settings > Playback > Fullscreen style
     """
     def __init__(self, window):
         super().__init__()
         self._window = window
+        # Reference to the currently-open fullscreen dialog so we can
+        # close it when playback stops or when the user dismisses it.
+        # Stored on the observer (not the home window) so it survives
+        # a re-init of the window if that happens.
+        self._np_dialog = None
 
     def onAVStarted(self):
         try:
@@ -168,6 +184,15 @@ class _PlayerObserver(xbmc.Player):
             xbmc.log(
                 "plugin.audio.soundcloud::PlayerObserver onAVStarted: %s" % str(e),
                 xbmc.LOGDEBUG,
+            )
+        # Open fullscreen overlay if user enabled one
+        try:
+            self._maybe_open_now_playing()
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::PlayerObserver fullscreen open "
+                "failed: %s" % str(e),
+                xbmc.LOGWARNING,
             )
 
     def onAVChange(self):
@@ -178,6 +203,662 @@ class _PlayerObserver(xbmc.Player):
                 "plugin.audio.soundcloud::PlayerObserver onAVChange: %s" % str(e),
                 xbmc.LOGDEBUG,
             )
+
+    def onPlayBackStopped(self):
+        self._close_now_playing()
+
+    def onPlayBackEnded(self):
+        # When autoplay queues the next track, onPlayBackEnded fires
+        # then onAVStarted fires again — we don't want to close+reopen
+        # the fullscreen window between tracks (it would flash). So we
+        # leave the dialog open here and rely on Player.* infolabels to
+        # update inside the still-open dialog.
+        pass
+
+    def _maybe_open_now_playing(self):
+        """Open the configured fullscreen overlay, if any, and only if
+        not already open."""
+        style = (self._window.settings.get("playback.fullscreen_style")
+                 or "off").strip()
+        xbmc.log(
+            "plugin.audio.soundcloud::PlayerObserver _maybe_open_now_"
+            "playing setting=%r np_dialog_is_set=%s" %
+            (style, self._np_dialog is not None),
+            xbmc.LOGINFO,
+        )
+        if style in ("", "off"):
+            return
+        if self._np_dialog is not None:
+            # Already open — just leave it; infolabels will refresh.
+            return
+
+        xml_for_style = {
+            "cinema": "script-soundcloud-now-playing-cinema.xml",
+            "waveform": "script-soundcloud-now-playing-waveform.xml",
+            "editorial": "script-soundcloud-now-playing-editorial.xml",
+            "vinyl": "script-soundcloud-now-playing-vinyl.xml",
+        }
+        xml_file = xml_for_style.get(style)
+        if not xml_file:
+            xbmc.log(
+                "plugin.audio.soundcloud::PlayerObserver fullscreen style "
+                "'%s' not yet implemented — falling back to no overlay" %
+                style, xbmc.LOGINFO,
+            )
+            return
+
+        # Extract cover URL from Kodi infolabel — that one is reliably
+        # available because Kodi sets it from the playing ListItem.
+        cover_url = ""
+        try:
+            cover_url = xbmc.getInfoLabel("Player.Art(thumb)") or ""
+        except Exception:
+            pass
+
+        # Read the waveform_url and description that were stashed in
+        # window properties by _play_with_queue when the user clicked
+        # the track. Avoids an extra API call here.
+        waveform_url = ""
+        description = ""
+        if style == "waveform":
+            try:
+                waveform_url = self._window.getProperty(
+                    "soundcloud.last_played_waveform_url"
+                ) or ""
+            except Exception:
+                pass
+        if style == "editorial":
+            try:
+                description = self._window.getProperty(
+                    "soundcloud.last_played_description"
+                ) or ""
+            except Exception:
+                pass
+
+        addon_path = self._window.addon.getAddonInfo("path")
+        try:
+            self._np_dialog = NowPlayingDialog(
+                xml_file, addon_path, "default", "1080i",
+                observer=self,
+                style=style,
+                cover_url=cover_url,
+                waveform_url=waveform_url,
+                description=description,
+            )
+            self._np_dialog.show()
+            xbmc.log(
+                "plugin.audio.soundcloud::PlayerObserver opened fullscreen "
+                "'%s' (cover=%s, waveform=%s, descr=%d chars)" %
+                (style, bool(cover_url), bool(waveform_url),
+                 len(description)),
+                xbmc.LOGINFO,
+            )
+        except Exception as e:
+            self._np_dialog = None
+            xbmc.log(
+                "plugin.audio.soundcloud::PlayerObserver could not open "
+                "fullscreen '%s': %s" % (style, str(e)),
+                xbmc.LOGWARNING,
+            )
+
+    def _close_now_playing(self):
+        """Close the fullscreen overlay if open."""
+        if self._np_dialog is None:
+            return
+        try:
+            self._np_dialog.close()
+        except Exception:
+            pass
+        self._np_dialog = None
+
+
+class NowPlayingDialog(xbmcgui.WindowXMLDialog):
+    """
+    Generic fullscreen "now playing" overlay. The actual look is
+    determined by the XML file passed at construction (Cinema, Waveform,
+    Vinyl or Editorial).
+
+    Most visual state comes from $INFO[Player.*] infolabels.
+
+    Cinema style: just a progress bar updater.
+    Waveform style: ALSO fetches the waveform JSON, generates a blurred
+    background, and animates the bars from grey -> orange as the track
+    progresses.
+    """
+    # Control IDs (must match the XML files)
+    # Cinema:
+    ID_CINEMA_PROGRESS_FILL = 9100
+    CINEMA_BAR_WIDTH = 600
+
+    # Waveform style (now visualizer-style: bars heights animated):
+    ID_WAVEFORM_BG = 9100
+    ID_WAVEFORM_PROGRESS_FG = 9151
+    WAVEFORM_PROGRESS_BAR_WIDTH = 1520
+    WAVEFORM_NUM_BARS = 90
+    WAVEFORM_BAR_BASE = 9200  # single set of orange bars; heights animated
+    WAVEFORM_BAR_AREA_HEIGHT = 100
+    WAVEFORM_BAR_AREA_TOP = 880
+
+    # Editorial style:
+    ID_EDITORIAL_BG = 9100
+    ID_EDITORIAL_QUOTE = 9010
+    ID_EDITORIAL_PROGRESS_FG = 9151
+    EDITORIAL_PROGRESS_BAR_WIDTH = 1080
+
+    # Vinyl style:
+    ID_VINYL_BG = 9100
+    ID_VINYL_PROGRESS_FG = 9151
+    VINYL_PROGRESS_BAR_WIDTH = 820
+
+    def __init__(self, *args, **kwargs):
+        self._observer = kwargs.pop("observer", None)
+        # Style: "cinema", "waveform", "vinyl", "editorial".
+        # Determines which behaviour the dialog applies.
+        self._style = kwargs.pop("style", "cinema")
+        # Track metadata for waveform/blur generation. Set externally
+        # before show() — we don't fetch it ourselves because the
+        # observer already has API access.
+        self._cover_url = kwargs.pop("cover_url", "")
+        self._waveform_url = kwargs.pop("waveform_url", "")
+        # Track description (long text) — used for the editorial
+        # style's pull quote. May be empty for tracks that don't have
+        # one (most user uploads, sadly).
+        self._description = kwargs.pop("description", "")
+        super().__init__(*args, **kwargs)
+        self._progress_updater = None
+        self._waveform_samples = None  # 90 floats 0..1, set by prep thread
+        self._dominant_colour = "FF5500"  # default orange, may be overridden
+
+    def onInit(self):
+        xbmc.log(
+            "plugin.audio.soundcloud::NowPlayingDialog onInit style=%s "
+            "cover_url=%r waveform_url=%r descr=%d chars" %
+            (self._style, self._cover_url[:80], self._waveform_url[:80],
+             len(self._description)),
+            xbmc.LOGINFO,
+        )
+        # Kick off the right behaviour depending on style.
+        try:
+            if self._style == "waveform":
+                self._init_waveform()
+            elif self._style == "editorial":
+                self._init_editorial()
+            elif self._style == "vinyl":
+                self._init_vinyl()
+            else:
+                # cinema (default)
+                self._progress_updater = _NowPlayingProgressUpdater(self)
+                self._progress_updater.start()
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::NowPlayingDialog onInit FAILED: "
+                "%s" % str(e),
+                xbmc.LOGERROR,
+            )
+            import traceback
+            xbmc.log(traceback.format_exc(), xbmc.LOGERROR)
+
+    def _init_editorial(self):
+        """Set up the editorial display: populate the pull quote label
+        (the description text) and start the editorial progress
+        updater (thin orange bar at the bottom of the right column)."""
+        # 1. Pull quote: clean up the description and set it on the
+        # quote label (id 9010). SoundCloud descriptions often contain
+        # raw URLs and hashtag spam — we strip those for readability.
+        # If there's no description, we leave the quote empty rather
+        # than padding with derived metadata (genre/year) — empty
+        # whitespace looks intentional, fake filler does not.
+        clean = self._clean_description(self._description)
+        try:
+            self.getControl(self.ID_EDITORIAL_QUOTE).setLabel(clean)
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::NowPlayingDialog could not set "
+                "editorial pull quote: %s" % str(e),
+                xbmc.LOGDEBUG,
+            )
+
+        # 2. Optional Pillow blurred bg in a background thread.
+        # Reuse the same helper used by waveform.
+        prep = threading.Thread(
+            target=self._prepare_editorial_assets, daemon=True
+        )
+        prep.start()
+
+        # 3. Start the editorial progress updater (drives the thin
+        # orange progress bar that fills as the track plays).
+        self._progress_updater = _EditorialProgressUpdater(self)
+        self._progress_updater.start()
+
+    def _prepare_editorial_assets(self):
+        """Background: install the blurred cover as the editorial bg
+        if Pillow is available. Silently skipped otherwise."""
+        try:
+            from resources.lib.kodi import imagehelpers
+            if not self._cover_url:
+                return
+            blurred_path = imagehelpers.get_blurred_cover(
+                self._cover_url, blur_radius=30
+            )
+            if blurred_path and blurred_path != self._cover_url:
+                # Only swap if we actually got a different (blurred) file
+                self.getControl(self.ID_EDITORIAL_BG).setImage(blurred_path)
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::NowPlayingDialog editorial bg "
+                "blur failed: %s" % str(e),
+                xbmc.LOGDEBUG,
+            )
+
+    def _init_vinyl(self):
+        """Set up the vinyl display. The disc rotation is handled
+        natively by Kodi via <animation effect="rotate" loop="true">
+        in the XML — Python only needs to install the blurred bg and
+        start the progress bar updater. We reuse the editorial
+        updater because the only difference is bar width (820 vs
+        1080) and that's parameterised via the dialog constants."""
+        # 1. Optional Pillow blurred bg in a background thread.
+        prep = threading.Thread(
+            target=self._prepare_vinyl_assets, daemon=True
+        )
+        prep.start()
+
+        # 2. Start the progress bar updater. We use the editorial
+        # updater class but it reads VINYL_PROGRESS_BAR_WIDTH and
+        # ID_VINYL_PROGRESS_FG, so we override at construction.
+        self._progress_updater = _VinylProgressUpdater(self)
+        self._progress_updater.start()
+
+    def _prepare_vinyl_assets(self):
+        """Background: install the blurred cover as the vinyl bg if
+        Pillow is available. Silently skipped otherwise."""
+        try:
+            from resources.lib.kodi import imagehelpers
+            if not self._cover_url:
+                return
+            blurred_path = imagehelpers.get_blurred_cover(
+                self._cover_url, blur_radius=30
+            )
+            if blurred_path and blurred_path != self._cover_url:
+                self.getControl(self.ID_VINYL_BG).setImage(blurred_path)
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::NowPlayingDialog vinyl bg "
+                "blur failed: %s" % str(e),
+                xbmc.LOGDEBUG,
+            )
+
+    @staticmethod
+    def _clean_description(raw):
+        """Strip hashtags, URLs, excessive whitespace from a SoundCloud
+        track description so it reads as editorial body copy. Truncate
+        to ~280 chars (a tweet's worth) so the layout doesn't overflow
+        the pull-quote area."""
+        if not raw:
+            return ""
+        import re
+        # Strip URLs
+        s = re.sub(r"https?://\S+", "", raw)
+        # Strip hashtag chains at the end (common SoundCloud pattern)
+        s = re.sub(r"(#\S+\s*)+$", "", s)
+        # Collapse whitespace runs
+        s = re.sub(r"\s+", " ", s).strip()
+        # Truncate
+        if len(s) > 280:
+            # Cut at the last sentence boundary before 280 chars if any
+            cut = s[:280].rsplit(".", 1)[0]
+            if len(cut) < 80:
+                # Sentence boundary too early — just hard-cut with ellipsis
+                cut = s[:277].rstrip() + "..."
+            else:
+                cut = cut.rstrip() + "."
+            s = cut
+        return s
+
+    def _init_waveform(self):
+        """Set up the waveform display: launch a background thread to
+        download blur+samples, then start the per-tick foreground bar
+        updater. The bar areas stay flat until the prep thread fills
+        them in."""
+        xbmc.log(
+            "plugin.audio.soundcloud::NowPlayingDialog _init_waveform "
+            "starting prep thread + progress updater",
+            xbmc.LOGINFO,
+        )
+        # 1. Start a thread that does the heavy lifting (network +
+        # PIL operations) without blocking the UI.
+        prep = threading.Thread(target=self._prepare_waveform_assets,
+                                daemon=True)
+        prep.start()
+
+        # 2. Start the foreground bar progress updater (refreshes which
+        # bars should be orange based on Player.Time / Duration).
+        self._progress_updater = _VisualizerUpdater(self)
+        self._progress_updater.start()
+
+    def _prepare_waveform_assets(self):
+        """Background thread: download waveform JSON, generate blurred
+        background, extract dominant colour. Updates the dialog's
+        controls when each piece arrives (no waiting for everything).
+
+        Note: in visualizer mode we no longer fetch the SoundCloud
+        waveform JSON — the bar heights are animated in real time by
+        the _VisualizerUpdater thread, not derived from a static
+        waveform shape. We keep this thread for the (optional) Pillow
+        blurred background and dominant colour extraction."""
+        xbmc.log(
+            "plugin.audio.soundcloud::NowPlayingDialog _prepare_waveform_"
+            "assets thread started",
+            xbmc.LOGINFO,
+        )
+        try:
+            from resources.lib.kodi import imagehelpers
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::NowPlayingDialog could not import "
+                "imagehelpers: %s" % str(e),
+                xbmc.LOGERROR,
+            )
+            return
+
+        # 1. Blurred background (Pillow only — gracefully no-op without it)
+        if self._cover_url:
+            try:
+                blurred_path = imagehelpers.get_blurred_cover(
+                    self._cover_url, blur_radius=20
+                )
+                if blurred_path:
+                    self.getControl(self.ID_WAVEFORM_BG)\
+                        .setImage(blurred_path)
+                    xbmc.log(
+                        "plugin.audio.soundcloud::NowPlaying applied "
+                        "blurred bg: %s" % blurred_path,
+                        xbmc.LOGDEBUG,
+                    )
+            except Exception as e:
+                xbmc.log(
+                    "plugin.audio.soundcloud::NowPlaying blurred bg "
+                    "failed: %s" % str(e), xbmc.LOGDEBUG,
+                )
+
+        # 2. Dominant colour (currently unused, kept for future styles)
+        try:
+            self._dominant_colour = imagehelpers.get_dominant_colour(
+                self._cover_url
+            )
+        except Exception:
+            pass
+
+    def onAction(self, action):
+        # Any back/menu/exit action closes the overlay.
+        if action.getId() in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK,
+                              ACTION_PARENT_DIR):
+            self.close()
+            if self._observer is not None:
+                self._observer._np_dialog = None
+            return
+
+    def close(self):
+        try:
+            if self._progress_updater is not None:
+                self._progress_updater.stop()
+        except Exception:
+            pass
+        super().close()
+
+
+class _NowPlayingProgressUpdater(threading.Thread):
+    """
+    Cinema-style progress: poll the player every 500ms and resize the
+    orange fill control via Python's setWidth().
+    """
+    def __init__(self, dialog):
+        super().__init__(daemon=True)
+        self._dialog = dialog
+        self._player = xbmc.Player()
+        self._stop_event = threading.Event()
+
+    def stop(self):
+        self._stop_event.set()
+
+    def run(self):
+        while not self._stop_event.is_set():
+            try:
+                self._tick()
+            except Exception:
+                pass
+            self._stop_event.wait(0.5)
+
+    def _tick(self):
+        if not self._player.isPlayingAudio():
+            return
+        try:
+            elapsed = self._player.getTime()
+            duration = self._player.getTotalTime()
+        except Exception:
+            return
+        if not duration or duration <= 0:
+            return
+        ratio = max(0.0, min(1.0, elapsed / duration))
+        width = max(1, int(NowPlayingDialog.CINEMA_BAR_WIDTH * ratio))
+        try:
+            self._dialog.getControl(NowPlayingDialog.ID_CINEMA_PROGRESS_FILL)\
+                .setWidth(width)
+        except Exception:
+            pass
+
+
+class _VisualizerUpdater(threading.Thread):
+    """
+    Animates the 90 orange bars with pseudo-audio-reactive heights to
+    SIMULATE a real-time audio visualizer. Kodi's Python API doesn't
+    expose audio samples to addons, so we can't make a true visualizer
+    — but a well-tuned animation pattern is indistinguishable from one
+    for a casual user.
+
+    Pattern logic (per tick, ~80ms cadence):
+      - Bars 0..30 (left, "bass"): slow undulation, medium amplitude
+      - Bars 30..60 (middle, "mids"): faster variation, high amplitude
+      - Bars 60..90 (right, "highs"): rapid flicker, lower amplitude
+
+    Each bar's target height is recomputed every tick from a smooth
+    sinusoid + a small random perturbation, then setHeight is applied.
+
+    The thread also updates the thin progress bar above the
+    visualizer based on real Player.Time / Duration so the user has
+    an accurate playback indicator.
+    """
+    # Animation cadence in seconds. 80ms = 12.5 FPS — fast enough to
+    # feel alive, slow enough to not hammer Kodi's UI thread.
+    TICK_INTERVAL = 0.08
+
+    def __init__(self, dialog):
+        super().__init__(daemon=True)
+        self._dialog = dialog
+        self._player = xbmc.Player()
+        self._stop_event = threading.Event()
+        # Per-bar phase offsets so they don't all peak together.
+        # Pre-computed once at thread creation.
+        import random
+        rng = random.Random(42)  # deterministic so behaviour is reproducible
+        self._phases = [rng.uniform(0, 6.28) for _ in
+                        range(NowPlayingDialog.WAVEFORM_NUM_BARS)]
+        # Counter that drives the sinusoids. Incremented each tick.
+        self._t = 0.0
+
+    def stop(self):
+        self._stop_event.set()
+
+    def run(self):
+        while not self._stop_event.is_set():
+            try:
+                self._tick()
+            except Exception as e:
+                xbmc.log(
+                    "plugin.audio.soundcloud::VisualizerUpdater "
+                    "tick error: %s" % str(e),
+                    xbmc.LOGDEBUG,
+                )
+            self._stop_event.wait(self.TICK_INTERVAL)
+
+    def _tick(self):
+        if not self._player.isPlayingAudio():
+            return
+
+        # 1. Update the progress bar based on real Player.Time
+        try:
+            elapsed = self._player.getTime()
+            duration = self._player.getTotalTime()
+            if duration and duration > 0:
+                ratio = max(0.0, min(1.0, elapsed / duration))
+                width = max(
+                    1, int(NowPlayingDialog.WAVEFORM_PROGRESS_BAR_WIDTH * ratio)
+                )
+                self._dialog.getControl(
+                    NowPlayingDialog.ID_WAVEFORM_PROGRESS_FG
+                ).setWidth(width)
+        except Exception:
+            pass
+
+        # 2. Animate bar heights to simulate audio reactivity
+        import math
+        import random
+        self._t += self.TICK_INTERVAL
+
+        n = NowPlayingDialog.WAVEFORM_NUM_BARS
+        max_h = NowPlayingDialog.WAVEFORM_BAR_AREA_HEIGHT
+        top_base = NowPlayingDialog.WAVEFORM_BAR_AREA_TOP
+        for i in range(n):
+            # Frequency band: 0=bass (slow), 1=mid, 2=highs (fast).
+            band = i / n  # 0..1 left to right
+            if band < 0.33:
+                # Bass: slow rolling motion, ~0.6 cycles/sec
+                freq = 1.5
+                amp_base = 0.55
+                noise = random.uniform(-0.1, 0.1)
+            elif band < 0.66:
+                # Mids: faster, more variable
+                freq = 4.0
+                amp_base = 0.65
+                noise = random.uniform(-0.2, 0.2)
+            else:
+                # Highs: rapid flicker, smaller
+                freq = 8.0
+                amp_base = 0.4
+                noise = random.uniform(-0.3, 0.3)
+
+            # Sinusoidal motion + per-bar phase offset + random noise
+            sine = (math.sin(self._t * freq + self._phases[i]) + 1.0) / 2.0
+            target = amp_base * sine + noise
+            target = max(0.05, min(1.0, target))
+            h = max(4, int(target * max_h))
+            new_top = top_base + max_h - h
+
+            try:
+                bar = self._dialog.getControl(
+                    NowPlayingDialog.WAVEFORM_BAR_BASE + i
+                )
+                bar.setHeight(h)
+                bar.setPosition(bar.getPosition()[0], new_top)
+            except Exception:
+                # Dialog might be closing — bail out for this tick
+                return
+
+
+class _EditorialProgressUpdater(threading.Thread):
+    """
+    Drives the thin orange progress bar at the bottom of the editorial
+    layout. Same pattern as the cinema updater (poll Player.Time every
+    500ms, resize the orange fill control via setWidth) but targets a
+    different control id and a wider bar (1080px instead of 600px).
+    """
+    def __init__(self, dialog):
+        super().__init__(daemon=True)
+        self._dialog = dialog
+        self._player = xbmc.Player()
+        self._stop_event = threading.Event()
+
+    def stop(self):
+        self._stop_event.set()
+
+    def run(self):
+        while not self._stop_event.is_set():
+            try:
+                self._tick()
+            except Exception:
+                pass
+            self._stop_event.wait(0.5)
+
+    def _tick(self):
+        if not self._player.isPlayingAudio():
+            return
+        try:
+            elapsed = self._player.getTime()
+            duration = self._player.getTotalTime()
+        except Exception:
+            return
+        if not duration or duration <= 0:
+            return
+        ratio = max(0.0, min(1.0, elapsed / duration))
+        width = max(
+            1, int(NowPlayingDialog.EDITORIAL_PROGRESS_BAR_WIDTH * ratio)
+        )
+        try:
+            self._dialog.getControl(
+                NowPlayingDialog.ID_EDITORIAL_PROGRESS_FG
+            ).setWidth(width)
+        except Exception:
+            pass
+
+
+class _VinylProgressUpdater(threading.Thread):
+    """
+    Drives the thin orange progress bar in the vinyl style. Same
+    pattern as the cinema/editorial updaters, just targeting different
+    constants (VINYL_PROGRESS_BAR_WIDTH=820, ID_VINYL_PROGRESS_FG=9151).
+
+    NOTE: the disc rotation itself is NOT driven by Python — it's a
+    native Kodi <animation effect="rotate" loop="true"> in the XML.
+    That's why the rotation stays smooth even when Python is busy
+    doing other work.
+    """
+    def __init__(self, dialog):
+        super().__init__(daemon=True)
+        self._dialog = dialog
+        self._player = xbmc.Player()
+        self._stop_event = threading.Event()
+
+    def stop(self):
+        self._stop_event.set()
+
+    def run(self):
+        while not self._stop_event.is_set():
+            try:
+                self._tick()
+            except Exception:
+                pass
+            self._stop_event.wait(0.5)
+
+    def _tick(self):
+        if not self._player.isPlayingAudio():
+            return
+        try:
+            elapsed = self._player.getTime()
+            duration = self._player.getTotalTime()
+        except Exception:
+            return
+        if not duration or duration <= 0:
+            return
+        ratio = max(0.0, min(1.0, elapsed / duration))
+        width = max(
+            1, int(NowPlayingDialog.VINYL_PROGRESS_BAR_WIDTH * ratio)
+        )
+        try:
+            self._dialog.getControl(
+                NowPlayingDialog.ID_VINYL_PROGRESS_FG
+            ).setWidth(width)
+        except Exception:
+            pass
 
 
 WINDOW_XML = "script-soundcloud-home.xml"
@@ -213,11 +894,6 @@ ROW_TYPES = {
 ID_MP_PREV = 520
 ID_MP_PLAY = 521
 ID_MP_NEXT = 522
-
-# Kodi action IDs
-ACTION_PREVIOUS_MENU = 10
-ACTION_NAV_BACK = 92
-ACTION_PARENT_DIR = 9
 
 
 class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
@@ -767,6 +1443,27 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             playlist.clear()
             for url, li in track_items:
                 playlist.add(url=url, listitem=li)
+
+            # Stash the about-to-play track's metadata in window props
+            # so the fullscreen overlay (NowPlayingDialog) can read them.
+            # We update them again on every onAVStarted via the observer
+            # (TODO: hook that in for autoplayed next tracks).
+            try:
+                _, first_li = track_items[new_start]
+                self.setProperty(
+                    "soundcloud.last_played_track_id",
+                    first_li.getProperty("soundcloud.track_id") or "",
+                )
+                self.setProperty(
+                    "soundcloud.last_played_waveform_url",
+                    first_li.getProperty("soundcloud.waveform_url") or "",
+                )
+                self.setProperty(
+                    "soundcloud.last_played_description",
+                    first_li.getProperty("soundcloud.description") or "",
+                )
+            except Exception:
+                pass
 
             xbmc.log(
                 "plugin.audio.soundcloud::HomeWindow queued %d tracks, "

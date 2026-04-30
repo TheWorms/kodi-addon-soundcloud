@@ -51,6 +51,19 @@ class Track(ListItem):
 
         list_item.setProperty("isPlayable", "true")
         list_item.setProperty("mediaUrl", self.media)
+        # Stash the track id and waveform url so the fullscreen overlay
+        # can identify the playing track and display its waveform.
+        # Kodi keeps these properties on the playing item.
+        if self.id is not None:
+            list_item.setProperty("soundcloud.track_id", str(self.id))
+        if self.info.get("waveform_url"):
+            list_item.setProperty(
+                "soundcloud.waveform_url", self.info["waveform_url"]
+            )
+        if self.info.get("description"):
+            list_item.setProperty(
+                "soundcloud.description", self.info["description"]
+            )
 
         url = addon_base + "/play/?" + urllib.parse.urlencode({"media_url": self.media})
         return url, list_item, False

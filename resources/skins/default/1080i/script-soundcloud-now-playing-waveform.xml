@@ -1,0 +1,772 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Now Playing — Waveform style (visualizer mode)
+  ===============================================
+
+  90 orange bars whose heights are animated continuously by Python
+  at ~80ms cadence to simulate an audio visualizer. Lower frequencies
+  (left) move slow with medium amplitude, mids vary, highs flicker
+  fast. The result LOOKS audio-reactive even though Python has no
+  access to the actual audio samples (Kodi's API doesn't expose them).
+
+  Above the bars: a thin progress bar driven by the real Player.Time
+  so the user has a true playback position indicator.
+
+  Loaded by NowPlayingDialog when
+  Settings > Playback > Fullscreen style = "waveform".
+-->
+<window type="dialog" id="13101">
+    <defaultcontrol>9001</defaultcontrol>
+    <coordinates>
+        <system>1</system>
+    </coordinates>
+
+    <controls>
+
+        <!-- 0. Opaque black mask -->
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture>black.png</texture>
+        </control>
+
+        <!-- 1. Cover art background (Pillow-blurred via Python if available) -->
+        <control type="image" id="9100">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture background="true">$INFO[Player.Art(thumb)]</texture>
+            <aspectratio>scale</aspectratio>
+            <colordiffuse>66FFFFFF</colordiffuse>
+            <animation effect="zoom" start="100" end="108" center="auto"
+                       time="18000" pulse="true" tween="sine">Conditional</animation>
+        </control>
+
+        <!-- 2. Dark gradient overlay at the bottom for text readability. -->
+        <control type="image">
+            <left>0</left>
+            <top>500</top>
+            <width>1920</width>
+            <height>580</height>
+            <texture colordiffuse="BB000000">white.png</texture>
+        </control>
+
+        <!-- 3. Track title -->
+        <control type="label" id="9001">
+            <left>200</left>
+            <top>720</top>
+            <width>1520</width>
+            <height>50</height>
+            <align>left</align>
+            <font>font14</font>
+            <textcolor>FFFFFFFF</textcolor>
+            <label>$INFO[Player.Title]</label>
+            <animation effect="slide" start="0,30" end="0,0" time="700"
+                       tween="cubic" easing="out">WindowOpen</animation>
+            <animation effect="fade" start="0" end="100" time="700">WindowOpen</animation>
+        </control>
+
+        <!-- 4. Artist (smaller, dimmer) -->
+        <control type="label" id="9002">
+            <left>200</left>
+            <top>780</top>
+            <width>1520</width>
+            <height>40</height>
+            <align>left</align>
+            <font>font12</font>
+            <textcolor>BBFFFFFF</textcolor>
+            <label>$INFO[Player.Artist]</label>
+            <animation effect="slide" start="0,30" end="0,0" time="800"
+                       delay="80" tween="cubic" easing="out">WindowOpen</animation>
+            <animation effect="fade" start="0" end="100" time="800"
+                       delay="80">WindowOpen</animation>
+        </control>
+
+        <!-- 5. Thin progress bar (real playback position) -->
+        <control type="image" id="9150">
+            <left>200</left>
+            <top>850</top>
+            <width>1520</width>
+            <height>3</height>
+            <texture colordiffuse="33FFFFFF">white.png</texture>
+        </control>
+        <control type="image" id="9151">
+            <left>200</left>
+            <top>850</top>
+            <width>1</width>
+            <height>3</height>
+            <texture>orange.png</texture>
+        </control>
+
+        <!-- 6. Visualizer bars (90 orange bars, heights animated by Python) -->
+        <control type="image" id="9200">
+            <left>200</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9201">
+            <left>216</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9202">
+            <left>232</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9203">
+            <left>248</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9204">
+            <left>264</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9205">
+            <left>280</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9206">
+            <left>296</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9207">
+            <left>312</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9208">
+            <left>328</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9209">
+            <left>344</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9210">
+            <left>360</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9211">
+            <left>376</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9212">
+            <left>392</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9213">
+            <left>408</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9214">
+            <left>424</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9215">
+            <left>440</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9216">
+            <left>456</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9217">
+            <left>472</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9218">
+            <left>488</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9219">
+            <left>504</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9220">
+            <left>520</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9221">
+            <left>536</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9222">
+            <left>552</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9223">
+            <left>568</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9224">
+            <left>584</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9225">
+            <left>600</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9226">
+            <left>616</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9227">
+            <left>632</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9228">
+            <left>648</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9229">
+            <left>664</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9230">
+            <left>680</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9231">
+            <left>696</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9232">
+            <left>712</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9233">
+            <left>728</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9234">
+            <left>744</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9235">
+            <left>760</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9236">
+            <left>776</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9237">
+            <left>792</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9238">
+            <left>808</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9239">
+            <left>824</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9240">
+            <left>840</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9241">
+            <left>856</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9242">
+            <left>872</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9243">
+            <left>888</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9244">
+            <left>904</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9245">
+            <left>920</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9246">
+            <left>936</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9247">
+            <left>952</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9248">
+            <left>968</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9249">
+            <left>984</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9250">
+            <left>1000</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9251">
+            <left>1016</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9252">
+            <left>1032</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9253">
+            <left>1048</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9254">
+            <left>1064</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9255">
+            <left>1080</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9256">
+            <left>1096</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9257">
+            <left>1112</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9258">
+            <left>1128</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9259">
+            <left>1144</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9260">
+            <left>1160</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9261">
+            <left>1176</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9262">
+            <left>1192</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9263">
+            <left>1208</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9264">
+            <left>1224</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9265">
+            <left>1240</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9266">
+            <left>1256</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9267">
+            <left>1272</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9268">
+            <left>1288</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9269">
+            <left>1304</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9270">
+            <left>1320</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9271">
+            <left>1336</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9272">
+            <left>1352</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9273">
+            <left>1368</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9274">
+            <left>1384</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9275">
+            <left>1400</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9276">
+            <left>1416</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9277">
+            <left>1432</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9278">
+            <left>1448</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9279">
+            <left>1464</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9280">
+            <left>1480</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9281">
+            <left>1496</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9282">
+            <left>1512</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9283">
+            <left>1528</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9284">
+            <left>1544</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9285">
+            <left>1560</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9286">
+            <left>1576</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9287">
+            <left>1592</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9288">
+            <left>1608</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+        <control type="image" id="9289">
+            <left>1624</left>
+            <top>976</top>
+            <width>14</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+
+        <!-- 7. Time labels -->
+        <control type="label" id="9003">
+            <left>200</left>
+            <top>1000</top>
+            <width>200</width>
+            <height>30</height>
+            <align>left</align>
+            <font>font12</font>
+            <textcolor>BBFFFFFF</textcolor>
+            <label>$INFO[Player.Time]</label>
+        </control>
+
+        <control type="label" id="9004">
+            <left>1520</left>
+            <top>1000</top>
+            <width>200</width>
+            <height>30</height>
+            <align>right</align>
+            <font>font12</font>
+            <textcolor>BBFFFFFF</textcolor>
+            <label>$INFO[Player.Duration]</label>
+        </control>
+
+        <!-- 8. Hint text -->
+        <control type="label">
+            <left>0</left>
+            <top>1040</top>
+            <width>1920</width>
+            <height>30</height>
+            <align>center</align>
+            <font>font10</font>
+            <textcolor>66FFFFFF</textcolor>
+            <label>$ADDON[plugin.audio.soundcloud 32116]</label>
+        </control>
+
+    </controls>
+</window>

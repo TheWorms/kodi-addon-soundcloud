@@ -164,6 +164,26 @@
                     <control type="spinner" format="string"/>
                 </setting>
             </group>
+
+            <!-- Fullscreen playback overlay: opens a custom WindowXMLDialog
+                 on top of the new UI when audio playback starts. The user
+                 picks one of 4 visual styles or "off" to disable. -->
+            <group id="2" label="32100">
+                <setting id="playback.fullscreen_style" type="string" label="32101" help="32114">
+                    <level>0</level>
+                    <default>off</default>
+                    <constraints>
+                        <options>
+                            <option label="32115">off</option>
+                            <option label="32112">cinema</option>
+                            <option label="32111">waveform</option>
+                            <option label="32113">editorial</option>
+                            <option label="32110">vinyl</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                </setting>
+            </group>
         </category>
 
         <!-- ============================================================ -->

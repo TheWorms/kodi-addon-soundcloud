@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.7.4" provider-name="TheWorms">
+<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.0" provider-name="TheWorms">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.29.0"/>
+        <!-- Pillow (PIL fork) is used to generate the blurred cover art
+             background and extract the dominant colour for the
+             "Now Playing" fullscreen overlay (waveform / cinema styles).
+             Marked optional="true" so the addon still loads and works
+             on Kodi installs where script.module.pil is missing
+             (notably some Android builds) — the overlays gracefully
+             fall back to unblurred covers in that case. -->
+        <import addon="script.module.pil" version="1.0.0" optional="true"/>
     </requires>
     <extension point="xbmc.python.pluginsource" library="addon.py">
         <provides>audio</provides>
@@ -28,7 +36,75 @@
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
         <credits>jaylinski (original add-on), bromix, SLiX</credits>
-        <news>5.7.4 (2026-04-26) - hide music window flash
+        <news>5.9.0 (2026-04-29) - Vinyl style + complete spec
+New "Vinyl" fullscreen overlay! Editorial-vinyl layout: a detailed black vinyl record on the left half (with the cover art embedded in the central label), title and artist on the right. The disc rotates continuously at 33⅓ RPM (one turn every 12 seconds) — both the record and the cover label rotate together as a rigid unit so the cover stays oriented with the disc.
+
+The vinyl PNG is generated at build time with subtle concentric grooves, a diagonal light reflection sweep, rim highlights, and a transparent label hole that reveals the cover art underneath.
+
+Performance note: continuous rotation animations may stutter on lower-end devices (Raspberry Pi 3 etc.). If you experience this, please report and we'll add a "static disc" toggle.
+
+This release completes the full 5-style fullscreen overlay spec: Off / Cinema / Waveform / Editorial / Vinyl.
+
+5.8.9 (2026-04-29) - editorial: no fallback metadata
+The Editorial pull quote area is now left empty when the track has no description, instead of falling back to "Genre · Year" or "...". Empty whitespace reads as intentional editorial restraint; fake filler doesn't.
+
+5.8.8 (2026-04-29) - Editorial fullscreen style
+New "Editorial" fullscreen overlay! A magazine-style layout with the cover art on the left third and large display typography on the right two-thirds. Pulls a clean version of the track's SoundCloud description and uses it as a pull quote (URLs and trailing hashtag chains are stripped, content is truncated to ~280 characters at a sentence boundary). Falls back to genre + year if no description is available.
+
+Honest note on typography: Kodi's Python WindowXML system does NOT allow addons to register their own TTF fonts (documented limitation). Times New Roman bundled with the addon would not work. The editorial feel is therefore achieved through layout, sizing, letter-spacing and rule lines using only the standard Kodi font names — visually convincing but not actually serif. Sorry about the earlier promise.
+
+5.8.7 (2026-04-29) - waveform becomes a visualizer
+The Waveform overlay no longer uses the static SoundCloud waveform shape — instead 90 orange bars are continuously animated at 12 FPS to simulate a live audio visualizer. Bars on the left move slowly with medium amplitude (bass), middle ones vary fast and tall (mids), right ones flicker quickly with smaller amplitude (highs). The result LOOKS audio-reactive even though Kodi's Python API doesn't expose actual audio samples.
+
+A thin orange progress bar above the visualizer shows the real playback position based on Player.Time, so users still have an accurate playback indicator.
+
+5.8.6 (2026-04-28) - waveform bars now actually colour orange
+Reverted to the dual-bar approach (grey background + orange foreground stacked, foreground hidden by default). Python now flips visibility of the orange bars as the track plays, instead of using setColorDiffuse which is silently no-op on some Kodi/skin combinations (notably Arctic Zephyr Reloaded).
+
+5.8.5 (2026-04-28) - hide unimplemented styles
+Removed "Vinyl" and "Editorial" from the fullscreen style picker — they were silently doing nothing because their XML+Python isn't done yet. They'll come back when implemented in 5.8.6+. The picker now shows only Off / Cinema / Waveform.
+
+5.8.4 (2026-04-28) - simpler waveform XML
+Halved the number of waveform bar controls (from 180 to 90) by using setColorDiffuse to switch played bars from grey to orange instead of stacking two image controls per position. This may have been the reason the waveform overlay wouldn't open on some Kodi builds — too many controls. Removed the dedicated background image control too, the cover art is shown directly (dimmed) when Pillow isn't installed.
+
+5.8.3 (2026-04-28) - Pillow dependency + diagnostic
+Declared Pillow (script.module.pil) as an OPTIONAL dependency in addon.xml so Kodi proposes its installation automatically when missing. The addon still loads without it (overlays fall back to unblurred covers).
+
+Added detailed logging in NowPlayingDialog and PlayerObserver to diagnose cases where the fullscreen overlay doesn't appear. Look for "NowPlayingDialog onInit" and "_maybe_open_now_playing" in kodi.log.
+
+5.8.2 (2026-04-28) - Waveform fullscreen style
+New "Waveform" fullscreen overlay style — the SoundCloud signature look. Set Settings > Playback > Fullscreen on playback > Style to "Waveform" to enable.
+
+Features: blurred cover art as fullscreen background (real Gaussian blur via Pillow if installed, fallback to dimmed cover otherwise), 90 vertical bars showing the actual track waveform downloaded from SoundCloud's waveform JSON, bars turn from grey to orange as the track plays, smooth Ken Burns zoom on background, slide-in title and artist.
+
+Requires Pillow (script.module.pil from the Kodi addon repository) for the best visual experience. Without Pillow the dialog still works but uses the unblurred cover and a fallback dominant colour.
+
+5.8.1 (2026-04-28) - opaque mask for fullscreen overlay
+The Cinema overlay now has a solid black background as its first layer, fully masking the home UI underneath. Previously the home UI was visible "showing through" the dialog because WindowXMLDialog draws over the existing window without hiding it.
+
+5.8.0 (2026-04-27) - fullscreen overlay (Cinema style)
+New "Now Playing" fullscreen overlay! When audio playback starts, a custom dialog can open on top of the home UI showing the cover art with Ken Burns animation, title, artist, time and an orange progress bar.
+
+Configure via Settings > Playback > Fullscreen on playback. Available styles in this release: "Cinema" (Apple Music / Spotify style with blurred background and centred cover) and "Off" (no overlay). Other styles (Waveform, Vinyl, Editorial) coming in 5.8.x.
+
+Default is "Off" — opt in by changing the setting.
+
+5.7.7 (2026-04-27) - widget detection improved + flash workaround documented
+Improved widget vs user detection: now explicitly detects MyMusicNav.xml, musicfiles, addonbrowser, filemanager as user-browsing contexts. Previously relied on Window.IsActive(home) which gave false negatives in some Kodi builds. Diagnostic logs are still active to help debug edge cases.
+
+The music-browser flash on launch can't be fully eliminated from inside the addon (Kodi renders the music page before calling the plugin), but the readme now documents how to bypass it entirely using a Kodi favourite or skin home shortcut that calls RunScript(plugin.audio.soundcloud) directly.
+
+5.7.6 (2026-04-27) - aggressive flash hiding
+Reordered the launch sequence and added Dialog.Close(all,true) before ReplaceWindow(home) — the "music addons" page is now closed immediately along with any modal dialog spinner before our UI launches, reducing the music-window flash to near-invisible.
+
+5.7.5 (2026-04-26) - token resilience + diagnostics
+The token is no longer disabled on the FIRST 401 response. SoundCloud occasionally returns transient 401s for valid tokens (network blips, rate limits, backend deploys), and the previous code was way too aggressive. Now we wait for 2 consecutive 401s before disabling the token, and the counter resets on any successful authenticated call.
+
+Also added detailed logging for every authenticated API call: endpoint, status code, response time, token call count and lifetime tracking. When a 401 finally hits, the log shows how long the token actually lived and how many calls it served — making it possible to diagnose the real cause of token expiry.
+
+Tests for the new behaviour added (28 tests now passing).
+
+5.7.4 (2026-04-26) - hide music window flash
 When opening the addon from Music > Add-ons, Kodi briefly shows the music browser before our full-screen UI takes over. Now we call ReplaceWindow(home) right before launching the script, so the music window is replaced (not stacked) — the flash is invisible and Back from the UI goes straight to home instead of bouncing back to the music browser.
 
 5.7.3 (2026-04-26) - diagnostic
