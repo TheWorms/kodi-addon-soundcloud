@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Now Playing — Cinema style
+  ============================
+
+  Apple Music / Spotify Now Playing aesthetic. Cover art is shown
+  centred and prominent, with a blurred copy of the same art used as
+  the background. A slow Ken Burns animation (zoom + subtle rotation)
+  gives the screen permanent gentle motion without being distracting.
+
+  Track title and artist slide up from below when the dialog opens.
+
+  All values use $INFO from the Kodi Player infolabels — no Python
+  data injection needed beyond the dialog open/close lifecycle.
+
+  This file is loaded by NowPlayingDialog when
+  Settings > Playback > Fullscreen style = "cinema".
+-->
+<window type="dialog" id="13100">
+    <defaultcontrol>9001</defaultcontrol>
+    <coordinates>
+        <system>1</system>
+    </coordinates>
+
+    <controls>
+
+        <!-- ============================================================
+             0. OPAQUE FULLSCREEN MASK
+             A WindowXMLDialog renders over the existing window without
+             hiding it. We need a fully opaque background to mask the
+             home UI underneath, otherwise the user sees the home UI
+             "showing through" between cover art and labels.
+             This must be the FIRST control so it's painted at the bottom.
+             ============================================================ -->
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture>black.png</texture>
+        </control>
+
+        <!-- ============================================================
+             1. Background: cover art, scaled up, dimmed, with a slow
+                pulse zoom (Ken Burns effect).
+             We use colordiffuse to dim the image to ~55% so the
+             foreground content stays readable on bright covers.
+             ============================================================ -->
+        <control type="image">
+            <left>-100</left>
+            <top>-100</top>
+            <width>2120</width>
+            <height>1280</height>
+            <texture background="true" colordiffuse="8CFFFFFF">$INFO[Player.Art(thumb)]</texture>
+            <aspectratio>scale</aspectratio>
+            <animation effect="zoom" start="100" end="115" center="auto"
+                       time="14000" pulse="true" tween="sine">Conditional</animation>
+        </control>
+
+        <!-- ============================================================
+             2. Dark overlay gradient — ensures the title/artist text
+                is always readable regardless of the cover's colours.
+                We use a flat semi-transparent black image; a real
+                gradient would need a pre-rendered PNG.
+             ============================================================ -->
+        <control type="image">
+            <left>0</left>
+            <top>700</top>
+            <width>1920</width>
+            <height>380</height>
+            <texture colordiffuse="CC000000">white.png</texture>
+        </control>
+
+        <!-- ============================================================
+             3. Centred cover art — the focus of the screen.
+                Subtle Ken Burns counter-zoom so the cover and the
+                background animate at slightly different rates, giving
+                a depth effect.
+             ============================================================ -->
+        <control type="image">
+            <left>660</left>
+            <top>120</top>
+            <width>600</width>
+            <height>600</height>
+            <texture>$INFO[Player.Art(thumb)]</texture>
+            <aspectratio>keep</aspectratio>
+            <animation effect="zoom" start="100" end="107" center="auto"
+                       time="14000" pulse="true" tween="sine">Conditional</animation>
+            <animation effect="fade" start="0" end="100" time="600"
+                       tween="cubic" easing="out">WindowOpen</animation>
+        </control>
+
+        <!-- ============================================================
+             4. Track title — large, white, centered, slides up on open.
+             ============================================================ -->
+        <control type="label" id="9001">
+            <left>0</left>
+            <top>770</top>
+            <width>1920</width>
+            <height>56</height>
+            <align>center</align>
+            <aligny>center</aligny>
+            <font>font14</font>
+            <textcolor>FFFFFFFF</textcolor>
+            <label>$INFO[Player.Title]</label>
+            <animation effect="slide" start="0,30" end="0,0" time="700"
+                       tween="cubic" easing="out">WindowOpen</animation>
+            <animation effect="fade" start="0" end="100" time="700"
+                       tween="cubic" easing="out">WindowOpen</animation>
+        </control>
+
+        <!-- ============================================================
+             5. Artist name — smaller, dimmer, centered below title.
+             ============================================================ -->
+        <control type="label">
+            <left>0</left>
+            <top>830</top>
+            <width>1920</width>
+            <height>40</height>
+            <align>center</align>
+            <aligny>center</aligny>
+            <font>font13</font>
+            <textcolor>CCFFFFFF</textcolor>
+            <label>$INFO[Player.Artist]</label>
+            <animation effect="slide" start="0,30" end="0,0" time="800"
+                       delay="100" tween="cubic" easing="out">WindowOpen</animation>
+            <animation effect="fade" start="0" end="100" time="800"
+                       delay="100" tween="cubic" easing="out">WindowOpen</animation>
+        </control>
+
+        <!-- ============================================================
+             6. Time indicators (elapsed / total)
+             ============================================================ -->
+        <control type="label">
+            <left>660</left>
+            <top>920</top>
+            <width>120</width>
+            <height>30</height>
+            <align>left</align>
+            <font>font12</font>
+            <textcolor>BFFFFFFF</textcolor>
+            <label>$INFO[Player.Time]</label>
+        </control>
+
+        <control type="label">
+            <left>1140</left>
+            <top>920</top>
+            <width>120</width>
+            <height>30</height>
+            <align>right</align>
+            <font>font12</font>
+            <textcolor>BFFFFFFF</textcolor>
+            <label>$INFO[Player.Duration]</label>
+        </control>
+
+        <!-- ============================================================
+             7. Progress bar — same orange-fill approach as the
+                mini-player, sized down to look elegant on the
+                fullscreen overlay. The Python ProgressUpdater for the
+                mini-player doesn't update this one; we use the native
+                <progress> control here because it's simpler and the
+                home dialog isn't subject to the Arctic Zephyr override
+                (this is OUR window, not the skin's).
+             ============================================================ -->
+        <control type="image">
+            <left>660</left>
+            <top>958</top>
+            <width>600</width>
+            <height>4</height>
+            <texture colordiffuse="33FFFFFF">white.png</texture>
+        </control>
+        <control type="image" id="9100">
+            <left>660</left>
+            <top>958</top>
+            <width>1</width>
+            <height>4</height>
+            <texture>orange.png</texture>
+        </control>
+
+        <!-- ============================================================
+             8. Hint text at bottom — explains how to dismiss.
+             ============================================================ -->
+        <control type="label">
+            <left>0</left>
+            <top>1020</top>
+            <width>1920</width>
+            <height>30</height>
+            <align>center</align>
+            <font>font10</font>
+            <textcolor>66FFFFFF</textcolor>
+            <label>$ADDON[plugin.audio.soundcloud 32116]</label>
+        </control>
+
+    </controls>
+</window>

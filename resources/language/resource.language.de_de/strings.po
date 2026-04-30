@@ -569,3 +569,43 @@ msgctxt "#30270"
 msgid "▶ Open SoundCloud"
 msgstr "▶ SoundCloud öffnen"
 
+msgctxt "#32100"
+msgid "Fullscreen on playback"
+msgstr "Vollbild bei Wiedergabe"
+
+msgctxt "#32101"
+msgid "Fullscreen style"
+msgstr "Vollbild-Stil"
+
+msgctxt "#32110"
+msgid "Vinyl with sleeve"
+msgstr "Vinyl mit Hülle"
+
+msgctxt "#32111"
+msgid "Waveform"
+msgstr "Waveform"
+
+msgctxt "#32112"
+msgid "Cinema"
+msgstr "Kino"
+
+msgctxt "#32113"
+msgid "Editorial"
+msgstr "Redaktionell"
+
+msgctxt "#32114"
+msgid "Display style for the fullscreen overlay shown when audio playback starts. Set to \"Off\" to disable the overlay entirely."
+msgstr "Anzeigestil für die Vollbild-Überlagerung beim Start der Audiowiedergabe. \"Aus\" zum Deaktivieren."
+
+msgctxt "#32115"
+msgid "Off"
+msgstr "Aus"
+
+msgctxt "#32116"
+msgid "Press Back to close"
+msgstr "Zurück zum Schließen drücken"
+
+msgctxt "#32117"
+msgid "NOW PLAYING"
+msgstr "JETZT ANHÖREN"
+

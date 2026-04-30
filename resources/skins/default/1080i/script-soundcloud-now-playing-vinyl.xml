@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Now Playing — Vinyl style
+  ==========================
+
+  Editorial-vinyl layout: rotating vinyl disc on the left half with
+  the cover art embedded in the central label, large title and artist
+  on the right. Background is the cover art blurred (Pillow if
+  available, dimmed otherwise) for visual coherence with the other
+  fullscreen styles.
+
+  Rotation: the disc spins continuously at ~33⅓ RPM (one full turn
+  every ~12 seconds). Kodi's <animation effect="rotate"> with
+  loop="true" handles the spin natively; the cover art inside the
+  label is on a SEPARATE control so it rotates with the disc as a
+  rigid unit (we apply the same rotation animation to both).
+
+  ⚠ Performance note: continuous rotation animations can cause CPU
+  load on lower-end devices (Raspberry Pi, older CoreELEC boxes).
+  If users report stutter, we should fall back to a non-rotating
+  variant — but most modern boxes handle 12-second-per-turn fine.
+
+  Loaded by NowPlayingDialog when
+  Settings > Playback > Fullscreen style = "vinyl".
+-->
+<window type="dialog" id="13103">
+    <defaultcontrol>9001</defaultcontrol>
+    <coordinates>
+        <system>1</system>
+    </coordinates>
+
+    <controls>
+
+        <!-- 0. Opaque black mask underneath everything -->
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture>black.png</texture>
+        </control>
+
+        <!-- 1. Blurred cover background -->
+        <control type="image" id="9100">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture background="true">$INFO[Player.Art(thumb)]</texture>
+            <aspectratio>scale</aspectratio>
+            <colordiffuse>33FFFFFF</colordiffuse>
+            <animation effect="zoom" start="100" end="106" center="auto"
+                       time="22000" pulse="true" tween="sine">Conditional</animation>
+        </control>
+
+        <!-- 2. Dark scrim for legibility -->
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture colordiffuse="AA000000">white.png</texture>
+        </control>
+
+        <!-- ============================================================
+             LEFT: VINYL DISC (centred at x=480, y=540, size 720x720)
+             The cover art and the disc share the same animation so
+             they rotate together as a unit. Both controls are placed
+             at the same coordinates with same dimensions; the cover
+             art is BEHIND the disc (smaller, in the label area) and
+             the disc PNG has a transparent label hole through which
+             the cover shows.
+             ============================================================ -->
+
+        <!-- 2a. Cover art in the label area. The disc PNG has a
+             transparent hole at radius 110 (out of 295), so for a
+             720px disc the label diameter is 720 * 220/590 ~ 268px.
+             We center it at the same point as the disc and rotate it
+             with the same animation. -->
+        <control type="image" id="9200">
+            <left>346</left>
+            <top>406</top>
+            <width>268</width>
+            <height>268</height>
+            <texture>$INFO[Player.Art(thumb)]</texture>
+            <aspectratio>scale</aspectratio>
+            <animation effect="rotate" start="0" end="360"
+                       time="12000" loop="true"
+                       center="auto">Conditional</animation>
+        </control>
+
+        <!-- 2b. The vinyl disc PNG (overlays the cover, the central
+             hole reveals the cover art). Same animation = synchronised
+             rotation. -->
+        <control type="image">
+            <left>120</left>
+            <top>180</top>
+            <width>720</width>
+            <height>720</height>
+            <texture>vinyl-disc.png</texture>
+            <animation effect="rotate" start="0" end="360"
+                       time="12000" loop="true"
+                       center="auto">Conditional</animation>
+        </control>
+
+        <!-- ============================================================
+             RIGHT: TYPOGRAPHY
+             ============================================================ -->
+
+        <!-- Eyebrow rule -->
+        <control type="image">
+            <left>980</left>
+            <top>360</top>
+            <width>60</width>
+            <height>3</height>
+            <texture>orange.png</texture>
+        </control>
+
+        <!-- Eyebrow: artist in orange -->
+        <control type="label" id="9002">
+            <left>980</left>
+            <top>380</top>
+            <width>820</width>
+            <height>30</height>
+            <align>left</align>
+            <font>font12</font>
+            <textcolor>FFFF5500</textcolor>
+            <label>$INFO[Player.Artist]</label>
+            <animation effect="fade" start="0" end="100" time="700">WindowOpen</animation>
+        </control>
+
+        <!-- Title -->
+        <control type="label" id="9001">
+            <left>980</left>
+            <top>425</top>
+            <width>820</width>
+            <height>180</height>
+            <align>left</align>
+            <font>font14</font>
+            <textcolor>FFFFFFFF</textcolor>
+            <label>$INFO[Player.Title]</label>
+            <wrapmultiline>true</wrapmultiline>
+            <animation effect="slide" start="20,0" end="0,0" time="800"
+                       tween="cubic" easing="out">WindowOpen</animation>
+            <animation effect="fade" start="0" end="100" time="800">WindowOpen</animation>
+        </control>
+
+        <!-- Hairline -->
+        <control type="image">
+            <left>980</left>
+            <top>620</top>
+            <width>240</width>
+            <height>1</height>
+            <texture colordiffuse="55FFFFFF">white.png</texture>
+        </control>
+
+        <!-- Footer block: time elapsed + duration + thin progress -->
+        <control type="label" id="9003">
+            <left>980</left>
+            <top>660</top>
+            <width>200</width>
+            <height>30</height>
+            <align>left</align>
+            <font>font12</font>
+            <textcolor>BBFFFFFF</textcolor>
+            <label>$INFO[Player.Time]</label>
+        </control>
+
+        <control type="label" id="9004">
+            <left>1600</left>
+            <top>660</top>
+            <width>200</width>
+            <height>30</height>
+            <align>right</align>
+            <font>font12</font>
+            <textcolor>BBFFFFFF</textcolor>
+            <label>$INFO[Player.Duration]</label>
+        </control>
+
+        <!-- Thin progress bar -->
+        <control type="image" id="9150">
+            <left>980</left>
+            <top>705</top>
+            <width>820</width>
+            <height>2</height>
+            <texture colordiffuse="33FFFFFF">white.png</texture>
+        </control>
+        <control type="image" id="9151">
+            <left>980</left>
+            <top>705</top>
+            <width>1</width>
+            <height>2</height>
+            <texture>orange.png</texture>
+        </control>
+
+        <!-- Hint text -->
+        <control type="label">
+            <left>0</left>
+            <top>1040</top>
+            <width>1920</width>
+            <height>30</height>
+            <align>center</align>
+            <font>font10</font>
+            <textcolor>66FFFFFF</textcolor>
+            <label>$ADDON[plugin.audio.soundcloud 32116]</label>
+        </control>
+
+    </controls>
+</window>

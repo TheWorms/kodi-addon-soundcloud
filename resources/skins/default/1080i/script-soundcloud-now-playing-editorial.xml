@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Now Playing — Editorial style
+  ==============================
+
+  Magazine layout: cover image on the left third, generous typography
+  on the right two-thirds. The look reaches for a Pitchfork / The New
+  Yorker feel with strong vertical alignment, large display titles, an
+  oversized pull quote pulled from the track description.
+
+  Note on fonts: Kodi's Python WindowXML system does NOT allow addons
+  to register their own TTF files (it's a documented limitation —
+  see https://kodi.wiki/view/Archive:WindowXML "Fonts are currently
+  out of your control"). So we can't ship Times New Roman or any
+  custom serif. Instead we lean on layout, sizing, letter-spacing
+  and rule lines to create an editorial feel using only the standard
+  Kodi font names (font10 / font12 / font13 / font13_title / font14)
+  which every skin must define.
+
+  Loaded by NowPlayingDialog when
+  Settings > Playback > Fullscreen style = "editorial".
+-->
+<window type="dialog" id="13102">
+    <defaultcontrol>9001</defaultcontrol>
+    <coordinates>
+        <system>1</system>
+    </coordinates>
+
+    <controls>
+
+        <!-- 0. Opaque black mask underneath everything -->
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture>black.png</texture>
+        </control>
+
+        <!-- 1. Blurred cover background. Pillow-blurred via Python if
+             available; otherwise the cover is shown directly, deeply
+             dimmed (15% opacity) so the foreground stays readable on
+             any cover. -->
+        <control type="image" id="9100">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture background="true">$INFO[Player.Art(thumb)]</texture>
+            <aspectratio>scale</aspectratio>
+            <colordiffuse>26FFFFFF</colordiffuse>
+            <animation effect="zoom" start="100" end="106" center="auto"
+                       time="22000" pulse="true" tween="sine">Conditional</animation>
+        </control>
+
+        <!-- 2. Heavy dark scrim — editorial layouts rely on quiet
+             backgrounds so the type can do the talking. -->
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture colordiffuse="CC000000">white.png</texture>
+        </control>
+
+        <!-- ============================================================
+             LEFT COLUMN — cover art (480x480, centred vertically)
+             ============================================================ -->
+        <control type="image">
+            <left>120</left>
+            <top>300</top>
+            <width>480</width>
+            <height>480</height>
+            <texture>$INFO[Player.Art(thumb)]</texture>
+            <aspectratio>keep</aspectratio>
+            <animation effect="fade" start="0" end="100" time="800"
+                       tween="cubic" easing="out">WindowOpen</animation>
+            <animation effect="slide" start="-30,0" end="0,0" time="800"
+                       tween="cubic" easing="out">WindowOpen</animation>
+        </control>
+
+        <!-- Thin caption rule under the cover -->
+        <control type="image">
+            <left>120</left>
+            <top>800</top>
+            <width>120</width>
+            <height>2</height>
+            <texture colordiffuse="FFFFFFFF">white.png</texture>
+        </control>
+
+        <!-- Cover caption — "NOW PLAYING" eyebrow text -->
+        <control type="label">
+            <left>120</left>
+            <top>815</top>
+            <width>480</width>
+            <height>20</height>
+            <align>left</align>
+            <font>font10</font>
+            <textcolor>99FFFFFF</textcolor>
+            <label>$ADDON[plugin.audio.soundcloud 32117]</label>
+        </control>
+
+        <!-- ============================================================
+             RIGHT COLUMN — typography (starts at x=720, generous left
+             gutter; right edge at 1800; max width = 1080px)
+             ============================================================ -->
+
+        <!-- Eyebrow rule (decorative orange line) -->
+        <control type="image">
+            <left>720</left>
+            <top>180</top>
+            <width>60</width>
+            <height>3</height>
+            <texture>orange.png</texture>
+        </control>
+
+        <!-- Eyebrow label: artist in small caps style -->
+        <control type="label" id="9002">
+            <left>720</left>
+            <top>200</top>
+            <width>1080</width>
+            <height>30</height>
+            <align>left</align>
+            <font>font12</font>
+            <textcolor>FFFF5500</textcolor>
+            <label>$INFO[Player.Artist]</label>
+            <animation effect="fade" start="0" end="100" time="700">WindowOpen</animation>
+        </control>
+
+        <!-- Title — display size, slides up on open -->
+        <control type="label" id="9001">
+            <left>720</left>
+            <top>250</top>
+            <width>1080</width>
+            <height>180</height>
+            <align>left</align>
+            <font>font14</font>
+            <textcolor>FFFFFFFF</textcolor>
+            <label>$INFO[Player.Title]</label>
+            <wrapmultiline>true</wrapmultiline>
+            <animation effect="slide" start="0,30" end="0,0" time="800"
+                       tween="cubic" easing="out">WindowOpen</animation>
+            <animation effect="fade" start="0" end="100" time="800">WindowOpen</animation>
+        </control>
+
+        <!-- Hairline separator under the title block -->
+        <control type="image">
+            <left>720</left>
+            <top>460</top>
+            <width>240</width>
+            <height>1</height>
+            <texture colordiffuse="55FFFFFF">white.png</texture>
+        </control>
+
+        <!-- Pull quote — track description (fallback to genre+date if
+             empty). Rendered indented and dimmer to feel like body
+             editorial copy. The actual content is set by Python in
+             onInit() because it's pulled from API data, not from a
+             Kodi infolabel. -->
+        <control type="label" id="9010">
+            <left>720</left>
+            <top>500</top>
+            <width>1080</width>
+            <height>320</height>
+            <align>left</align>
+            <font>font13</font>
+            <textcolor>CCFFFFFF</textcolor>
+            <label></label>
+            <wrapmultiline>true</wrapmultiline>
+            <animation effect="fade" start="0" end="100" time="1000"
+                       delay="200" tween="cubic" easing="out">WindowOpen</animation>
+        </control>
+
+        <!-- Footer — time elapsed and total, separated by a discreet bullet -->
+        <control type="image">
+            <left>720</left>
+            <top>900</top>
+            <width>1080</width>
+            <height>1</height>
+            <texture colordiffuse="33FFFFFF">white.png</texture>
+        </control>
+
+        <control type="label" id="9003">
+            <left>720</left>
+            <top>920</top>
+            <width>200</width>
+            <height>30</height>
+            <align>left</align>
+            <font>font12</font>
+            <textcolor>BBFFFFFF</textcolor>
+            <label>$INFO[Player.Time]</label>
+        </control>
+
+        <control type="label" id="9004">
+            <left>1600</left>
+            <top>920</top>
+            <width>200</width>
+            <height>30</height>
+            <align>right</align>
+            <font>font12</font>
+            <textcolor>BBFFFFFF</textcolor>
+            <label>$INFO[Player.Duration]</label>
+        </control>
+
+        <!-- Thin progress bar (real playback position) -->
+        <control type="image" id="9150">
+            <left>720</left>
+            <top>970</top>
+            <width>1080</width>
+            <height>2</height>
+            <texture colordiffuse="33FFFFFF">white.png</texture>
+        </control>
+        <control type="image" id="9151">
+            <left>720</left>
+            <top>970</top>
+            <width>1</width>
+            <height>2</height>
+            <texture>orange.png</texture>
+        </control>
+
+        <!-- Hint text -->
+        <control type="label">
+            <left>0</left>
+            <top>1040</top>
+            <width>1920</width>
+            <height>30</height>
+            <align>center</align>
+            <font>font10</font>
+            <textcolor>66FFFFFF</textcolor>
+            <label>$ADDON[plugin.audio.soundcloud 32116]</label>
+        </control>
+
+    </controls>
+</window>
