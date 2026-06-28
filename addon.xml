@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.6003" provider-name="TheWorms">
+<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.6004" provider-name="TheWorms">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.29.0"/>
@@ -36,7 +36,16 @@
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
         <credits>jaylinski (original add-on), bromix, SLiX</credits>
-        <news>5.9.6003 (2026-06-29) - helper page snippet: minification bugfix (URLs no longer eaten)
+        <news>5.9.6004 (2026-06-29) - playback fixed + auth test fixed + help dialog simplified
+Three real bugs diagnosed from a user log:
+
+PLAYBACK: every track was failing with HTTP 404 on its /media/.../stream/progressive URL, causing Kodi to skip through the entire playlist. Root cause: since 2025, SoundCloud requires a `track_authorization` query parameter (a JWT, valid ~2h) on stream URLs IN ADDITION to the OAuth token in the Authorization header. We were only passing the OAuth token. Fixed: read `track_authorization` from each track object and stitch it onto the transcoding URL at extraction time.
+
+AUTH TEST: the "Test OAuth token" button always failed with HTTP 403 even for fully-valid tokens, because SoundCloud started blocking the /me endpoint specifically. Other user-scoped endpoints (/me/track_likes, /me/play-history, /users/{id}/...) still work fine. Switched the test to hit /me/play-history?limit=1 instead, then optimistically tries /me afterwards to enrich the success message with the username (but doesn't fail if /me is blocked). Added a new generic success message (string 30246) for when we can't get the username but auth is confirmed working.
+
+HELP DIALOG: the "How to get a token" button in settings used to show a long step-by-step text. Replaced with a short message pointing to the web helper page (https://theworms.github.io/kodi-addon-soundcloud/) which now does all the work — both the automatic snippet and the manual fallback method are documented there.
+
+5.9.6003 (2026-06-29) - helper page snippet: minification bugfix (URLs no longer eaten)
 The console snippet on the helper page was broken by a bug in its own minification: the regex stripping line comments (//...) was also matching the // in URLs like https://api-v2.soundcloud.com/... and truncating the source. Result: SyntaxError "missing ) after argument list" in the browser console, and nothing ran at all — no popup, no alert, no logs.
 
 Fixed by removing the buggy comment-stripping pass entirely and removing inline // comments from the snippet source. The minification now only collapses whitespace, which is safe for URLs. Validated end-to-end on soundcloud.com.
