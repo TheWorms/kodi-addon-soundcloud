@@ -292,14 +292,12 @@ function snippetFn() {
   var found = null;
   var source = null;
 
-  // 1) Cookies
   try {
     var cookieMatch = (document.cookie || '').match(TOKEN_RE);
     if (cookieMatch) { found = cookieMatch[0]; source = 'cookie'; }
     console.log('%c[SC] Step 1/4 cookies: ' + (found ? 'HIT' : 'miss'), STYLE_INFO);
   } catch (e) { console.log('[SC] cookie scan error:', e); }
 
-  // 2) localStorage
   if (!found) {
     try {
       for (var i = 0; i < localStorage.length; i++) {
@@ -314,7 +312,6 @@ function snippetFn() {
     } catch (e) { console.log('[SC] localStorage scan error:', e); }
   }
 
-  // 3) sessionStorage
   if (!found) {
     try {
       for (var j = 0; j < sessionStorage.length; j++) {
@@ -329,7 +326,6 @@ function snippetFn() {
     } catch (e) { console.log('[SC] sessionStorage scan error:', e); }
   }
 
-  // If found, show it now
   if (found) {
     console.log('%c[SC] Token found: ' + found, STYLE_OK);
     console.log('%c[SC] Source: ' + source, STYLE_INFO);
@@ -337,7 +333,6 @@ function snippetFn() {
     return;
   }
 
-  // 4) Last resort: hook fetch/XHR and trigger an authenticated call
   console.log('%c[SC] Step 4/4 hooking fetch+XHR and triggering /me...', STYLE_INFO);
   var _t = null;
   var _of = window.fetch;
@@ -365,7 +360,6 @@ function snippetFn() {
     };
   } catch (e) {}
 
-  // Force-trigger
   try { fetch('https://api-v2.soundcloud.com/me/track_likes?limit=1', {credentials: 'include'}).catch(function(){}); } catch (e) {}
 
   setTimeout(function() {
@@ -434,8 +428,6 @@ function snippetFn() {
 
 (function() {
   var src = '(' + snippetFn.toString() + ')();';
-  src = src.replace(/\/\*[\s\S]*?\*\//g, '');
-  src = src.replace(/\/\/[^\n]*/g, '');
   src = src.replace(/\s+/g, ' ').trim();
 
   var sn = document.getElementById('snippet');
