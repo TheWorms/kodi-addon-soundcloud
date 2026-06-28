@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.6000" provider-name="TheWorms">
+<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.6001" provider-name="TheWorms">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.29.0"/>
@@ -36,7 +36,16 @@
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
         <credits>jaylinski (original add-on), bromix, SLiX</credits>
-        <news>5.9.6000 (2026-06-28) - shuffle fix + Back stack + readme simplified
+        <news>5.9.6001 (2026-06-28) - helper page redesigned: console snippet instead of bookmarklet
+The bookmarklet approach didn't work in practice because SoundCloud serves a strict Content-Security-Policy header that blocks javascript: URIs from bookmark clicks (a known limitation of modern sites). Switched the helper page to a different approach: a code snippet to copy-paste into the browser's DevTools console (which is exempt from CSP).
+
+New flow on the helper page: 1) open soundcloud.com signed in, 2) press F12 to open the Console tab, 3) click "Copy snippet" on the helper page and paste in the console, 4) press Enter — a popup appears with the token. Still no token sent anywhere; everything runs in your browser.
+
+Also added a Firefox-specific warning about the "allow pasting" security prompt that newer Firefox versions show on first paste into the console.
+
+Readme: the helper page is now also highlighted in the top-of-readme "What's new in v5" bullets so users see it immediately, not just buried in the Authentication section.
+
+5.9.6000 (2026-06-28) - shuffle fix + Back stack + readme simplified
 Switched versioning to 4-digit patch numbers (5.9.6000 instead of 5.9.6) per fork maintainer preference.
 
 Fixes:
