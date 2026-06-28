@@ -66,10 +66,26 @@ Follow the instructions on [https://kodi.wiki/view/Add-on:SoundCloud](https://ko
 
 ### Manual
 
-* [Download the latest release](https://github.com/jaylinski/kodi-addon-soundcloud/releases) (`plugin.audio.soundcloud.zip`)
+* [Download the latest release from this fork](https://github.com/TheWorms/kodi-addon-soundcloud/releases) (`plugin.audio.soundcloud.zip`)
 * Copy the zip file to your Kodi system
 * Open Kodi, go to Add-ons and select "Install from zip file"
 * Select the file `plugin.audio.soundcloud.zip`
+
+### Optional dependency — Pillow
+
+The fullscreen "Now Playing" overlays (Cinema/Waveform/Editorial/Vinyl)
+look noticeably better with [Pillow](https://pypi.org/project/Pillow/)
+installed, because Pillow lets the addon generate a real Gaussian-blurred
+version of the cover art for the background. Without Pillow, the cover
+is just shown dimmed.
+
+To install: Kodi → *Add-ons → Install from repository → Kodi Add-on
+repository → Look and feel → Pillow* (or directly search for
+`script.module.pil`). The addon will pick it up automatically on next
+playback.
+
+Pillow is **optional**: the addon still works without it, you just lose
+the blur effect.
 
 ## Launching SoundCloud without the music browser flash
 
@@ -177,21 +193,53 @@ Kodi after pasting a new token.
 * It is sent **only** to `api-v2.soundcloud.com` as the `Authorization` request header.
 * It is **redacted** from debug logs (the header value is replaced by `<redacted>` in `kodi.log`).
 
-## API
+## Fullscreen "Now Playing" overlays
 
-Documentation of the **public** interface.
+When audio playback starts, the addon can open a custom fullscreen
+overlay on top of the home UI showing the cover, title, artist and
+progress. Pick one of four visual styles in
+*Settings → Playback → Fullscreen on playback*, or keep it disabled
+to rely on the mini-player only.
 
-### plugin://plugin.audio.soundcloud/play/?[track_id|playlist_id|url]
+| Style       | Look                                                                                                                |
+| ----------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Off**     | No overlay. The mini-player at the bottom of the home UI is the only feedback.                                       |
+| **Cinema**  | Apple-Music style. Centred cover with slow Ken Burns zoom, blurred background, large title and artist underneath.    |
+| **Waveform**| 90 orange bars at the bottom animated continuously to simulate an audio visualizer. Real progress bar above the bars.|
+| **Editorial** | Magazine layout. Cover on the left third, large title and artist on the right, with a pull quote pulled from the SoundCloud track description (URLs and hashtag chains stripped, truncated at a sentence boundary). |
+| **Vinyl**   | A detailed black vinyl record on the left with the cover embedded in the central label, both rotating together at ~33⅓ RPM. Title and artist on the right.|
 
-Examples:
+Press **Back** during playback to dismiss the overlay (the music keeps
+playing). The overlay re-opens automatically on the next track.
 
-* `plugin://plugin.audio.soundcloud/play/?track_id=1`
-* `plugin://plugin.audio.soundcloud/play/?playlist_id=1`
-* `plugin://plugin.audio.soundcloud/play/?url=https%3A%2F%2Fsoundcloud.com%2Fpslwave%2Fallwithit`
+### Honest limitations
 
-Legacy (will be removed in a future release):
+* **Waveform is not actually audio-reactive.** Kodi's Python API
+  doesn't expose audio samples to addons, so the bars are animated by a
+  pseudo-random sinusoidal pattern. It LOOKS audio-reactive but is
+  decoupled from the actual music. The progress bar above the
+  visualizer however reflects real playback position.
+* **Vinyl rotation** uses Kodi's native continuous-rotate animation.
+  It's smooth on modern boxes but may stutter on lower-end devices
+  (Raspberry Pi 3 etc.). If so, switch to a different style.
+* **Editorial pull quote** depends on the SoundCloud track having a
+  description. Many user uploads don't, in which case the quote area
+  is left empty (intentional editorial restraint, not a bug).
+* **Custom fonts**: Kodi's Python WindowXML system does not allow addons
+  to register their own TTF fonts. All overlays therefore use the
+  standard Kodi font names. The editorial style achieves its feel
+  through layout and hierarchy, not through a bundled serif font.
 
-* `plugin://plugin.audio.soundcloud/play/?audio_id=1` — use `track_id=1` instead.
+## Integration with Kodi
+
+Since v5.7 there is no classic plugin-style menu — the addon opens
+directly into its full-screen "app-like" interface.
+
+For different ways to launch the addon (Music browser, skin home
+shortcut, Kodi favourite) see the
+["Launching SoundCloud without the music browser flash"](#launching-soundcloud-without-the-music-browser-flash)
+section above. This section covers integration on Kodi's home screen
+through skin widgets.
 
 ### Widgets (skin home menu)
 
