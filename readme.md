@@ -44,6 +44,10 @@ the classic plugin-style menu with an "app-like" experience:
   audio visualizer), *Editorial* (magazine layout with pull quote from
   the track description), *Vinyl* (spinning record with cover in the
   central label). Disable entirely if you prefer the mini-player only.
+* **One-click token helper page** (v5.9+): a companion web page at
+  [theworms.github.io/kodi-addon-soundcloud](https://theworms.github.io/kodi-addon-soundcloud/)
+  with a bookmarklet that grabs your SoundCloud OAuth token in a single
+  click — no more F12 / Network tab manual fiddling.
 
 Since v5.7 the full-screen UI is the only interface — the classic
 plugin-style menu was removed. Skin home widgets continue to work via
