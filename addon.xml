@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.1" provider-name="TheWorms">
+<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.2" provider-name="TheWorms">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.29.0"/>
@@ -36,7 +36,15 @@
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
         <credits>jaylinski (original add-on), bromix, SLiX</credits>
-        <news>5.9.1 (2026-04-29) - readme: explicit fork notice
+        <news>5.9.2 (2026-06-28) - readme refresh for v5.9 reality
+Updated the readme to match what the addon actually does in v5.9:
+- Dropped the obsolete "API" section that documented plugin://...play/ URLs (no longer publicly callable since the classic plugin menu was removed in 5.7).
+- New "Fullscreen Now Playing overlays" section with a comparison table of the 5 styles (Off / Cinema / Waveform / Editorial / Vinyl) and honest limitations (waveform not actually audio-reactive, vinyl may stutter on Raspberry Pi 3, editorial pull quote depends on track having a description, no custom fonts allowed by Kodi).
+- New "Optional dependency — Pillow" subsection explaining what Pillow buys you (real Gaussian blur for the overlay backgrounds) and that it's optional.
+- Consolidated launching-the-addon coverage so it's documented in one place, not duplicated.
+- "Manual install" download link now points to this fork's releases.
+
+5.9.1 (2026-04-29) - readme: explicit fork notice
 The readme now clearly states upfront that this is a community fork of jaylinski/kodi-addon-soundcloud (link), maintained at github.com/TheWorms/kodi-addon-soundcloud. Badges updated to point to this fork's tag releases instead of upstream. Attributions section consolidated. What's new and Features lists now mention the four fullscreen "Now Playing" overlay styles (Cinema, Waveform, Editorial, Vinyl) added in v5.8+.
 
 5.9.0 (2026-04-29) - Vinyl style + complete spec
