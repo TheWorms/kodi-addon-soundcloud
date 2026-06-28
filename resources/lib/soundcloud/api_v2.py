@@ -199,7 +199,17 @@ class ApiV2(ApiInterface):
             payload["client_id"] = self.api_client_id
         payload["app_locale"] = self.api_lang
 
-        headers = {"Accept-Encoding": "gzip", "User-Agent": self.api_user_agent}
+        headers = {
+            "Accept-Encoding": "gzip",
+            "User-Agent": self.api_user_agent,
+            # SoundCloud's edge tightened up filtering in 2025: requests
+            # without Origin/Referer headers get HTTP 403 on user-scoped
+            # endpoints like /me even when the OAuth token is valid.
+            # Mimic the headers a real browser session on soundcloud.com
+            # would send, and we get the same 200 response.
+            "Origin": "https://soundcloud.com",
+            "Referer": "https://soundcloud.com/",
+        }
         if authenticated:
             headers["Authorization"] = "OAuth " + oauth_token
 

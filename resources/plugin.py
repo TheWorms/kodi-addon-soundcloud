@@ -339,11 +339,16 @@ def run():
         # reflects the *real* current state of the token, not a cached
         # decision from earlier in the session.
         #
-        # NOTE: We don't hit /me anymore — SoundCloud started blocking that
-        # endpoint with HTTP 403 even for fully-valid tokens (probably
-        # tightened CORS / origin checks since 2025). Use /me/play-history
-        # instead, which is also user-scoped (so it requires auth and proves
-        # the token works) but isn't subject to the /me block.
+        # IMPORTANT: SoundCloud's edge tightened up since 2025. /me returns
+        # 403 unless we send Origin + Referer headers identifying us as
+        # coming from soundcloud.com. We now always send those, matching
+        # what api_v2.py does for its normal requests.
+        #
+        # Cascade strategy:
+        #   1) /me — gives us username + subscription tier
+        #   2) /users/{my_id}/track_likes — proven to work in the user's
+        #      log even when /me misbehaves
+        # If any responds 200, auth is confirmed.
         import requests
         dialog = xbmcgui.Dialog()
         token = settings.get_oauth_token()
@@ -355,66 +360,111 @@ def run():
                 token[:6],
                 token[-4:],
             )
-            test_url = "https://api-v2.soundcloud.com/me/play-history?limit=1"
-            try:
-                xbmc.log(
-                    "plugin.audio.soundcloud::AuthTest sending GET to "
-                    "%s with header "
-                    "Authorization='OAuth %s' (%d chars)" %
-                    (test_url, token[:6] + "..." + token[-4:], len(token)),
-                    xbmc.LOGINFO,
-                )
-                resp = requests.get(
-                    test_url,
-                    headers={"Authorization": "OAuth " + token},
-                    timeout=10,
-                )
-                body_preview = (resp.text or "")[:300]
-                xbmc.log(
-                    "plugin.audio.soundcloud::AuthTest got HTTP %d, "
-                    "body[:300]=%r, "
-                    "response_headers=%r" % (
-                        resp.status_code,
-                        body_preview,
-                        dict(resp.headers),
-                    ),
-                    xbmc.LOGINFO,
-                )
 
-                if resp.status_code == 200:
-                    # /me/play-history doesn't return the username directly,
-                    # but a 200 response proves the token authenticated.
-                    # Try /me as a follow-up to enrich the success message
-                    # with the username — failure of that follow-up is
-                    # non-fatal (we already proved auth works).
-                    username = None
+            common_headers = {
+                "Authorization": "OAuth " + token,
+                "User-Agent": (
+                    "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:142.0) "
+                    "Gecko/20100101 Firefox/142.0"
+                ),
+                "Origin": "https://soundcloud.com",
+                "Referer": "https://soundcloud.com/",
+            }
+
+            def try_endpoint(test_url):
+                """Returns (status, body_preview, parsed_json_or_None)."""
+                try:
+                    xbmc.log(
+                        "plugin.audio.soundcloud::AuthTest GET %s "
+                        "with token len=%d" % (test_url, len(token)),
+                        xbmc.LOGINFO,
+                    )
+                    r = requests.get(test_url, headers=common_headers,
+                                     timeout=10)
+                    bp = (r.text or "")[:300]
+                    xbmc.log(
+                        "plugin.audio.soundcloud::AuthTest %s -> HTTP %d, "
+                        "body[:300]=%r" % (test_url, r.status_code, bp),
+                        xbmc.LOGINFO,
+                    )
+                    parsed = None
+                    if r.status_code == 200:
+                        try:
+                            parsed = r.json()
+                        except Exception:
+                            parsed = None
+                    return (r.status_code, bp, parsed)
+                except Exception as ex:
+                    xbmc.log(
+                        "plugin.audio.soundcloud::AuthTest %s failed: %s" %
+                        (test_url, str(ex)),
+                        xbmc.LOGWARNING,
+                    )
+                    return (None, str(ex), None)
+
+            try:
+                username = None
+                tier = None
+                last_status = None
+                last_body = ""
+
+                # Step 1: /me with browser-like headers
+                status, body, parsed = try_endpoint(
+                    "https://api-v2.soundcloud.com/me"
+                )
+                last_status, last_body = status, body
+                if status == 200 and parsed:
+                    username = parsed.get("username")
+                    # Extract subscription tier so we can show it to the
+                    # user. Free accounts have certain SoundCloud-imposed
+                    # limitations (preview-only tracks marked SNIP, etc).
+                    sub = parsed.get("consumer_subscription") or {}
+                    product = sub.get("product") or {}
+                    tier = product.get("id")  # "free", "go_plus", "pro", ...
+                    # Persist tier so other code paths (settings menu,
+                    # row filters) can react without re-querying.
                     try:
-                        me_resp = requests.get(
-                            "https://api-v2.soundcloud.com/me",
-                            headers={"Authorization": "OAuth " + token},
-                            timeout=5,
-                        )
-                        if me_resp.status_code == 200:
-                            username = me_resp.json().get("username", None)
+                        settings.set("account.tier", tier or "")
                     except Exception:
                         pass
 
-                    if username:
+                # Step 2: /users/{my_id}/track_likes - proven to work
+                # when /me is blocked. We try this even when /me succeeded,
+                # but only as a fallback if /me failed.
+                if status is None or status != 200:
+                    user_id = None
+                    try:
+                        user_id = api.get_my_user_id()
+                    except Exception:
+                        pass
+                    if user_id:
+                        status, body, _ = try_endpoint(
+                            "https://api-v2.soundcloud.com/users/%d/track_likes?limit=1"
+                            % user_id
+                        )
+                        last_status, last_body = status, body
+
+                if status == 200:
+                    # Auth confirmed.
+                    if username and tier:
+                        msg = addon.getLocalizedString(30242).format(username)
+                        msg += "\n\n" + addon.getLocalizedString(30247).format(
+                            tier.replace("_", " ").title() if tier != "free"
+                            else "Free"
+                        )
+                    elif username:
                         msg = addon.getLocalizedString(30242).format(username)
                     else:
-                        # Generic success message — we proved auth works
-                        # but couldn't get the username from /me. That's
-                        # fine for the addon.
                         msg = addon.getLocalizedString(30246)
-
                     dialog.ok("SoundCloud", msg + "\n\n" + preview)
                     if hasattr(api, "_token_invalid"):
                         api._token_invalid = False
                 else:
                     err_msg = (
-                        addon.getLocalizedString(30243).format(resp.status_code) +
+                        addon.getLocalizedString(30243).format(
+                            last_status if last_status else "?") +
                         "\n\n" + preview +
-                        "\n\nResponse body:\n" + body_preview
+                        "\n\nLast response body:\n" + last_body
                     )
                     dialog.ok("SoundCloud", err_msg)
             except Exception as e:

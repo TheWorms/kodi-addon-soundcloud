@@ -466,6 +466,10 @@ msgctxt "#30246"
 msgid "Token valid - authentication works."
 msgstr "Token geldig - authenticatie werkt."
 
+msgctxt "#30247"
+msgid "Account: {0}"
+msgstr "Account: {0}"
+
 msgctxt "#30250"
 msgid "Widgets"
 msgstr "Widgets"
