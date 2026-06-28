@@ -387,7 +387,7 @@ class ApiV2(ApiInterface):
                 addon.getAddonInfo("name"),
                 addon.getLocalizedString(30024),
                 xbmcgui.NOTIFICATION_WARNING,
-                5000
+                8000
             )
         except Exception:
             # Never let a notification failure break playback.

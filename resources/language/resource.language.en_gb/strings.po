@@ -59,70 +59,104 @@ msgid "Paste your SoundCloud OAuth token here to access your likes, playlists, f
 msgstr ""
 
 msgctxt "#30024"
-msgid "OAuth token is invalid or expired. Please update it in Settings."
-msgstr ""
+msgid "OAuth token expired — open Settings > Account > How to get a token"
+msgstr "OAuth token expired — open Settings > Account > How to get a token"
 
 msgctxt "#30025"
 msgid "You need to configure an OAuth token to access your profile. Opening settings now..."
 msgstr ""
 
 msgctxt "#30026"
-msgid "To get your OAuth token:
+msgid "═══════════════════════════════════════
+   FASTEST WAY — USE THE WEB HELPER
+═══════════════════════════════════════
 
-1. Open https://soundcloud.com in Chrome or Firefox and sign in (verify your avatar shows top-right).
+▶ ON YOUR COMPUTER, OPEN THIS URL:
 
-2. Press F12 to open the developer tools.
+    https://theworms.github.io/kodi-addon-soundcloud/
 
-3. Go to the \"Network\" tab.
+The helper page has a one-click bookmarklet
+that grabs your token automatically — no F12,
+no copy-paste fiddling.
 
-4. In the filter box, type: api-v2
 
-5. Reload the page (F5).
+═══════════════════════════════════════
+   ALTERNATIVE — MANUAL METHOD
+═══════════════════════════════════════
 
-6. Click on any request in the list (e.g. \"me\" or \"featured-tracks\").
+If the web helper isn't an option:
 
-7. In the right panel, scroll to \"Request Headers\".
+1. Open https://soundcloud.com in Chrome
+   or Firefox, signed in.
+2. Press F12, click \"Network\" tab.
+3. Filter by: api-v2
+4. Reload (F5), click any request.
+5. In \"Request Headers\" find:
+     Authorization: OAuth XXXXXXXXX
+6. Copy ONLY what comes after \"OAuth \"
+   (no prefix, no space).
+7. Paste it here in \"OAuth token\" and
+   click \"Test OAuth token\".
 
-8. Find the line: Authorization: OAuth XXXXXXXXX
 
-9. Copy ONLY what comes after \"OAuth \" (the token itself, no prefix, no space).
+═══════════════════════════════════════
+   COMMON MISTAKES
+═══════════════════════════════════════
 
-10. Paste it in the \"OAuth token\" field of the addon settings.
+✗ Do NOT copy the cookie \"oauth_token\"
+  (Application → Cookies in DevTools).
+  It looks similar but is REJECTED.
 
-11. Click \"Test OAuth token\" to verify.
+✗ Do NOT include the word \"OAuth\" or
+  any leading space.
 
-Common pitfalls:
-- Do NOT copy the cookie named \"oauth_token\" (under Application > Cookies). It looks similar but is rejected by the API.
-- Do NOT include the word \"OAuth\" or any space at the start.
-- The token expires periodically — when it does, repeat the steps to get a fresh one."
-msgstr "To get your OAuth token:
+Tokens expire after a few months —
+just repeat the process when needed."
+msgstr "═══════════════════════════════════════
+   FASTEST WAY — USE THE WEB HELPER
+═══════════════════════════════════════
 
-1. Open https://soundcloud.com in Chrome or Firefox and sign in (verify your avatar shows top-right).
+▶ ON YOUR COMPUTER, OPEN THIS URL:
 
-2. Press F12 to open the developer tools.
+    https://theworms.github.io/kodi-addon-soundcloud/
 
-3. Go to the \"Network\" tab.
+The helper page has a one-click bookmarklet
+that grabs your token automatically — no F12,
+no copy-paste fiddling.
 
-4. In the filter box, type: api-v2
 
-5. Reload the page (F5).
+═══════════════════════════════════════
+   ALTERNATIVE — MANUAL METHOD
+═══════════════════════════════════════
 
-6. Click on any request in the list (e.g. \"me\" or \"featured-tracks\").
+If the web helper isn't an option:
 
-7. In the right panel, scroll to \"Request Headers\".
+1. Open https://soundcloud.com in Chrome
+   or Firefox, signed in.
+2. Press F12, click \"Network\" tab.
+3. Filter by: api-v2
+4. Reload (F5), click any request.
+5. In \"Request Headers\" find:
+     Authorization: OAuth XXXXXXXXX
+6. Copy ONLY what comes after \"OAuth \"
+   (no prefix, no space).
+7. Paste it here in \"OAuth token\" and
+   click \"Test OAuth token\".
 
-8. Find the line: Authorization: OAuth XXXXXXXXX
 
-9. Copy ONLY what comes after \"OAuth \" (the token itself, no prefix, no space).
+═══════════════════════════════════════
+   COMMON MISTAKES
+═══════════════════════════════════════
 
-10. Paste it in the \"OAuth token\" field of the addon settings.
+✗ Do NOT copy the cookie \"oauth_token\"
+  (Application → Cookies in DevTools).
+  It looks similar but is REJECTED.
 
-11. Click \"Test OAuth token\" to verify.
+✗ Do NOT include the word \"OAuth\" or
+  any leading space.
 
-Common pitfalls:
-- Do NOT copy the cookie named \"oauth_token\" (under Application > Cookies). It looks similar but is rejected by the API.
-- Do NOT include the word \"OAuth\" or any space at the start.
-- The token expires periodically — when it does, repeat the steps to get a fresh one."
+Tokens expire after a few months —
+just repeat the process when needed."
 
 msgctxt "#30060"
 msgid "API v2"
