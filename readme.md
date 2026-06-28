@@ -137,66 +137,22 @@ sent only to `api-v2.soundcloud.com`.
 
 ### How to get your OAuth token
 
-**Easiest way — use the web helper:**
-[https://theworms.github.io/kodi-addon-soundcloud/](https://theworms.github.io/kodi-addon-soundcloud/)
+Open the helper page:
+**[https://theworms.github.io/kodi-addon-soundcloud/](https://theworms.github.io/kodi-addon-soundcloud/)**
 
-The helper page gives you a **one-click bookmarklet** that grabs your
-token automatically from soundcloud.com. The bookmarklet runs entirely
-in your browser; the token never leaves your machine.
+The page walks you through a one-click bookmarklet that grabs your
+token from soundcloud.com and shows it in a popup with a Copy button.
+The bookmarklet runs entirely in your browser — the token never leaves
+your machine.
 
----
+The helper page also includes a fallback manual procedure (F12
+DevTools, `Authorization` header) for the rare cases where the
+bookmarklet doesn't work.
 
-**Manual fallback** if the bookmarklet doesn't work in your browser:
-
-The token is the `Authorization` header value of any authenticated
-request your browser makes to the SoundCloud API.
-
-1. Open [https://soundcloud.com](https://soundcloud.com) in Chrome or
-   Firefox and **sign in** (verify your avatar shows top-right — important).
-2. Press `F12` to open the developer tools.
-3. Go to the **Network** tab.
-4. In the filter box, type: `api-v2`
-5. Reload the page (`F5`) so requests appear in the list.
-6. Click on any request in the list (e.g. `me`, `featured-tracks`, etc.).
-7. In the right panel, scroll to **Request Headers**.
-8. Find the line: `Authorization: OAuth XXXXXXXXX`
-9. Copy **only what comes after** `OAuth ` (the token itself, no prefix,
-   no leading space).
-10. In Kodi, go to the addon settings → **Account** → paste the value
-    into the **OAuth token** field.
-11. Click **Test OAuth token**. You should see "Token valid: <yourname>".
-
-#### Common pitfalls
-
-* **Do not** copy the cookie named `oauth_token` (under
-  *Application → Cookies* in DevTools). It looks similar but is rejected
-  by the API and will silently break authentication.
-* **Do not** include the word `OAuth` or any leading/trailing space in the
-  pasted value (the addon will strip them defensively, but it's cleaner
-  to copy just the token).
-* If your token starts with `2-` it's a recent format; older accounts may
-  see `1-` — both are valid.
-* If you can't find the `Authorization` header, you're probably not
-  signed in — check the avatar in the top-right of soundcloud.com.
-
-### Test your token
-
-The settings page has a **Test OAuth token** button right below the
-token field. Click it after pasting to verify the token actually works:
-the dialog will show your username on success, or the exact HTTP error
-returned by SoundCloud on failure (with a token-length preview to help
-spot truncated pastes).
-
-### Token expiration
-
-The token expires occasionally (usually after several months, or if you
-sign out from the SoundCloud website). When that happens, lists under
-"My profile", "Likes", etc. come back empty and you see a warning
-notification in Kodi. Just repeat the steps above to get a fresh token,
-paste it into the settings and click **Test OAuth token** to confirm.
-
-The addon now picks up token changes immediately — no need to restart
-Kodi after pasting a new token.
+Tokens expire after a few months or when you sign out from
+soundcloud.com — just repeat the procedure on the helper page when
+needed. The addon picks up token changes immediately, no Kodi restart
+required.
 
 ### Privacy
 

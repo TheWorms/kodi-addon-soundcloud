@@ -913,6 +913,12 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         # Cached next-page link for the page list (set by _fill_page_list).
         self._next_href = None
 
+        # Navigation history stack — pushed every time we change "page"
+        # (home, browse, likes, playlists, etc.) so that Back can pop the
+        # previous state instead of closing the whole window.
+        # Each entry is a callable that re-renders the previous state.
+        self._nav_stack = []
+
         # Player observer to follow the currently-playing track in the UI.
         # We keep a reference so it doesn't get garbage-collected.
         self._player_observer = _PlayerObserver(self)
@@ -985,18 +991,34 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
     def onAction(self, action):
         action_id = action.getId()
         if action_id in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK, ACTION_PARENT_DIR):
-            # Stop the background progress updater before closing the
-            # window so it doesn't keep polling the player after we're gone.
+            # Back behaviour:
+            # - If we have navigation history (user is deep in a folder),
+            #   pop the previous state and re-render it.
+            # - If the stack is empty (we're at the home page or top-level),
+            #   close the window and return to Kodi's home screen.
+            if self._nav_stack:
+                try:
+                    restore = self._nav_stack.pop()
+                    xbmc.log(
+                        "plugin.audio.soundcloud::HomeWindow Back pops nav "
+                        "stack (depth now %d)" % len(self._nav_stack),
+                        xbmc.LOGINFO,
+                    )
+                    restore()
+                except Exception as e:
+                    xbmc.log(
+                        "plugin.audio.soundcloud::HomeWindow nav restore "
+                        "failed: %s" % str(e),
+                        xbmc.LOGWARNING,
+                    )
+                return
+
+            # Stack empty -> exit addon
             try:
                 self._progress_updater.stop()
             except Exception:
                 pass
             self.close()
-            # After closing the WindowXMLDialog, Kodi would normally return
-            # to whichever window the user came from (often "Music files /
-            # add-ons"). For a cleaner UX we send them straight back to
-            # Kodi's home screen — the SoundCloud "app" experience ends
-            # cleanly instead of dropping them into the music browser.
             xbmc.executebuiltin("ActivateWindow(Home)")
             return
         try:
@@ -1048,7 +1070,50 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
     # Page rendering
     # =====================================================================
 
+    def _push_nav_state(self):
+        """
+        Capture the current page state (page id, title, subtitle, page
+        list contents) and push a restoration callable on the nav stack.
+        Called before navigating deeper (e.g. opening a playlist) so
+        that Back can return to where the user was.
+        """
+        current_page = self.getProperty("page") or "home"
+        current_title = self.getProperty("title") or ""
+        current_subtitle = self.getProperty("subtitle") or ""
+        # We don't capture the page-list collection itself — for the most
+        # common case (Playlists -> playlist tracks -> Back), the previous
+        # state was "show_playlists" which we re-trigger via the helper.
+        if current_page == "playlists":
+            self._nav_stack.append(self._show_playlists)
+        elif current_page == "likes":
+            self._nav_stack.append(self._show_likes)
+        elif current_page == "following":
+            self._nav_stack.append(self._show_following)
+        elif current_page == "search":
+            self._nav_stack.append(self._show_search)
+        elif current_page == "home":
+            self._nav_stack.append(self._show_home)
+        elif current_page == "browse":
+            # Nested browse (e.g. user -> tracks). Restoring this is
+            # tricky because we'd need to re-call the original API path.
+            # For now we just go back to home rather than re-fetching;
+            # users can re-navigate if needed. Better than dropping out
+            # of the addon entirely.
+            self._nav_stack.append(self._show_home)
+        else:
+            self._nav_stack.append(self._show_home)
+
+        xbmc.log(
+            "plugin.audio.soundcloud::HomeWindow pushed nav state '%s' "
+            "(stack depth %d)" % (current_page, len(self._nav_stack)),
+            xbmc.LOGINFO,
+        )
+
     def _show_home(self):
+        # Home is the root of the navigation tree — clear the nav stack
+        # so Back from here cleanly exits the addon instead of trying
+        # to pop something.
+        self._nav_stack = []
         self.setProperty("page", "home")
         self.setProperty("title", self.addon.getLocalizedString(30150))
         self.setProperty("subtitle", "")
@@ -1379,6 +1444,9 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 qs = parse_qs(parsed.query)
                 call_path = unquote(qs.get("call", [""])[0])
                 if call_path:
+                    # Push the current page onto the nav stack so Back
+                    # can return here instead of closing the window.
+                    self._push_nav_state()
                     self.setProperty("page", "browse")
                     self.setProperty("title", list_item.getLabel())
                     self.setProperty("subtitle", "")
@@ -1439,6 +1507,34 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 break
 
         try:
+            # If the user enabled shuffle, randomise the order of
+            # track_items BEFORE building the Kodi playlist. We pin the
+            # clicked track at position 0 so it plays first, then the
+            # rest in shuffled order. This is more reliable than calling
+            # PlayerControl(RandomOn) after play() — the builtin doesn't
+            # always apply in time on some Kodi versions, especially when
+            # the player is still resolving the stream URL.
+            shuffle = (self.settings.get("ui.shuffle") or "false") == "true"
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow shuffle setting=%s "
+                "tracks=%d clicked_pos=%d" %
+                (shuffle, len(track_items), new_start),
+                xbmc.LOGINFO,
+            )
+            if shuffle and len(track_items) > 1:
+                import random
+                clicked = track_items[new_start]
+                remaining = track_items[:new_start] + track_items[new_start + 1:]
+                random.shuffle(remaining)
+                track_items = [clicked] + remaining
+                new_start = 0
+                xbmc.log(
+                    "plugin.audio.soundcloud::HomeWindow shuffled playlist; "
+                    "clicked track now at position 0, %d others randomised" %
+                    len(remaining),
+                    xbmc.LOGINFO,
+                )
+
             playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
             playlist.clear()
             for url, li in track_items:
@@ -1446,8 +1542,6 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
 
             # Stash the about-to-play track's metadata in window props
             # so the fullscreen overlay (NowPlayingDialog) can read them.
-            # We update them again on every onAVStarted via the observer
-            # (TODO: hook that in for autoplayed next tracks).
             try:
                 _, first_li = track_items[new_start]
                 self.setProperty(
@@ -1472,9 +1566,10 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             )
             xbmc.Player().play(playlist, startpos=new_start)
 
-            # Shuffle if the user enabled it. We call shuffle AFTER play()
-            # so the clicked track plays first, then random thereafter.
-            shuffle = (self.settings.get("ui.shuffle") or "false") == "true"
+            # Also flip Kodi's own random toggle for visual consistency
+            # in the player controls. If we shuffled the list above, the
+            # actual order is already random; this builtin just makes
+            # the "shuffle" icon light up in the player UI.
             if shuffle:
                 xbmc.executebuiltin("PlayerControl(RandomOn)")
             else:

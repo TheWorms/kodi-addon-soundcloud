@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.6" provider-name="TheWorms">
+<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.6000" provider-name="TheWorms">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.29.0"/>
@@ -36,7 +36,22 @@
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
         <credits>jaylinski (original add-on), bromix, SLiX</credits>
-        <news>5.9.6 (2026-06-28) - helper page: fix HTML injection bug + wider layout
+        <news>5.9.6000 (2026-06-28) - shuffle fix + Back stack + readme simplified
+Switched versioning to 4-digit patch numbers (5.9.6000 instead of 5.9.6) per fork maintainer preference.
+
+Fixes:
+- Shuffle/random play now actually shuffles. Previously we called PlayerControl(RandomOn) AFTER play() which Kodi often ignored (timing race with stream URL resolution). Now we shuffle the Python track list BEFORE adding it to the Kodi playlist, pinning the clicked track at position 0. The PlayerControl is still called for visual consistency in the player UI.
+
+- Back no longer drops you out of the addon when navigating inside a playlist or folder. Added a navigation stack: when you open a playlist/user/folder, the previous page state is pushed; Back pops the stack and re-renders the previous page. The stack is cleared when returning to home. Back from home still exits the addon to Kodi's home screen.
+
+Readme:
+- "How to get your OAuth token" section drastically simplified to a 3-paragraph pointer to the helper page at https://theworms.github.io/kodi-addon-soundcloud/ which contains the full flow (bookmarklet + manual fallback). Removed the duplicated Test/Expiration/Common pitfalls sub-sections.
+
+Known issues not yet addressed (need log to diagnose):
+- Playback can crash Kodi on some tracks — waiting for log
+- Addon loads in 2 stages (music browser flash) — Kodi-side limitation, documented workaround via RunScript favourite
+
+5.9.6 (2026-06-28) - helper page: fix HTML injection bug + wider layout
 The helper page on GitHub Pages had a serious bug: the bookmarklet's inline href contained literal angle brackets (from innerHTML strings inside it), which the browser's HTML parser interpreted as real page elements. Result: the bookmarklet's popup DOM was rendered directly on the helper page at load, breaking the layout entirely (visible "Token found!" button, fake textarea, raw JS code at the bottom).
 
 Fixed by building the bookmarklet href in JavaScript at page load (encodeURIComponent), and using createElement / appendChild inside the bookmarklet instead of innerHTML — no angle brackets ever appear in the HTML source.
