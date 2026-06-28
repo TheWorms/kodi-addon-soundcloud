@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.6005" provider-name="TheWorms">
+<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.6008" provider-name="TheWorms">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.29.0"/>
@@ -36,7 +36,40 @@
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
         <credits>jaylinski (original add-on), bromix, SLiX</credits>
-        <news>5.9.6005 (2026-06-29) - api: Origin/Referer headers + auth test cascade + tier detection
+        <news>5.9.6008 (2026-06-29) - playback keys in the fullscreen overlay
+The fullscreen "now playing" overlay was only handling Back/Menu/Exit. The arrow keys did nothing — you couldn't seek inside a track or change track from the overlay. Added the standard music-player key bindings:
+
+  Left arrow         seek -10s in the current track
+  Right arrow        seek +10s
+  Up arrow           next track in playlist
+  Down arrow         if >3s in: rewind to start of current track
+                     else: previous track (standard car-stereo behavior)
+  OK / Enter         toggle play/pause
+  Standard remote    Step-forward/back, play, next, previous keys
+                     also work (ACTION_STEP_FORWARD, ACTION_STEP_BACK,
+                     ACTION_PLAYER_PLAY, ACTION_NEXT_ITEM, ACTION_PREV_ITEM)
+
+All actions wrap their player calls in try/except so an unexpected error never brings the overlay down — at worst a single key press becomes a no-op and gets logged. The seek step is clamped to [0, duration-0.5s] so we don't crash near the boundaries.
+
+5.9.6007 (2026-06-29) - faster open (round 2) + help URL in orange
+Tuning pass on the open-from-music-browser timing:
+
+OPEN SPEED: script.py now also issues Dialog.Close(all,true) + ReplaceWindow(home) at the very top of its bootstrap, BEFORE importing our (heavy) Python modules. This way the music browser starts disappearing immediately on Kodi's GUI thread while we're still loading code in parallel. Combined with the plugin.py change from 5.9.6006, the perceived delay should drop again.
+
+HELP DIALOG URL: the helper-page URL is now displayed in SoundCloud orange via Kodi BBCode ([COLOR=FFFF5500]...[/COLOR]) so it visually stands out in the otherwise-plain dialog.ok() body.
+
+If you still see the music browser flash, the only fully-eliminating workaround remains the documented one in the readme: bind a skin home shortcut or Kodi favourite to RunScript(plugin.audio.soundcloud), which bypasses the music browser entirely.
+
+5.9.6006 (2026-06-29) - faster open + help dialog renders reliably
+Two UX fixes from a user report:
+
+OPEN FROM MUSIC BROWSER: previously the addon took ~1.4s on slower devices (ODROID-N2Plus etc.) between the click and the full-screen UI appearing. During that window the music browser was visible. Re-ordered the launch sequence: RunScript(plugin) now fires FIRST so the script process can start loading Python modules and parsing the window XML in parallel with Kodi's music-browser cleanup. The UI shows up roughly as soon as it's ready, instead of waiting for cleanup to finish first.
+
+HELP DIALOG ("How to get a token"): switched from xbmcgui.Dialog().textviewer() to dialog.ok(). Some Kodi skins on 4K TV resolutions were rendering the textviewer with a blank body. dialog.ok() is plainer-looking but renders consistently everywhere. Also added a defensive fallback: if the localization didn't load for some reason, the dialog shows a hard-coded English message with the helper-page URL instead of a blank screen.
+
+Note on HLS AAC migration: SoundCloud announced removal of MP3/Opus transcodings on 2025-12-31, but as of 2026-06 their edge is still serving them for backward compatibility. We're keeping the MP3 progressive code path for now (it still works for the user). When MP3 actually breaks, we'll do the HLS AAC migration as a focused release — see the code comments in _extract_media_url for the planned approach.
+
+5.9.6005 (2026-06-29) - api: Origin/Referer headers + auth test cascade + tier detection
 Three fixes diagnosed by testing endpoints directly from a browser console:
 
 API HEADERS: SoundCloud's edge started returning HTTP 403 on /me (and 404 on /me/play-history) for requests that don't look like they come from soundcloud.com. The fix: every api-v2 request now sends Origin: https://soundcloud.com and Referer: https://soundcloud.com/ headers alongside the OAuth token. With these headers in place, /me works, /users/{id}/* works, and the addon no longer relies on endpoints SoundCloud has been quietly removing.

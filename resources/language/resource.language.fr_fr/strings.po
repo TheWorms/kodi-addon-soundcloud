@@ -67,18 +67,18 @@ msgid "You need to configure an OAuth token to access your profile. Opening sett
 msgstr "Vous devez configurer un jeton OAuth pour accéder à votre profil. Ouverture des paramètres..."
 
 msgctxt "#30026"
-msgid "Get your token on the web helper page:
+msgid "Get your token from the helper page:
 
-  https://theworms.github.io/kodi-addon-soundcloud/
+[COLOR=FFFF5500]https://theworms.github.io/kodi-addon-soundcloud/[/COLOR]
 
-The page walks you through the process step by step, with a copy-paste console snippet that finds your token automatically. The snippet runs entirely in your browser - your token is never sent anywhere.
+The page has a copy-paste console snippet that grabs your token automatically. The snippet runs entirely in your browser - your token is never sent anywhere.
 
 If the snippet doesn't work, the same page documents a manual fallback method."
-msgstr "Obtenez votre jeton via la page d'aide en ligne :
+msgstr "Obtenez votre jeton via la page d'aide :
 
-  https://theworms.github.io/kodi-addon-soundcloud/
+[COLOR=FFFF5500]https://theworms.github.io/kodi-addon-soundcloud/[/COLOR]
 
-La page vous guide étape par étape, avec un code à copier-coller dans la console qui trouve votre jeton automatiquement. Le code s'exécute entièrement dans votre navigateur - votre jeton n'est jamais envoyé quelque part.
+La page propose un code à copier-coller dans la console du navigateur qui trouve votre jeton automatiquement. Le code s'exécute entièrement dans votre navigateur - votre jeton n'est jamais envoyé quelque part.
 
 Si le code ne fonctionne pas, la même page documente une méthode manuelle de secours."
 

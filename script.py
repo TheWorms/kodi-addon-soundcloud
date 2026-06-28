@@ -32,6 +32,22 @@ if __name__ == "__main__":
         )
         sys.exit(0)
 
+    # Hide the music browser as early as possible so the user doesn't
+    # see it while our Python modules and skin XML are loading. We do
+    # this BEFORE importing our heavy modules so the visible cleanup
+    # starts immediately (Kodi processes executebuiltin commands on its
+    # GUI thread, which runs in parallel with our imports).
+    #
+    # plugin.py also issues these commands when it's the entry point,
+    # but they can race: depending on which process Kodi schedules
+    # first, the music browser may still be visible at this point.
+    # Issuing them here too is idempotent (Kodi just no-ops if the
+    # window is already closed/replaced).
+    if xbmc.getCondVisibility("Window.IsActive(MyMusicNav.xml)") or \
+       xbmc.getCondVisibility("Window.IsActive(musicfiles)"):
+        xbmc.executebuiltin("Dialog.Close(all,true)")
+        xbmc.executebuiltin("ReplaceWindow(home)")
+
     home_window.setProperty(GUARD_PROPERTY, "1")
     try:
         addon = xbmcaddon.Addon()

@@ -67,18 +67,18 @@ msgid "You need to configure an OAuth token to access your profile. Opening sett
 msgstr ""
 
 msgctxt "#30026"
-msgid "Get your token on the web helper page:
+msgid "Get your token from the helper page:
 
-  https://theworms.github.io/kodi-addon-soundcloud/
+[COLOR=FFFF5500]https://theworms.github.io/kodi-addon-soundcloud/[/COLOR]
 
-The page walks you through the process step by step, with a copy-paste console snippet that finds your token automatically. The snippet runs entirely in your browser - your token is never sent anywhere.
+The page has a copy-paste console snippet that grabs your token automatically. The snippet runs entirely in your browser - your token is never sent anywhere.
 
 If the snippet doesn't work, the same page documents a manual fallback method."
-msgstr "Get your token on the web helper page:
+msgstr "Get your token from the helper page:
 
-  https://theworms.github.io/kodi-addon-soundcloud/
+[COLOR=FFFF5500]https://theworms.github.io/kodi-addon-soundcloud/[/COLOR]
 
-The page walks you through the process step by step, with a copy-paste console snippet that finds your token automatically. The snippet runs entirely in your browser - your token is never sent anywhere.
+The page has a copy-paste console snippet that grabs your token automatically. The snippet runs entirely in your browser - your token is never sent anywhere.
 
 If the snippet doesn't work, the same page documents a manual fallback method."
 

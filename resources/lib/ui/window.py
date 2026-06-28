@@ -31,9 +31,30 @@ import xbmcgui
 
 # Kodi action IDs (used by both NowPlayingDialog and SoundCloudHomeWindow,
 # defined here at module top so both classes can reference them).
-ACTION_PREVIOUS_MENU = 10
-ACTION_NAV_BACK = 92
+ACTION_MOVE_LEFT = 1
+ACTION_MOVE_RIGHT = 2
+ACTION_MOVE_UP = 3
+ACTION_MOVE_DOWN = 4
+ACTION_SELECT_ITEM = 7
 ACTION_PARENT_DIR = 9
+ACTION_PREVIOUS_MENU = 10
+ACTION_NEXT_ITEM = 14
+ACTION_PREV_ITEM = 15
+ACTION_PLAYER_PLAY = 68
+ACTION_STEP_FORWARD = 87
+ACTION_STEP_BACK = 88
+ACTION_NAV_BACK = 92
+
+# How many seconds the left/right arrow keys seek when an audio
+# track is playing. 10s feels right on a TV remote — small enough
+# to land precisely, large enough that the user notices movement
+# without holding the button down for 10 repeats.
+SEEK_STEP_SECONDS = 10
+# If the user presses Down within this many seconds of the start
+# of a track, we treat it as "previous track". After this threshold,
+# Down rewinds to the start of the current track instead. Mimics
+# standard music-player behavior.
+DOWN_PREV_THRESHOLD_SECONDS = 3
 
 
 class _ProgressUpdater(threading.Thread):
@@ -590,13 +611,106 @@ class NowPlayingDialog(xbmcgui.WindowXMLDialog):
             pass
 
     def onAction(self, action):
-        # Any back/menu/exit action closes the overlay.
-        if action.getId() in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK,
-                              ACTION_PARENT_DIR):
+        action_id = action.getId()
+
+        # Back/menu/exit closes the overlay.
+        if action_id in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK,
+                         ACTION_PARENT_DIR):
             self.close()
             if self._observer is not None:
                 self._observer._np_dialog = None
             return
+
+        # Playback control keys. We resolve the player lazily — if
+        # nothing is playing (which shouldn't happen here since the
+        # overlay only opens during playback, but defensive code is
+        # cheap), all of these become no-ops.
+        try:
+            player = xbmc.Player()
+            if not player.isPlayingAudio():
+                return
+
+            # Left/Right: seek backward/forward by SEEK_STEP_SECONDS.
+            # Clamp to [0, totalTime] so we don't crash on edge cases.
+            if action_id == ACTION_MOVE_LEFT or action_id == ACTION_STEP_BACK:
+                try:
+                    current = player.getTime()
+                    target = max(0.0, current - SEEK_STEP_SECONDS)
+                    player.seekTime(target)
+                except Exception as e:
+                    xbmc.log(
+                        "plugin.audio.soundcloud::NowPlayingDialog "
+                        "seek backward failed: %s" % str(e),
+                        xbmc.LOGWARNING,
+                    )
+                return
+
+            if action_id == ACTION_MOVE_RIGHT or action_id == ACTION_STEP_FORWARD:
+                try:
+                    current = player.getTime()
+                    total = player.getTotalTime()
+                    target = min(total - 0.5, current + SEEK_STEP_SECONDS)
+                    if target > current:
+                        player.seekTime(target)
+                except Exception as e:
+                    xbmc.log(
+                        "plugin.audio.soundcloud::NowPlayingDialog "
+                        "seek forward failed: %s" % str(e),
+                        xbmc.LOGWARNING,
+                    )
+                return
+
+            # OK/Enter and the play-pause button both toggle pause.
+            if action_id in (ACTION_SELECT_ITEM, ACTION_PLAYER_PLAY):
+                try:
+                    player.pause()
+                except Exception as e:
+                    xbmc.log(
+                        "plugin.audio.soundcloud::NowPlayingDialog "
+                        "pause toggle failed: %s" % str(e),
+                        xbmc.LOGWARNING,
+                    )
+                return
+
+            # Up: next track in the playlist. Equivalent to the
+            # "Next" button most music players have.
+            if action_id in (ACTION_MOVE_UP, ACTION_NEXT_ITEM):
+                try:
+                    player.playnext()
+                except Exception as e:
+                    xbmc.log(
+                        "plugin.audio.soundcloud::NowPlayingDialog "
+                        "playnext failed: %s" % str(e),
+                        xbmc.LOGWARNING,
+                    )
+                return
+
+            # Down: standard music-player behavior. If we're more
+            # than DOWN_PREV_THRESHOLD_SECONDS into the current track,
+            # rewind it to 0. Otherwise jump to the previous track.
+            # This matches the "Previous" button on most car stereos,
+            # phones, and physical CD players.
+            if action_id in (ACTION_MOVE_DOWN, ACTION_PREV_ITEM):
+                try:
+                    current = player.getTime()
+                    if current > DOWN_PREV_THRESHOLD_SECONDS:
+                        player.seekTime(0.0)
+                    else:
+                        player.playprevious()
+                except Exception as e:
+                    xbmc.log(
+                        "plugin.audio.soundcloud::NowPlayingDialog "
+                        "previous failed: %s" % str(e),
+                        xbmc.LOGWARNING,
+                    )
+                return
+        except Exception as e:
+            # Catch-all so we never bring down the UI on an action.
+            xbmc.log(
+                "plugin.audio.soundcloud::NowPlayingDialog onAction "
+                "unexpected error: %s" % str(e),
+                xbmc.LOGWARNING,
+            )
 
     def close(self):
         try:

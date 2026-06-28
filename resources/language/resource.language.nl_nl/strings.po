@@ -66,18 +66,18 @@ msgid "You need to configure an OAuth token to access your profile. Opening sett
 msgstr "Je moet een OAuth-token configureren om toegang te krijgen tot je profiel. Instellingen worden geopend..."
 
 msgctxt "#30026"
-msgid "Get your token on the web helper page:
+msgid "Get your token from the helper page:
 
-  https://theworms.github.io/kodi-addon-soundcloud/
+[COLOR=FFFF5500]https://theworms.github.io/kodi-addon-soundcloud/[/COLOR]
 
-The page walks you through the process step by step, with a copy-paste console snippet that finds your token automatically. The snippet runs entirely in your browser - your token is never sent anywhere.
+The page has a copy-paste console snippet that grabs your token automatically. The snippet runs entirely in your browser - your token is never sent anywhere.
 
 If the snippet doesn't work, the same page documents a manual fallback method."
-msgstr "Verkrijg uw token via de webhulppagina:
+msgstr "Verkrijg uw token via de hulppagina:
 
-  https://theworms.github.io/kodi-addon-soundcloud/
+[COLOR=FFFF5500]https://theworms.github.io/kodi-addon-soundcloud/[/COLOR]
 
-De pagina leidt u stap voor stap door het proces, met een console-snippet om te kopiëren dat uw token automatisch vindt. Het snippet draait volledig in uw browser - uw token wordt nergens heen gestuurd.
+De pagina biedt een console-snippet om te kopiëren dat uw token automatisch vindt. Het snippet draait volledig in uw browser - uw token wordt nergens heen gestuurd.
 
 Als het snippet niet werkt, documenteert dezelfde pagina een handmatige alternatieve methode."
 

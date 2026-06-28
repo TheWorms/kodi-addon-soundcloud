@@ -67,18 +67,18 @@ msgid "You need to configure an OAuth token to access your profile. Opening sett
 msgstr "Du musst ein OAuth-Token konfigurieren, um auf dein Profil zuzugreifen. Einstellungen werden geöffnet..."
 
 msgctxt "#30026"
-msgid "Get your token on the web helper page:
+msgid "Get your token from the helper page:
 
-  https://theworms.github.io/kodi-addon-soundcloud/
+[COLOR=FFFF5500]https://theworms.github.io/kodi-addon-soundcloud/[/COLOR]
 
-The page walks you through the process step by step, with a copy-paste console snippet that finds your token automatically. The snippet runs entirely in your browser - your token is never sent anywhere.
+The page has a copy-paste console snippet that grabs your token automatically. The snippet runs entirely in your browser - your token is never sent anywhere.
 
 If the snippet doesn't work, the same page documents a manual fallback method."
-msgstr "Token über die Web-Hilfeseite holen:
+msgstr "Token über die Hilfeseite holen:
 
-  https://theworms.github.io/kodi-addon-soundcloud/
+[COLOR=FFFF5500]https://theworms.github.io/kodi-addon-soundcloud/[/COLOR]
 
-Die Seite führt Sie Schritt für Schritt durch den Prozess, mit einem Konsolen-Snippet zum Kopieren, das Ihren Token automatisch findet. Das Snippet läuft komplett in Ihrem Browser - Ihr Token wird nirgendwo hingesendet.
+Die Seite bietet ein Konsolen-Snippet zum Kopieren, das Ihren Token automatisch findet. Das Snippet läuft komplett in Ihrem Browser - Ihr Token wird nirgendwo hingesendet.
 
 Falls das Snippet nicht funktioniert, dokumentiert dieselbe Seite eine manuelle Alternative."Anwendung\" (Chrome/Edge) oder \"Speicher\" (Firefox).\n\n4. Klappe in der linken Seitenleiste \"Cookies\" auf und wähle \"https://soundcloud.com\".\n\n5. Suche das Cookie namens \"oauth_token\" und kopiere seinen Wert.\n\n6. Füge den Wert in das Feld \"OAuth-Token\" in den Addon-Einstellungen ein.\n\nAlternative Methode: Suche im Tab \"Netzwerk\" der Entwicklertools eine beliebige Anfrage an api-v2.soundcloud.com, schau in den \"Authorization\"-Request-Header und kopiere den Wert nach \"OAuth \".\n\nHinweis: Das Token läuft gelegentlich ab — in dem Fall wiederhole die Schritte, um ein frisches zu erhalten."
 
