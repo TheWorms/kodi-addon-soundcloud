@@ -67,97 +67,20 @@ msgid "You need to configure an OAuth token to access your profile. Opening sett
 msgstr "Vous devez configurer un jeton OAuth pour accéder à votre profil. Ouverture des paramètres..."
 
 msgctxt "#30026"
-msgid "═══════════════════════════════════════
-   FASTEST WAY — USE THE WEB HELPER
-═══════════════════════════════════════
+msgid "Get your token on the web helper page:
 
-▶ ON YOUR COMPUTER, OPEN THIS URL:
+  https://theworms.github.io/kodi-addon-soundcloud/
 
-    https://theworms.github.io/kodi-addon-soundcloud/
+The page walks you through the process step by step, with a copy-paste console snippet that finds your token automatically. The snippet runs entirely in your browser - your token is never sent anywhere.
 
-The helper page has a one-click bookmarklet
-that grabs your token automatically — no F12,
-no copy-paste fiddling.
+If the snippet doesn't work, the same page documents a manual fallback method."
+msgstr "Obtenez votre jeton via la page d'aide en ligne :
 
+  https://theworms.github.io/kodi-addon-soundcloud/
 
-═══════════════════════════════════════
-   ALTERNATIVE — MANUAL METHOD
-═══════════════════════════════════════
+La page vous guide étape par étape, avec un code à copier-coller dans la console qui trouve votre jeton automatiquement. Le code s'exécute entièrement dans votre navigateur - votre jeton n'est jamais envoyé quelque part.
 
-If the web helper isn't an option:
-
-1. Open https://soundcloud.com in Chrome
-   or Firefox, signed in.
-2. Press F12, click \"Network\" tab.
-3. Filter by: api-v2
-4. Reload (F5), click any request.
-5. In \"Request Headers\" find:
-     Authorization: OAuth XXXXXXXXX
-6. Copy ONLY what comes after \"OAuth \"
-   (no prefix, no space).
-7. Paste it here in \"OAuth token\" and
-   click \"Test OAuth token\".
-
-
-═══════════════════════════════════════
-   COMMON MISTAKES
-═══════════════════════════════════════
-
-✗ Do NOT copy the cookie \"oauth_token\"
-  (Application → Cookies in DevTools).
-  It looks similar but is REJECTED.
-
-✗ Do NOT include the word \"OAuth\" or
-  any leading space.
-
-Tokens expire after a few months —
-just repeat the process when needed."
-msgstr "═══════════════════════════════════════
-  MÉTHODE LA PLUS RAPIDE — AIDE EN LIGNE
-═══════════════════════════════════════
-
-▶ SUR VOTRE ORDINATEUR, OUVREZ CETTE URL :
-
-    https://theworms.github.io/kodi-addon-soundcloud/
-
-La page d'aide propose un bookmarklet
-qui récupère votre jeton automatiquement —
-sans F12, sans manipulations fastidieuses.
-
-
-═══════════════════════════════════════
-   ALTERNATIVE — MÉTHODE MANUELLE
-═══════════════════════════════════════
-
-Si l'aide en ligne n'est pas une option :
-
-1. Ouvrez https://soundcloud.com dans
-   Chrome ou Firefox, en étant connecté.
-2. Appuyez sur F12, onglet \"Network\".
-3. Filtrez par : api-v2
-4. Rechargez (F5), cliquez une requête.
-5. Dans \"Request Headers\" trouvez :
-     Authorization: OAuth XXXXXXXXX
-6. Copiez UNIQUEMENT ce qui vient après
-   \"OAuth \" (sans préfixe, sans espace).
-7. Collez ici dans \"Jeton OAuth\" et
-   cliquez sur \"Tester le jeton\".
-
-
-═══════════════════════════════════════
-   ERREURS COURANTES
-═══════════════════════════════════════
-
-✗ NE COPIEZ PAS le cookie \"oauth_token\"
-  (Application → Cookies dans DevTools).
-  Il ressemble mais est REJETÉ.
-
-✗ N'INCLUEZ PAS le mot \"OAuth\" ni
-  d'espace au début.
-
-Les jetons expirent après quelques mois —
-refaites simplement la procédure quand
-nécessaire."
+Si le code ne fonctionne pas, la même page documente une méthode manuelle de secours."
 
 msgctxt "#30060"
 msgid "API v2"
@@ -539,6 +462,10 @@ msgstr "Aucun jeton configuré. Collez-en un dans le champ ci-dessus."
 msgctxt "#30245"
 msgid "Network error: {0}"
 msgstr "Erreur réseau : {0}"
+
+msgctxt "#30246"
+msgid "Token valid - authentication works."
+msgstr "Jeton valide - l'authentification fonctionne."
 
 msgctxt "#30250"
 msgid "Widgets"

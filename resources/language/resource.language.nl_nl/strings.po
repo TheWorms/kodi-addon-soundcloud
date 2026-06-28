@@ -66,79 +66,20 @@ msgid "You need to configure an OAuth token to access your profile. Opening sett
 msgstr "Je moet een OAuth-token configureren om toegang te krijgen tot je profiel. Instellingen worden geopend..."
 
 msgctxt "#30026"
-msgid "═══════════════════════════════════════
-   FASTEST WAY — USE THE WEB HELPER
-═══════════════════════════════════════
+msgid "Get your token on the web helper page:
 
-▶ ON YOUR COMPUTER, OPEN THIS URL:
+  https://theworms.github.io/kodi-addon-soundcloud/
 
-    https://theworms.github.io/kodi-addon-soundcloud/
+The page walks you through the process step by step, with a copy-paste console snippet that finds your token automatically. The snippet runs entirely in your browser - your token is never sent anywhere.
 
-The helper page has a one-click bookmarklet
-that grabs your token automatically — no F12,
-no copy-paste fiddling.
+If the snippet doesn't work, the same page documents a manual fallback method."
+msgstr "Verkrijg uw token via de webhulppagina:
 
+  https://theworms.github.io/kodi-addon-soundcloud/
 
-═══════════════════════════════════════
-   ALTERNATIVE — MANUAL METHOD
-═══════════════════════════════════════
+De pagina leidt u stap voor stap door het proces, met een console-snippet om te kopiëren dat uw token automatisch vindt. Het snippet draait volledig in uw browser - uw token wordt nergens heen gestuurd.
 
-If the web helper isn't an option:
-
-1. Open https://soundcloud.com in Chrome
-   or Firefox, signed in.
-2. Press F12, click \"Network\" tab.
-3. Filter by: api-v2
-4. Reload (F5), click any request.
-5. In \"Request Headers\" find:
-     Authorization: OAuth XXXXXXXXX
-6. Copy ONLY what comes after \"OAuth \"
-   (no prefix, no space).
-7. Paste it here in \"OAuth token\" and
-   click \"Test OAuth token\".
-
-
-═══════════════════════════════════════
-   COMMON MISTAKES
-═══════════════════════════════════════
-
-✗ Do NOT copy the cookie \"oauth_token\"
-  (Application → Cookies in DevTools).
-  It looks similar but is REJECTED.
-
-✗ Do NOT include the word \"OAuth\" or
-  any leading space.
-
-Tokens expire after a few months —
-just repeat the process when needed."
-msgstr "═══════════════════════════════════════
-   SNELSTE METHODE — WEB-HULP
-═══════════════════════════════════════
-
-▶ OPEN OP UW COMPUTER:
-
-    https://theworms.github.io/kodi-addon-soundcloud/
-
-De hulppagina biedt een bookmarklet die
-uw token automatisch ophaalt — geen F12,
-geen kopieer-plak gedoe.
-
-
-═══════════════════════════════════════
-   ALTERNATIEF — HANDMATIGE METHODE
-═══════════════════════════════════════
-
-1. soundcloud.com openen, ingelogd.
-2. F12, \"Network\"-tabblad.
-3. Filter: api-v2
-4. F5, klik een verzoek.
-5. \"Request Headers\":
-     Authorization: OAuth XXXXXXXXX
-6. ALLEEN het deel na \"OAuth \" kopiëren.
-7. Plak hier in \"OAuth Token\".
-
-Tokens verlopen na enkele maanden —
-gewoon herhalen."
+Als het snippet niet werkt, documenteert dezelfde pagina een handmatige alternatieve methode."
 
 msgctxt "#30060"
 msgid "API v2"
@@ -520,6 +461,10 @@ msgstr "Geen token geconfigureerd. Plak er een in het bovenstaande veld."
 msgctxt "#30245"
 msgid "Network error: {0}"
 msgstr "Netwerkfout: {0}"
+
+msgctxt "#30246"
+msgid "Token valid - authentication works."
+msgstr "Token geldig - authenticatie werkt."
 
 msgctxt "#30250"
 msgid "Widgets"

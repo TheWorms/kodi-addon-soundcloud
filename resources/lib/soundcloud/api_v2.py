@@ -393,14 +393,50 @@ class ApiV2(ApiInterface):
             # Never let a notification failure break playback.
             pass
 
-    def _extract_media_url(self, transcodings):
+    def _extract_media_url(self, item):
+        """
+        Pick the best transcoding URL for the configured audio format,
+        and attach the track-level track_authorization query parameter
+        if SoundCloud included one.
+
+        Background: since 2025-ish, SoundCloud's /media/{urn}/{tid}/stream/...
+        endpoint requires a `track_authorization` query parameter (a JWT)
+        in addition to the OAuth token in the Authorization header. Without
+        it, the API responds 404. The JWT lives on the track object at
+        `track.track_authorization`, *not* on individual transcodings, so
+        we have to read it from the parent track and stitch it into the
+        URL ourselves.
+
+        The authorization JWT typically expires ~2 hours after fetch.
+        """
+        transcodings = (item.get("media") or {}).get("transcodings") or []
+        if not transcodings:
+            return None
+
         setting = self.settings.get("audio.format")
+        chosen = None
         for codec in transcodings:
             if self._is_preferred_codec(codec["format"], self.settings.AUDIO_FORMATS[setting]):
-                return codec["url"]
+                chosen = codec
+                break
 
-        # Fallback
-        return transcodings[0]["url"] if len(transcodings) else None
+        if chosen is None:
+            # Fallback to first transcoding
+            chosen = transcodings[0]
+
+        url = chosen.get("url")
+        if not url:
+            return None
+
+        # Stitch track_authorization if present.
+        track_auth = item.get("track_authorization")
+        if track_auth:
+            sep = "&" if "?" in url else "?"
+            url = url + sep + "track_authorization=" + urllib.parse.quote(
+                track_auth, safe=""
+            )
+
+        return url
 
     def _find_id_in_selection(self, selection, selection_id):
         for category in selection:
@@ -553,7 +589,7 @@ class ApiV2(ApiInterface):
         track.preview = True if item.get("policy") == "SNIP" else False
         track.thumb = self._get_thumbnail(item, self.thumbnail_size)
         track.fanart = track.thumb  # Artwork doubles as fanart for detail views.
-        track.media = self._extract_media_url(item["media"]["transcodings"])
+        track.media = self._extract_media_url(item)
         track.info = {
             "artist": artist,
             "album": album,

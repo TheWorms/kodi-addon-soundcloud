@@ -338,6 +338,12 @@ def run():
         # Direct token test bypassing our normal API flow so the test result
         # reflects the *real* current state of the token, not a cached
         # decision from earlier in the session.
+        #
+        # NOTE: We don't hit /me anymore — SoundCloud started blocking that
+        # endpoint with HTTP 403 even for fully-valid tokens (probably
+        # tightened CORS / origin checks since 2025). Use /me/play-history
+        # instead, which is also user-scoped (so it requires auth and proves
+        # the token works) but isn't subject to the /me block.
         import requests
         dialog = xbmcgui.Dialog()
         token = settings.get_oauth_token()
@@ -349,22 +355,20 @@ def run():
                 token[:6],
                 token[-4:],
             )
+            test_url = "https://api-v2.soundcloud.com/me/play-history?limit=1"
             try:
-                # Log the exact request we're about to make so we can compare
-                # with what works in the browser.
                 xbmc.log(
                     "plugin.audio.soundcloud::AuthTest sending GET to "
-                    "https://api-v2.soundcloud.com/me with header "
+                    "%s with header "
                     "Authorization='OAuth %s' (%d chars)" %
-                    (token[:6] + "..." + token[-4:], len(token)),
+                    (test_url, token[:6] + "..." + token[-4:], len(token)),
                     xbmc.LOGINFO,
                 )
                 resp = requests.get(
-                    "https://api-v2.soundcloud.com/me",
+                    test_url,
                     headers={"Authorization": "OAuth " + token},
                     timeout=10,
                 )
-                # Log what we got back.
                 body_preview = (resp.text or "")[:300]
                 xbmc.log(
                     "plugin.audio.soundcloud::AuthTest got HTTP %d, "
@@ -378,21 +382,35 @@ def run():
                 )
 
                 if resp.status_code == 200:
+                    # /me/play-history doesn't return the username directly,
+                    # but a 200 response proves the token authenticated.
+                    # Try /me as a follow-up to enrich the success message
+                    # with the username — failure of that follow-up is
+                    # non-fatal (we already proved auth works).
+                    username = None
                     try:
-                        username = resp.json().get("username", "?")
+                        me_resp = requests.get(
+                            "https://api-v2.soundcloud.com/me",
+                            headers={"Authorization": "OAuth " + token},
+                            timeout=5,
+                        )
+                        if me_resp.status_code == 200:
+                            username = me_resp.json().get("username", None)
                     except Exception:
-                        username = "?"
-                    dialog.ok(
-                        "SoundCloud",
-                        addon.getLocalizedString(30242).format(username) +
-                        "\n\n" + preview
-                    )
+                        pass
+
+                    if username:
+                        msg = addon.getLocalizedString(30242).format(username)
+                    else:
+                        # Generic success message — we proved auth works
+                        # but couldn't get the username from /me. That's
+                        # fine for the addon.
+                        msg = addon.getLocalizedString(30246)
+
+                    dialog.ok("SoundCloud", msg + "\n\n" + preview)
                     if hasattr(api, "_token_invalid"):
                         api._token_invalid = False
                 else:
-                    # Show the body of the error response so the user can
-                    # see the exact reason from SoundCloud (sometimes it
-                    # says "expired", "invalid scope", "rate-limited", etc).
                     err_msg = (
                         addon.getLocalizedString(30243).format(resp.status_code) +
                         "\n\n" + preview +

@@ -67,79 +67,20 @@ msgid "You need to configure an OAuth token to access your profile. Opening sett
 msgstr "Du musst ein OAuth-Token konfigurieren, um auf dein Profil zuzugreifen. Einstellungen werden geöffnet..."
 
 msgctxt "#30026"
-msgid "═══════════════════════════════════════
-   FASTEST WAY — USE THE WEB HELPER
-═══════════════════════════════════════
+msgid "Get your token on the web helper page:
 
-▶ ON YOUR COMPUTER, OPEN THIS URL:
+  https://theworms.github.io/kodi-addon-soundcloud/
 
-    https://theworms.github.io/kodi-addon-soundcloud/
+The page walks you through the process step by step, with a copy-paste console snippet that finds your token automatically. The snippet runs entirely in your browser - your token is never sent anywhere.
 
-The helper page has a one-click bookmarklet
-that grabs your token automatically — no F12,
-no copy-paste fiddling.
+If the snippet doesn't work, the same page documents a manual fallback method."
+msgstr "Token über die Web-Hilfeseite holen:
 
+  https://theworms.github.io/kodi-addon-soundcloud/
 
-═══════════════════════════════════════
-   ALTERNATIVE — MANUAL METHOD
-═══════════════════════════════════════
+Die Seite führt Sie Schritt für Schritt durch den Prozess, mit einem Konsolen-Snippet zum Kopieren, das Ihren Token automatisch findet. Das Snippet läuft komplett in Ihrem Browser - Ihr Token wird nirgendwo hingesendet.
 
-If the web helper isn't an option:
-
-1. Open https://soundcloud.com in Chrome
-   or Firefox, signed in.
-2. Press F12, click \"Network\" tab.
-3. Filter by: api-v2
-4. Reload (F5), click any request.
-5. In \"Request Headers\" find:
-     Authorization: OAuth XXXXXXXXX
-6. Copy ONLY what comes after \"OAuth \"
-   (no prefix, no space).
-7. Paste it here in \"OAuth token\" and
-   click \"Test OAuth token\".
-
-
-═══════════════════════════════════════
-   COMMON MISTAKES
-═══════════════════════════════════════
-
-✗ Do NOT copy the cookie \"oauth_token\"
-  (Application → Cookies in DevTools).
-  It looks similar but is REJECTED.
-
-✗ Do NOT include the word \"OAuth\" or
-  any leading space.
-
-Tokens expire after a few months —
-just repeat the process when needed."
-msgstr "═══════════════════════════════════════
-  SCHNELLSTE METHODE — WEB-HILFE
-═══════════════════════════════════════
-
-▶ ÖFFNEN SIE AUF IHREM COMPUTER:
-
-    https://theworms.github.io/kodi-addon-soundcloud/
-
-Die Hilfeseite bietet ein Bookmarklet,
-das Ihr Token automatisch holt — kein F12,
-kein Kopieren-Einfügen.
-
-
-═══════════════════════════════════════
-   ALTERNATIVE — MANUELLE METHODE
-═══════════════════════════════════════
-
-1. soundcloud.com öffnen, eingeloggt.
-2. F12, \"Network\"-Tab.
-3. Filter: api-v2
-4. F5, eine Anfrage anklicken.
-5. \"Request Headers\":
-     Authorization: OAuth XXXXXXXXX
-6. NUR den Teil nach \"OAuth \" kopieren.
-7. Hier in \"OAuth Token\" einfügen.
-
-Token läuft nach einigen Monaten ab —
-einfach wiederholen."Anwendung\" (Chrome/Edge) oder \"Speicher\" (Firefox).\n\n4. Klappe in der linken Seitenleiste \"Cookies\" auf und wähle \"https://soundcloud.com\".\n\n5. Suche das Cookie namens \"oauth_token\" und kopiere seinen Wert.\n\n6. Füge den Wert in das Feld \"OAuth-Token\" in den Addon-Einstellungen ein.\n\nAlternative Methode: Suche im Tab \"Netzwerk\" der Entwicklertools eine beliebige Anfrage an api-v2.soundcloud.com, schau in den \"Authorization\"-Request-Header und kopiere den Wert nach \"OAuth \".\n\nHinweis: Das Token läuft gelegentlich ab — in dem Fall wiederhole die Schritte, um ein frisches zu erhalten."
+Falls das Snippet nicht funktioniert, dokumentiert dieselbe Seite eine manuelle Alternative."Anwendung\" (Chrome/Edge) oder \"Speicher\" (Firefox).\n\n4. Klappe in der linken Seitenleiste \"Cookies\" auf und wähle \"https://soundcloud.com\".\n\n5. Suche das Cookie namens \"oauth_token\" und kopiere seinen Wert.\n\n6. Füge den Wert in das Feld \"OAuth-Token\" in den Addon-Einstellungen ein.\n\nAlternative Methode: Suche im Tab \"Netzwerk\" der Entwicklertools eine beliebige Anfrage an api-v2.soundcloud.com, schau in den \"Authorization\"-Request-Header und kopiere den Wert nach \"OAuth \".\n\nHinweis: Das Token läuft gelegentlich ab — in dem Fall wiederhole die Schritte, um ein frisches zu erhalten."
 
 msgctxt "#30060"
 msgid "API v2"
@@ -521,6 +462,10 @@ msgstr "Kein Token konfiguriert. Füge eines im obigen Feld ein."
 msgctxt "#30245"
 msgid "Network error: {0}"
 msgstr "Netzwerkfehler: {0}"
+
+msgctxt "#30246"
+msgid "Token valid - authentication works."
+msgstr "Token gültig - Authentifizierung funktioniert."
 
 msgctxt "#30250"
 msgid "Widgets"
