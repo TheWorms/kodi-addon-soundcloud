@@ -119,27 +119,24 @@ def run():
             if not is_widget_call:
                 # User-initiated open: launch the full-screen UI.
                 #
-                # The order here matters for hiding the music-window flash:
+                # Order matters: RunScript is now FIRST so the script
+                # process (which has to load Python modules, parse the
+                # window XML, query the API) starts immediately and runs
+                # in parallel with Kodi's music-browser cleanup. With the
+                # previous order (cleanup first, RunScript last), the user
+                # saw the music browser for ~1.4s on lower-end devices
+                # (ODROID-N2Plus etc.) before the UI appeared.
                 #
-                # 1. endOfDirectory(succeeded=False) tells Kodi "this
-                #    plugin call returns nothing to display" — it stops
-                #    Kodi from trying to populate the music browser with
-                #    anything.
-                #
-                # 2. Dialog.Close(all,true) closes any modal dialog (like
-                #    the "loading directory" spinner) immediately.
-                #
-                # 3. ReplaceWindow(home) swaps the music browser for the
-                #    home screen WITHOUT keeping music in the back stack
-                #    — Back from our UI returns to home, not to music.
-                #
-                # 4. RunScript launches our full-screen UI on top of home.
+                # The trade-off: there's a brief moment where the script
+                # is starting to load but the music browser is still
+                # visible. That's still better than seeing the music
+                # browser fully painted before the UI starts.
+                xbmc.executebuiltin("RunScript(" + addon_id + ")")
                 xbmcplugin.endOfDirectory(
                     handle, succeeded=False, cacheToDisc=False
                 )
                 xbmc.executebuiltin("Dialog.Close(all,true)")
                 xbmc.executebuiltin("ReplaceWindow(home)")
-                xbmc.executebuiltin("RunScript(" + addon_id + ")")
                 return
 
             # Widget call: return the flat directory of widget shortcuts
@@ -328,10 +325,25 @@ def run():
             xbmcplugin.endOfDirectory(handle)
 
     elif path == PATH_SETTINGS_AUTH_HELP:
+        # We used to render the help text in a textviewer dialog, but
+        # some Kodi skins render it blank on TV resolutions. dialog.ok()
+        # is plainer-looking but renders reliably everywhere.
         dialog = xbmcgui.Dialog()
-        dialog.textviewer(
-            addon.getLocalizedString(30022),
-            addon.getLocalizedString(30026)
+        help_text = addon.getLocalizedString(30026)
+        if not help_text or not help_text.strip():
+            # Translation didn't load (shouldn't happen) — fall back to
+            # the hardcoded URL so the user at least gets something.
+            help_text = (
+                "Get your token on the helper page:\n\n"
+                "[COLOR=FFFF5500]https://theworms.github.io/"
+                "kodi-addon-soundcloud/[/COLOR]\n\n"
+                "The page has a copy-paste console snippet that grabs your "
+                "token automatically. The snippet runs entirely in your "
+                "browser - your token is never sent anywhere."
+            )
+        dialog.ok(
+            addon.getLocalizedString(30022) or "Get your OAuth token",
+            help_text
         )
 
     elif path == PATH_SETTINGS_AUTH_TEST:
