@@ -290,34 +290,6 @@ Estuary lets you navigate sub-directories when picking a widget. Go to
 *Add-ons → Music add-ons → SoundCloud → Widgets* — pick the widget you
 want directly without needing the Widget mode workaround.
 
-## Development
-
-This add-on uses [Pipenv](https://pypi.org/project/pipenv/) to manage its dependencies.
-
-### Setup
-
-[Install Pipenv](https://pipenv.pypa.io/en/latest/installation.html#installing-pipenv) and run `pipenv install --dev`.
-
-### Build
-
-Run `pipenv run build`.
-
-### Lint
-
-Run `pipenv run lint`.
-
-### Test
-
-Run `pipenv run test`.
-
-## Roadmap
-
-* Implement remaining
-  [enhancement ideas from upstream](https://github.com/jaylinski/kodi-addon-soundcloud/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement)
-  that make sense for the v5+ full-screen experience
-* Continue refining the fullscreen now-playing overlays based on user feedback
-* Track any upstream improvements worth merging back
-
 ## Attributions
 
 This v5+ fork is maintained by **[TheWorms](https://github.com/TheWorms)**,
