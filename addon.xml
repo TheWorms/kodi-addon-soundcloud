@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.3" provider-name="TheWorms">
+<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.5" provider-name="TheWorms">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.29.0"/>
@@ -36,7 +36,21 @@
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
         <credits>jaylinski (original add-on), bromix, SLiX</credits>
-        <news>5.9.3 (2026-06-28) - readme: dropped Development and Roadmap
+        <news>5.9.5 (2026-06-28) - web helper page for token retrieval
+A new helper page is published at https://theworms.github.io/kodi-addon-soundcloud/ with a one-click bookmarklet that grabs your SoundCloud OAuth token automatically — no more F12 / Network tab / Request Headers fiddling. Drag the bookmarklet to your browser's bookmarks bar, click it while logged into soundcloud.com, copy the token from the popup, paste into Kodi.
+
+The bookmarklet runs entirely in the browser — the token never leaves your machine, it's not sent to any server (not to TheWorms, not to GitHub).
+
+The help dialog (Settings > Account > How to get a token) now leads with this URL, and falls back to the manual F12 method as alternative. Readme updated to mirror this. Page is bilingual (EN/FR), auto-detects browser language.
+
+5.9.4 (2026-06-28) - clearer token instructions + actionable expiry notification
+The "How to get a token" help dialog (Settings > Account) is fully rewritten: SoundCloud URL displayed prominently at the top, clearer step-by-step instructions with visual separators (▶ markers and ═══ section dividers), explicit "on your computer, not on this device" guidance, and a "Common mistakes" section listing the typical traps (cookie vs Authorization header, OAuth prefix, etc.).
+
+Token-expired notification now displays for 8 seconds (was 5) and points directly to the help button: "OAuth token expired — open Settings > Account > How to get a token". No more silently empty Likes lists with confused users.
+
+Note: a "sign in with email/password" flow was considered for this release but rejected on safety grounds (SoundCloud's web-auth endpoint requires captcha after a few attempts, would store the password in plaintext in settings.xml, and risks account suspension for non-official client traffic). The token-based flow remains the safer approach.
+
+5.9.3 (2026-06-28) - readme: dropped Development and Roadmap
 Removed the Development section (Pipenv setup/build/lint/test instructions — anyone cloning the repo can read Pipfile directly) and the Roadmap section (vague bullets that mostly tracked upstream). The readme is now focused on what users actually need: install, launch, authenticate, configure overlays, integrate widgets.
 
 5.9.2 (2026-06-28) - readme refresh for v5.9 reality

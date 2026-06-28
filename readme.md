@@ -137,8 +137,19 @@ sent only to `api-v2.soundcloud.com`.
 
 ### How to get your OAuth token
 
-The recommended way is to read the **`Authorization` header** of any
-authenticated request your browser makes to the SoundCloud API.
+**Easiest way — use the web helper:**
+[https://theworms.github.io/kodi-addon-soundcloud/](https://theworms.github.io/kodi-addon-soundcloud/)
+
+The helper page gives you a **one-click bookmarklet** that grabs your
+token automatically from soundcloud.com. The bookmarklet runs entirely
+in your browser; the token never leaves your machine.
+
+---
+
+**Manual fallback** if the bookmarklet doesn't work in your browser:
+
+The token is the `Authorization` header value of any authenticated
+request your browser makes to the SoundCloud API.
 
 1. Open [https://soundcloud.com](https://soundcloud.com) in Chrome or
    Firefox and **sign in** (verify your avatar shows top-right — important).
