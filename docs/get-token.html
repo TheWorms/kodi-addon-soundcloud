@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Get your SoundCloud OAuth token — Kodi addon helper</title>
-<meta name="description" content="Helper page for the Kodi SoundCloud addon: get your SoundCloud OAuth token with a console snippet, no fiddling required.">
 <style>
 :root {
   --bg: #1a1a1a;
@@ -22,215 +21,97 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  background: var(--bg);
-  color: var(--fg);
-  line-height: 1.6;
-  padding: 0 16px;
+  background: var(--bg); color: var(--fg); line-height: 1.6; padding: 0 16px;
   min-height: 100vh;
 }
-.container {
-  max-width: 880px;
-  margin: 0 auto;
-  padding: 48px 0;
-}
-header {
-  text-align: center;
-  margin-bottom: 48px;
-}
-header .logo {
-  display: inline-block;
-  font-size: 64px;
-  margin-bottom: 16px;
-}
-h1 {
-  font-size: 32px;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-header p {
-  color: var(--fg-dim);
-  font-size: 16px;
-}
+.container { max-width: 880px; margin: 0 auto; padding: 48px 0; }
+header { text-align: center; margin-bottom: 48px; }
+header .logo { display: inline-block; font-size: 64px; margin-bottom: 16px; }
+h1 { font-size: 32px; font-weight: 600; margin-bottom: 8px; }
+header p { color: var(--fg-dim); font-size: 16px; }
 section {
-  background: var(--bg-elev);
-  border-radius: 12px;
-  padding: 32px;
-  margin-bottom: 24px;
-  border: 1px solid var(--border);
+  background: var(--bg-elev); border-radius: 12px; padding: 32px;
+  margin-bottom: 24px; border: 1px solid var(--border);
 }
 section h2 {
-  font-size: 22px;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  font-size: 22px; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
 }
-section h2 .step-num {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: var(--accent);
-  color: #000;
-  font-weight: 700;
-  border-radius: 50%;
-  font-size: 16px;
-  flex-shrink: 0;
+.step-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; background: var(--accent); color: #000;
+  font-weight: 700; border-radius: 50%; font-size: 16px; flex-shrink: 0;
 }
 p { margin-bottom: 12px; color: var(--fg); }
 p.subtle { color: var(--fg-dim); font-size: 14px; }
 a { color: var(--accent); text-decoration: none; }
 a:hover { color: var(--accent-hover); text-decoration: underline; }
 .btn-soundcloud {
-  display: inline-block;
-  background: #fff;
-  color: #000 !important;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-weight: 500;
-  margin: 8px 0;
+  display: inline-block; background: #fff; color: #000 !important;
+  padding: 10px 20px; border-radius: 6px; font-weight: 500; margin: 8px 0;
   text-decoration: none;
 }
-.btn-soundcloud:hover {
-  background: #f0f0f0;
-  text-decoration: none;
-  color: #000 !important;
-}
+.btn-soundcloud:hover { background: #f0f0f0; text-decoration: none; color: #000 !important; }
 .btn-copy {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--accent);
-  color: #000 !important;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 15px;
-  cursor: pointer;
-  font-family: inherit;
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--accent); color: #000 !important;
+  padding: 12px 24px; border: none; border-radius: 8px;
+  font-weight: 700; font-size: 15px; cursor: pointer; font-family: inherit;
   transition: background 0.15s;
 }
-.btn-copy:hover {
-  background: var(--accent-hover);
-  color: #000 !important;
-}
-.btn-copy.copied {
-  background: var(--success);
-  color: #fff !important;
-}
+.btn-copy:hover { background: var(--accent-hover); color: #000 !important; }
+.btn-copy.copied { background: var(--success); color: #fff !important; }
 code, .code-block, .snippet {
-  font-family: "SF Mono", Menlo, Consolas, monospace;
-  background: var(--bg-code);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 13px;
-  color: #e0e0e0;
+  font-family: "SF Mono", Menlo, Consolas, monospace; background: var(--bg-code);
+  padding: 2px 6px; border-radius: 4px; font-size: 13px; color: #e0e0e0;
 }
 .snippet {
-  display: block;
-  padding: 16px;
-  border-radius: 8px;
-  margin: 16px 0 12px 0;
-  border: 1px solid var(--border);
-  white-space: pre-wrap;
-  word-break: break-all;
-  max-height: 200px;
-  overflow-y: auto;
-  font-size: 12px;
-  line-height: 1.5;
+  display: block; padding: 16px; border-radius: 8px; margin: 16px 0 12px 0;
+  border: 1px solid var(--border); white-space: pre-wrap; word-break: break-all;
+  max-height: 240px; overflow-y: auto; font-size: 12px; line-height: 1.5;
   color: #c0e0c0;
 }
-.code-block {
-  display: block;
-  padding: 12px 16px;
-  border-radius: 6px;
-  word-break: break-all;
-  margin: 12px 0;
-  border: 1px solid var(--border);
-}
 kbd {
-  font-family: "SF Mono", Menlo, Consolas, monospace;
-  background: #333;
-  color: #fff;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  border: 1px solid #555;
-  box-shadow: 0 1px 0 #000;
+  font-family: "SF Mono", Menlo, Consolas, monospace; background: #333;
+  color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px;
+  border: 1px solid #555; box-shadow: 0 1px 0 #000;
 }
 ol { padding-left: 24px; margin: 12px 0; }
 ol li { margin-bottom: 10px; }
 .note {
-  background: #2a1810;
-  border-left: 3px solid var(--warning);
-  padding: 12px 16px;
-  margin: 16px 0;
-  border-radius: 4px;
-  font-size: 14px;
-  color: #ffcc99;
+  background: #2a1810; border-left: 3px solid var(--warning);
+  padding: 12px 16px; margin: 16px 0; border-radius: 4px;
+  font-size: 14px; color: #ffcc99;
 }
 .note strong { color: var(--warning); }
 .success-note {
-  background: #102018;
-  border-left: 3px solid var(--success);
-  padding: 12px 16px;
-  margin: 16px 0;
-  border-radius: 4px;
-  font-size: 14px;
-  color: #c0e0c0;
+  background: #102018; border-left: 3px solid var(--success);
+  padding: 12px 16px; margin: 16px 0; border-radius: 4px;
+  font-size: 14px; color: #c0e0c0;
 }
 .success-note strong { color: var(--success); }
-.fallback {
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 1px solid var(--border);
-}
+.fallback { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
 .fallback summary {
-  cursor: pointer;
-  font-weight: 500;
-  padding: 8px 0;
-  color: var(--fg-dim);
+  cursor: pointer; font-weight: 500; padding: 8px 0; color: var(--fg-dim);
   list-style: none;
 }
 .fallback summary::-webkit-details-marker { display: none; }
-.fallback summary::before {
-  content: '\25B6  ';
-  color: var(--accent);
-  font-size: 12px;
-}
+.fallback summary::before { content: '\25B6  '; color: var(--accent); font-size: 12px; }
 .fallback[open] summary::before { content: '\25BC  '; }
 .fallback summary:hover { color: var(--fg); }
 .fallback[open] summary { margin-bottom: 16px; }
 footer {
-  text-align: center;
-  margin-top: 48px;
-  padding-top: 24px;
-  border-top: 1px solid var(--border);
-  color: var(--fg-muted);
-  font-size: 13px;
+  text-align: center; margin-top: 48px; padding-top: 24px;
+  border-top: 1px solid var(--border); color: var(--fg-muted); font-size: 13px;
 }
 footer a { color: var(--fg-muted); }
-.lang-switch {
-  text-align: right;
-  margin-bottom: -16px;
-}
+.lang-switch { text-align: right; margin-bottom: -16px; }
 .lang-switch button {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--fg-dim);
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 12px;
-  cursor: pointer;
+  background: transparent; border: 1px solid var(--border); color: var(--fg-dim);
+  padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer;
   margin-left: 4px;
 }
-.lang-switch button.active {
-  background: var(--border);
-  color: var(--fg);
-}
+.lang-switch button.active { background: var(--border); color: var(--fg); }
 [data-lang-fr] { display: none; }
 body.lang-fr [data-lang-fr] { display: block; }
 body.lang-fr [data-lang-en] { display: none; }
@@ -255,11 +136,11 @@ body.lang-fr .lang-switch button[data-lang="fr"] { background: var(--border); co
   <p data-lang-fr>Pour le <a href="https://github.com/TheWorms/kodi-addon-soundcloud">module SoundCloud Kodi de TheWorms</a>.</p>
 </header>
 
-<div class="success-note">
-  <strong data-lang-en>Easy method:</strong>
-  <strong data-lang-fr>M&eacute;thode facile :</strong>
-  <span data-lang-en> copy the snippet below, paste it into the SoundCloud browser console. It prints your token. No bookmarklet, no Network tab, just one paste.</span>
-  <span data-lang-fr> copiez le code ci-dessous, collez-le dans la console du navigateur sur SoundCloud. Il affiche votre jeton. Pas de bookmarklet, pas d'onglet Network, juste un copier-coller.</span>
+<div class="note">
+  <strong data-lang-en>Two methods below.</strong>
+  <strong data-lang-fr>Deux m&eacute;thodes ci-dessous.</strong>
+  <span data-lang-en> The console snippet tries to find your token automatically. If it can't (SoundCloud sometimes keeps the token in their internal app state, out of reach for scripts), the manual Network-tab method always works. Both are documented here.</span>
+  <span data-lang-fr> Le code dans la console essaie de trouver votre jeton automatiquement. S'il n'y arrive pas (SoundCloud garde parfois le jeton dans son &eacute;tat interne, hors de port&eacute;e des scripts), la m&eacute;thode manuelle via l'onglet Network fonctionne toujours. Les deux sont document&eacute;es ici.</span>
 </div>
 
 <section>
@@ -274,8 +155,8 @@ body.lang-fr .lang-switch button[data-lang="fr"] { background: var(--border); co
     <a href="https://soundcloud.com/discover" target="_blank" rel="noopener" class="btn-soundcloud" data-lang-en>Open soundcloud.com &rarr;</a>
     <a href="https://soundcloud.com/discover" target="_blank" rel="noopener" class="btn-soundcloud" data-lang-fr>Ouvrir soundcloud.com &rarr;</a>
   </div>
-  <p class="subtle" data-lang-en>Make sure your avatar appears in the top-right corner.</p>
-  <p class="subtle" data-lang-fr>V&eacute;rifiez que votre avatar appara&icirc;t en haut &agrave; droite.</p>
+  <p class="subtle" data-lang-en>Wait a few seconds for the page to fully load. Make sure your avatar appears top-right.</p>
+  <p class="subtle" data-lang-fr>Attendez quelques secondes que la page charge enti&egrave;rement. V&eacute;rifiez que votre avatar appara&icirc;t en haut &agrave; droite.</p>
 </section>
 
 <section>
@@ -284,17 +165,14 @@ body.lang-fr .lang-switch button[data-lang="fr"] { background: var(--border); co
     <span data-lang-en>Open the browser console</span>
     <span data-lang-fr>Ouvrez la console du navigateur</span>
   </h2>
-  <p data-lang-en>While on soundcloud.com, press <kbd>F12</kbd> to open the Developer Tools, then click the <strong>Console</strong> tab.</p>
-  <p data-lang-fr>Toujours sur soundcloud.com, appuyez sur <kbd>F12</kbd> pour ouvrir les outils d&eacute;veloppeur, puis cliquez sur l'onglet <strong>Console</strong>.</p>
-
-  <p class="subtle" data-lang-en>Other shortcuts: <kbd>Ctrl+Shift+I</kbd> (Windows/Linux), <kbd>Cmd+Option+I</kbd> (Mac), or right-click anywhere on the page &rarr; <em>Inspect</em>.</p>
-  <p class="subtle" data-lang-fr>Autres raccourcis : <kbd>Ctrl+Maj+I</kbd> (Windows/Linux), <kbd>Cmd+Option+I</kbd> (Mac), ou clic droit sur la page &rarr; <em>Inspecter</em>.</p>
+  <p data-lang-en>Press <kbd>F12</kbd> &mdash; click the <strong>Console</strong> tab.</p>
+  <p data-lang-fr>Appuyez sur <kbd>F12</kbd> &mdash; cliquez sur l'onglet <strong>Console</strong>.</p>
 
   <div class="note">
-    <strong data-lang-en>If Firefox shows a warning</strong>
-    <strong data-lang-fr>Si Firefox affiche un avertissement</strong>
-    <span data-lang-en> about pasting code in the console (a security warning), type <code>allow pasting</code> as instructed, then press Enter. After that you can paste.</span>
-    <span data-lang-fr> concernant le collage de code dans la console (un avertissement de s&eacute;curit&eacute;), tapez <code>allow pasting</code> comme demand&eacute;, puis Entr&eacute;e. Vous pourrez ensuite coller.</span>
+    <strong data-lang-en>Firefox warning about pasting:</strong>
+    <strong data-lang-fr>Avertissement Firefox sur le collage :</strong>
+    <span data-lang-en> on first paste, Firefox shows "Don't paste code here" and asks you to type <code>allow pasting</code>. Type it, press Enter, then paste the snippet. (Chrome shows a similar warning, also need to type <code>allow pasting</code>.)</span>
+    <span data-lang-fr> au premier collage, Firefox affiche un avertissement et vous demande de taper <code>allow pasting</code>. Tapez-le, Entr&eacute;e, puis collez le code. (Chrome affiche le m&ecirc;me avertissement, m&ecirc;me proc&eacute;dure.)</span>
   </div>
 </section>
 
@@ -304,18 +182,28 @@ body.lang-fr .lang-switch button[data-lang="fr"] { background: var(--border); co
     <span data-lang-en>Copy and paste this snippet</span>
     <span data-lang-fr>Copiez et collez ce code</span>
   </h2>
-  <p data-lang-en>Click the <strong>Copy</strong> button below, then paste in the console (<kbd>Ctrl+V</kbd> / <kbd>Cmd+V</kbd>) and press <kbd>Enter</kbd>.</p>
-  <p data-lang-fr>Cliquez sur le bouton <strong>Copier</strong> ci-dessous, puis collez dans la console (<kbd>Ctrl+V</kbd> / <kbd>Cmd+V</kbd>) et appuyez sur <kbd>Entr&eacute;e</kbd>.</p>
+  <p data-lang-en>Click <strong>Copy snippet</strong>, then in the console: paste (<kbd>Ctrl+V</kbd> / <kbd>Cmd+V</kbd>) and press <kbd>Enter</kbd>.</p>
+  <p data-lang-fr>Cliquez sur <strong>Copier le code</strong>, puis dans la console : collez (<kbd>Ctrl+V</kbd> / <kbd>Cmd+V</kbd>) et appuyez sur <kbd>Entr&eacute;e</kbd>.</p>
 
-  <code id="snippet" class="snippet">// snippet will be injected here by JS</code>
+  <code id="snippet" class="snippet">// snippet will be inserted here</code>
 
   <div class="center">
     <button id="copy-btn" class="btn-copy" data-lang-en>&#128203; Copy snippet</button>
     <button id="copy-btn-fr" class="btn-copy" data-lang-fr>&#128203; Copier le code</button>
   </div>
 
-  <p data-lang-en>A popup will appear in the SoundCloud page with your token. Click the <strong>Copy</strong> button in the popup to copy the token to your clipboard.</p>
-  <p data-lang-fr>Une popup appara&icirc;tra dans la page SoundCloud avec votre jeton. Cliquez sur le bouton <strong>Copy</strong> dans la popup pour copier le jeton dans le presse-papier.</p>
+  <p data-lang-en><strong>You should see this in the console</strong> (one of the three cases):</p>
+  <p data-lang-fr><strong>Vous devriez voir l'un de ces trois cas dans la console :</strong></p>
+  <ol data-lang-en>
+    <li><strong>Best case</strong> &mdash; a popup appears in the page with your token and a Copy button. Also the token printed in green in the console.</li>
+    <li><strong>OK case</strong> &mdash; no popup, but the console prints <code>[SC] Token found: 2-...</code> in green. Copy from there.</li>
+    <li><strong>Failure case</strong> &mdash; console says <code>[SC] No token found</code>. SoundCloud keeps it out of reach for scripts &mdash; use the manual method below.</li>
+  </ol>
+  <ol data-lang-fr>
+    <li><strong>Meilleur cas</strong> &mdash; une popup appara&icirc;t dans la page avec votre jeton et un bouton Copy. Le jeton est aussi affich&eacute; en vert dans la console.</li>
+    <li><strong>Cas OK</strong> &mdash; pas de popup, mais la console affiche <code>[SC] Token found: 2-...</code> en vert. Copiez depuis l&agrave;.</li>
+    <li><strong>Cas d'&eacute;chec</strong> &mdash; la console affiche <code>[SC] No token found</code>. SoundCloud le cache des scripts &mdash; utilisez la m&eacute;thode manuelle ci-dessous.</li>
+  </ol>
 </section>
 
 <section>
@@ -324,53 +212,55 @@ body.lang-fr .lang-switch button[data-lang="fr"] { background: var(--border); co
     <span data-lang-en>Paste into Kodi</span>
     <span data-lang-fr>Collez dans Kodi</span>
   </h2>
-  <p data-lang-en>Open Kodi &rarr; SoundCloud addon settings &rarr; <code>Account &rarr; OAuth token</code> and paste the token there.</p>
-  <p data-lang-fr>Ouvrez Kodi &rarr; param&egrave;tres du module SoundCloud &rarr; <code>Compte &rarr; Jeton OAuth</code> et collez le jeton.</p>
-  <p data-lang-en>Click <strong>Test OAuth token</strong> to verify it works.</p>
-  <p data-lang-fr>Cliquez sur <strong>Tester le jeton</strong> pour v&eacute;rifier.</p>
+  <p data-lang-en>Kodi &rarr; SoundCloud addon settings &rarr; <code>Account &rarr; OAuth token</code> &rarr; paste. Click <strong>Test OAuth token</strong> to verify.</p>
+  <p data-lang-fr>Kodi &rarr; param&egrave;tres SoundCloud &rarr; <code>Compte &rarr; Jeton OAuth</code> &rarr; collez. Cliquez sur <strong>Tester le jeton</strong> pour v&eacute;rifier.</p>
 
   <div class="success-note">
-    <strong data-lang-en>Privacy note:</strong>
-    <strong data-lang-fr>Note sur la confidentialit&eacute; :</strong>
-    <span data-lang-en> the snippet runs entirely in your browser on soundcloud.com. The token is NEVER sent anywhere &mdash; not to TheWorms, not to GitHub. It only goes from soundcloud.com to your clipboard, then to Kodi.</span>
-    <span data-lang-fr> le code s'ex&eacute;cute enti&egrave;rement dans votre navigateur sur soundcloud.com. Le jeton n'est JAMAIS envoy&eacute; quelque part &mdash; ni &agrave; TheWorms, ni &agrave; GitHub. Il va uniquement de soundcloud.com vers votre presse-papier, puis vers Kodi.</span>
+    <strong data-lang-en>Privacy:</strong>
+    <strong data-lang-fr>Confidentialit&eacute; :</strong>
+    <span data-lang-en> the snippet runs entirely in your browser. Token never sent anywhere.</span>
+    <span data-lang-fr> le code s'ex&eacute;cute enti&egrave;rement dans votre navigateur. Le jeton n'est jamais envoy&eacute; quelque part.</span>
   </div>
 </section>
 
-<details class="fallback">
-  <summary data-lang-en>Snippet not working? Show full manual procedure</summary>
-  <summary data-lang-fr>Le code ne fonctionne pas ? Voir la proc&eacute;dure manuelle compl&egrave;te</summary>
+<section>
+  <h2 data-lang-en>Manual method (always works)</h2>
+  <h2 data-lang-fr>M&eacute;thode manuelle (marche toujours)</h2>
 
-  <p data-lang-en>If for some reason the snippet doesn't work, the fully manual procedure uses the Network tab:</p>
-  <p data-lang-fr>Si pour une raison ou une autre le code ne fonctionne pas, la proc&eacute;dure enti&egrave;rement manuelle utilise l'onglet Network :</p>
+  <p data-lang-en>If the snippet didn't find the token (3rd case above), follow this procedure. It's the same workflow the snippet tries to automate, but done by hand &mdash; and it always works because the browser doesn't hide network headers from you.</p>
+  <p data-lang-fr>Si le code n'a pas trouv&eacute; le jeton (3e cas ci-dessus), suivez cette proc&eacute;dure. C'est le m&ecirc;me workflow que le code essaie d'automatiser, mais &agrave; la main &mdash; et &ccedil;a marche toujours parce que le navigateur ne cache pas les ent&ecirc;tes r&eacute;seau.</p>
 
   <ol data-lang-en>
     <li>On soundcloud.com (signed in), press <kbd>F12</kbd>.</li>
     <li>Click the <strong>Network</strong> tab.</li>
-    <li>In the filter box, type: <code>api-v2</code></li>
+    <li>In the filter box, type <code>api-v2</code></li>
     <li>Reload the page with <kbd>F5</kbd>.</li>
-    <li>Click any request in the list (e.g. <code>me</code> or <code>featured-tracks</code>).</li>
-    <li>Scroll to <strong>Request Headers</strong> in the right panel.</li>
-    <li>Find the line <code>Authorization: OAuth XXXXXX</code>.</li>
-    <li>Copy <strong>only what comes after</strong> <code>OAuth&nbsp;</code> (no leading space).</li>
-    <li>Paste into Kodi addon settings &rarr; Account &rarr; OAuth token.</li>
+    <li>Wait a few seconds, then click <strong>any</strong> request in the list (e.g. <code>me</code>, <code>featured-tracks</code>, <code>track_likes</code>, etc.).</li>
+    <li>In the panel on the right, look for the <strong>Headers</strong> section.</li>
+    <li>Scroll to find <strong>Request Headers</strong>.</li>
+    <li>Find the line:<br>
+      <code>Authorization: OAuth 2-XXXXXX-XXXXXXXX-XXXXXX</code></li>
+    <li>Copy <strong>only what comes after</strong> <code>OAuth&nbsp;</code> (the token itself, no <code>OAuth</code> prefix, no leading space).</li>
+    <li>Paste into Kodi addon settings &rarr; Account &rarr; OAuth token. Click <strong>Test OAuth token</strong>.</li>
   </ol>
 
   <ol data-lang-fr>
     <li>Sur soundcloud.com (connect&eacute;), appuyez sur <kbd>F12</kbd>.</li>
     <li>Cliquez sur l'onglet <strong>Network</strong>.</li>
-    <li>Dans le filtre, tapez : <code>api-v2</code></li>
+    <li>Dans le filtre, tapez <code>api-v2</code></li>
     <li>Rechargez la page avec <kbd>F5</kbd>.</li>
-    <li>Cliquez sur une requ&ecirc;te (ex. <code>me</code> ou <code>featured-tracks</code>).</li>
-    <li>D&eacute;filez jusqu'&agrave; <strong>Request Headers</strong> dans le panneau de droite.</li>
-    <li>Trouvez la ligne <code>Authorization: OAuth XXXXXX</code>.</li>
-    <li>Copiez <strong>uniquement ce qui suit</strong> <code>OAuth&nbsp;</code> (sans espace au d&eacute;but).</li>
-    <li>Collez dans les param&egrave;tres Kodi &rarr; Compte &rarr; Jeton OAuth.</li>
+    <li>Attendez quelques secondes, puis cliquez sur <strong>n'importe quelle</strong> requ&ecirc;te (ex. <code>me</code>, <code>featured-tracks</code>, <code>track_likes</code>, etc.).</li>
+    <li>Dans le panneau de droite, cherchez la section <strong>Headers</strong>.</li>
+    <li>D&eacute;filez jusqu'&agrave; <strong>Request Headers</strong>.</li>
+    <li>Trouvez la ligne :<br>
+      <code>Authorization: OAuth 2-XXXXXX-XXXXXXXX-XXXXXX</code></li>
+    <li>Copiez <strong>uniquement ce qui suit</strong> <code>OAuth&nbsp;</code> (le jeton, sans le mot <code>OAuth</code>, sans espace au d&eacute;but).</li>
+    <li>Collez dans les param&egrave;tres Kodi &rarr; Compte &rarr; Jeton OAuth. Cliquez sur <strong>Tester le jeton</strong>.</li>
   </ol>
 
-  <p class="subtle" data-lang-en><strong>Common mistake:</strong> do not copy the cookie named <code>oauth_token</code> (under Application &rarr; Cookies). It looks similar but is rejected by the API.</p>
-  <p class="subtle" data-lang-fr><strong>Erreur courante :</strong> ne copiez pas le cookie nomm&eacute; <code>oauth_token</code> (sous Application &rarr; Cookies). Il ressemble beaucoup mais est rejet&eacute; par l'API.</p>
-</details>
+  <p class="subtle" data-lang-en><strong>Common mistake:</strong> don't copy the cookie named <code>oauth_token</code> (Application &rarr; Cookies). It looks similar but is rejected by the API. You want the <code>Authorization</code> request header, not the cookie.</p>
+  <p class="subtle" data-lang-fr><strong>Erreur courante :</strong> ne copiez pas le cookie nomm&eacute; <code>oauth_token</code> (Application &rarr; Cookies). Il ressemble mais est rejet&eacute; par l'API. Vous voulez l'ent&ecirc;te <code>Authorization</code>, pas le cookie.</p>
+</section>
 
 <footer>
   <p data-lang-en>Open source &middot; MIT license &middot; <a href="https://github.com/TheWorms/kodi-addon-soundcloud">View on GitHub</a></p>
@@ -381,166 +271,209 @@ body.lang-fr .lang-switch button[data-lang="fr"] { background: var(--border); co
 
 <script>
 /*
- * The console snippet to display.
+ * The console snippet. Multi-strategy token discovery:
+ *  1. Search cookies for a SoundCloud-format token (X-XXXXX-XXXXX-XXXXX)
+ *  2. Search localStorage values for the same pattern
+ *  3. Search sessionStorage values for the same pattern
+ *  4. As a last resort, hook fetch + XHR (rarely works because
+ *     SoundCloud cached fetch at startup) and trigger a /me call
  *
- * Why a snippet pasted in DevTools console instead of a bookmarklet?
- * SoundCloud serves a Content-Security-Policy header that blocks
- * javascript: URIs from bookmarks (CSP forbids inline script). So a
- * traditional bookmarklet just silently does nothing on soundcloud.com.
- *
- * A snippet pasted directly into the DevTools console is exempt from
- * CSP (the console is considered "trusted" by the browser) and runs
- * normally. So we display the same code as a snippet to copy-paste.
- *
- * The snippet:
- *  1. Hooks fetch + XHR to capture the next Authorization header
- *  2. Triggers a fetch to /me to force-capture
- *  3. Shows a popup with the token + Copy button (using createElement,
- *     no innerHTML, no string-templated HTML)
+ * Verbose console output at every step so the user can see exactly what's
+ * happening, even if the popup fails for some reason.
  */
 function snippetFn() {
+  var STYLE_TITLE = 'background:#ff5500;color:#000;padding:4px 8px;font-weight:bold;font-size:13px;';
+  var STYLE_OK = 'color:#4caf50;font-weight:bold;font-family:monospace;font-size:13px;';
+  var STYLE_WARN = 'color:#ff9800;font-weight:bold;';
+  var STYLE_INFO = 'color:#aaa;';
+  var TOKEN_RE = /\b[12]-\d+-\d+-[A-Za-z0-9_-]+/;
+  console.log('%c[SC] Token search starting...', STYLE_TITLE);
+
+  var found = null;
+  var source = null;
+
+  // 1) Cookies
+  try {
+    var cookieMatch = (document.cookie || '').match(TOKEN_RE);
+    if (cookieMatch) { found = cookieMatch[0]; source = 'cookie'; }
+    console.log('%c[SC] Step 1/4 cookies: ' + (found ? 'HIT' : 'miss'), STYLE_INFO);
+  } catch (e) { console.log('[SC] cookie scan error:', e); }
+
+  // 2) localStorage
+  if (!found) {
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        var v = localStorage.getItem(k);
+        if (typeof v === 'string') {
+          var m = v.match(TOKEN_RE);
+          if (m) { found = m[0]; source = 'localStorage[' + k + ']'; break; }
+        }
+      }
+      console.log('%c[SC] Step 2/4 localStorage (' + localStorage.length + ' keys): ' + (found ? 'HIT' : 'miss'), STYLE_INFO);
+    } catch (e) { console.log('[SC] localStorage scan error:', e); }
+  }
+
+  // 3) sessionStorage
+  if (!found) {
+    try {
+      for (var j = 0; j < sessionStorage.length; j++) {
+        var k2 = sessionStorage.key(j);
+        var v2 = sessionStorage.getItem(k2);
+        if (typeof v2 === 'string') {
+          var m2 = v2.match(TOKEN_RE);
+          if (m2) { found = m2[0]; source = 'sessionStorage[' + k2 + ']'; break; }
+        }
+      }
+      console.log('%c[SC] Step 3/4 sessionStorage (' + sessionStorage.length + ' keys): ' + (found ? 'HIT' : 'miss'), STYLE_INFO);
+    } catch (e) { console.log('[SC] sessionStorage scan error:', e); }
+  }
+
+  // If found, show it now
+  if (found) {
+    console.log('%c[SC] Token found: ' + found, STYLE_OK);
+    console.log('%c[SC] Source: ' + source, STYLE_INFO);
+    showResult(found, source);
+    return;
+  }
+
+  // 4) Last resort: hook fetch/XHR and trigger an authenticated call
+  console.log('%c[SC] Step 4/4 hooking fetch+XHR and triggering /me...', STYLE_INFO);
   var _t = null;
   var _of = window.fetch;
   var _ox = window.XMLHttpRequest.prototype.setRequestHeader;
-  window.fetch = function() {
-    try {
-      var a = arguments;
-      if (a[1] && a[1].headers) {
-        var h = a[1].headers;
-        if (h instanceof Headers) {
-          var v = h.get('Authorization');
-          if (v && !_t) _t = v;
-        } else if (typeof h === 'object') {
-          var v2 = h.Authorization || h.authorization;
-          if (v2 && !_t) _t = v2;
-        }
-      }
-    } catch (e) {}
-    return _of.apply(this, arguments);
-  };
-  window.XMLHttpRequest.prototype.setRequestHeader = function(n, v) {
-    try {
-      if (n && n.toLowerCase() === 'authorization' && v && !_t) _t = v;
-    } catch (e) {}
-    return _ox.apply(this, arguments);
-  };
-  function showResult(token) {
-    if (token && token.indexOf('OAuth ') === 0) token = token.substring(6);
-    if (!token) {
-      alert('No token captured. Make sure you are signed in to soundcloud.com (avatar visible top-right), reload the page, then re-paste this snippet.');
-      return;
-    }
-    console.log('%c SoundCloud OAuth token: ', 'background:#ff5500;color:#000;padding:4px 8px;font-weight:bold;', token);
-    var ov = document.createElement('div');
-    ov.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:2147483647;display:flex;align-items:center;justify-content:center;font-family:system-ui,-apple-system,sans-serif;';
-    var pn = document.createElement('div');
-    pn.style.cssText = 'background:#242424;color:#f0f0f0;padding:32px;border-radius:12px;max-width:560px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.5);border:1px solid #333;';
-    var tt = document.createElement('h2');
-    tt.textContent = 'SoundCloud token found';
-    tt.style.cssText = 'font-size:20px;margin:0 0 16px 0;color:#ff5500;font-weight:600;';
-    pn.appendChild(tt);
-    var ds = document.createElement('p');
-    ds.textContent = 'Copy this token and paste it into the Kodi addon settings (Account > OAuth token):';
-    ds.style.cssText = 'margin:0 0 12px 0;color:#aaa;font-size:14px;';
-    pn.appendChild(ds);
-    var ta = document.createElement('textarea');
-    ta.readOnly = true;
-    ta.value = token;
-    ta.style.cssText = 'width:100%;font-family:monospace;font-size:13px;padding:12px;background:#0e0e0e;color:#f0f0f0;border:1px solid #444;border-radius:6px;resize:none;height:80px;word-break:break-all;box-sizing:border-box;';
-    pn.appendChild(ta);
-    var br = document.createElement('div');
-    br.style.cssText = 'display:flex;gap:8px;margin-top:16px;';
-    var cb = document.createElement('button');
-    cb.textContent = 'Copy to clipboard';
-    cb.style.cssText = 'flex:1;background:#ff5500;color:#000;border:0;padding:12px;border-radius:6px;font-weight:600;cursor:pointer;font-size:14px;';
-    cb.onclick = function() {
-      ta.select();
-      try {
-        document.execCommand('copy');
-        if (navigator.clipboard) navigator.clipboard.writeText(token).catch(function(){});
-        cb.textContent = 'Copied!';
-        cb.style.background = '#4caf50';
-      } catch (e) {
-        cb.textContent = 'Select manually and copy';
-      }
-    };
-    br.appendChild(cb);
-    var xb = document.createElement('button');
-    xb.textContent = 'Close';
-    xb.style.cssText = 'flex:0 0 100px;background:transparent;color:#aaa;border:1px solid #444;padding:12px;border-radius:6px;cursor:pointer;font-size:14px;';
-    xb.onclick = function() { ov.remove(); };
-    br.appendChild(xb);
-    pn.appendChild(br);
-    ov.appendChild(pn);
-    ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
-    document.body.appendChild(ov);
-    setTimeout(function() { ta.select(); }, 50);
+  function tryHeader(v) {
+    if (typeof v !== 'string') return;
+    var m = v.match(TOKEN_RE);
+    if (m && !_t) _t = m[0];
   }
-  fetch('https://api-v2.soundcloud.com/me').then(function() {
-    setTimeout(function() { showResult(_t); }, 200);
-  }).catch(function() { showResult(_t); });
+  try {
+    window.fetch = function() {
+      try {
+        var a = arguments;
+        if (a[1] && a[1].headers) {
+          var h = a[1].headers;
+          if (h instanceof Headers) tryHeader(h.get('Authorization'));
+          else if (typeof h === 'object') tryHeader(h.Authorization || h.authorization);
+        }
+      } catch (e) {}
+      return _of.apply(this, arguments);
+    };
+    window.XMLHttpRequest.prototype.setRequestHeader = function(n, v) {
+      try { if (n && n.toLowerCase() === 'authorization') tryHeader(v); } catch (e) {}
+      return _ox.apply(this, arguments);
+    };
+  } catch (e) {}
+
+  // Force-trigger
+  try { fetch('https://api-v2.soundcloud.com/me/track_likes?limit=1', {credentials: 'include'}).catch(function(){}); } catch (e) {}
+
+  setTimeout(function() {
+    if (_t) {
+      console.log('%c[SC] Token found via hook: ' + _t, STYLE_OK);
+      console.log('%c[SC] Source: hooked fetch/XHR', STYLE_INFO);
+      showResult(_t, 'hooked fetch/XHR');
+    } else {
+      console.log('%c[SC] No token found in cookies/storage and hook did not catch any.', STYLE_WARN);
+      console.log('%c[SC] Use the manual Network tab method described on the helper page.', STYLE_WARN);
+      alert('SoundCloud token not found automatically.\n\nSoundCloud keeps the token in their app state, out of reach for scripts.\n\nPlease use the manual method:\n1. F12 > Network tab\n2. Filter: api-v2\n3. Reload page (F5)\n4. Click any request\n5. Request Headers > Authorization: OAuth XXX\n6. Copy the part after "OAuth "');
+    }
+  }, 1500);
+
+  function showResult(token, src) {
+    if (token && token.indexOf('OAuth ') === 0) token = token.substring(6);
+    try {
+      var ov = document.createElement('div');
+      ov.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:2147483647;display:flex;align-items:center;justify-content:center;font-family:system-ui,-apple-system,sans-serif;';
+      var pn = document.createElement('div');
+      pn.style.cssText = 'background:#242424;color:#f0f0f0;padding:32px;border-radius:12px;max-width:560px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.5);border:1px solid #333;';
+      var tt = document.createElement('h2');
+      tt.textContent = 'SoundCloud token found';
+      tt.style.cssText = 'font-size:20px;margin:0 0 16px 0;color:#ff5500;font-weight:600;';
+      pn.appendChild(tt);
+      var ds = document.createElement('p');
+      ds.textContent = 'Source: ' + (src || 'unknown') + '. Copy and paste into Kodi (Account > OAuth token):';
+      ds.style.cssText = 'margin:0 0 12px 0;color:#aaa;font-size:13px;';
+      pn.appendChild(ds);
+      var ta = document.createElement('textarea');
+      ta.readOnly = true;
+      ta.value = token;
+      ta.style.cssText = 'width:100%;font-family:monospace;font-size:13px;padding:12px;background:#0e0e0e;color:#f0f0f0;border:1px solid #444;border-radius:6px;resize:none;height:80px;word-break:break-all;box-sizing:border-box;';
+      pn.appendChild(ta);
+      var br = document.createElement('div');
+      br.style.cssText = 'display:flex;gap:8px;margin-top:16px;';
+      var cb = document.createElement('button');
+      cb.textContent = 'Copy to clipboard';
+      cb.style.cssText = 'flex:1;background:#ff5500;color:#000;border:0;padding:12px;border-radius:6px;font-weight:600;cursor:pointer;font-size:14px;';
+      cb.onclick = function() {
+        ta.select();
+        try {
+          document.execCommand('copy');
+          if (navigator.clipboard) navigator.clipboard.writeText(token).catch(function(){});
+          cb.textContent = 'Copied!';
+          cb.style.background = '#4caf50';
+        } catch (e) { cb.textContent = 'Select manually'; }
+      };
+      br.appendChild(cb);
+      var xb = document.createElement('button');
+      xb.textContent = 'Close';
+      xb.style.cssText = 'flex:0 0 100px;background:transparent;color:#aaa;border:1px solid #444;padding:12px;border-radius:6px;cursor:pointer;font-size:14px;';
+      xb.onclick = function() { ov.remove(); };
+      br.appendChild(xb);
+      pn.appendChild(br);
+      ov.appendChild(pn);
+      ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+      document.body.appendChild(ov);
+      setTimeout(function() { ta.select(); }, 50);
+    } catch (e) {
+      console.log('[SC] popup failed, falling back to alert', e);
+      alert('SoundCloud token (source: ' + src + '):\n\n' + token + '\n\nCopy it into Kodi addon settings.');
+    }
+  }
 }
 
 (function() {
-  // Build the snippet source code from the function.
   var src = '(' + snippetFn.toString() + ')();';
-  // Light minify (collapse whitespace runs)
   src = src.replace(/\/\*[\s\S]*?\*\//g, '');
   src = src.replace(/\/\/[^\n]*/g, '');
   src = src.replace(/\s+/g, ' ').trim();
 
-  // Display it in the snippet box
   var sn = document.getElementById('snippet');
   if (sn) sn.textContent = src;
 
-  // Wire up copy buttons (both EN and FR versions)
-  function makeCopyHandler(btnEl) {
+  function copyHandler(btn) {
     return function() {
-      var success = false;
+      function flash(text) {
+        btn.classList.add('copied');
+        var old = btn.textContent;
+        btn.textContent = text;
+        setTimeout(function() { btn.classList.remove('copied'); btn.textContent = old; }, 2000);
+      }
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          navigator.clipboard.writeText(src).then(function() {
-            btnEl.classList.add('copied');
-            var oldText = btnEl.textContent;
-            btnEl.textContent = '\u2713 Copied!';
-            setTimeout(function() {
-              btnEl.classList.remove('copied');
-              btnEl.textContent = oldText;
-            }, 2000);
-          });
-          success = true;
+          navigator.clipboard.writeText(src).then(function() { flash('\u2713 Copied!'); }).catch(function(){fallback();});
+          return;
         }
       } catch (e) {}
-      if (!success) {
-        // Fallback: legacy method
+      fallback();
+      function fallback() {
         var ta = document.createElement('textarea');
         ta.value = src;
         ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
         document.body.appendChild(ta);
         ta.select();
-        try {
-          document.execCommand('copy');
-          btnEl.classList.add('copied');
-          var oldText2 = btnEl.textContent;
-          btnEl.textContent = '\u2713 Copied!';
-          setTimeout(function() {
-            btnEl.classList.remove('copied');
-            btnEl.textContent = oldText2;
-          }, 2000);
-        } catch (e) {
-          alert('Copy failed. Please select the code manually and copy it.');
-        }
+        try { document.execCommand('copy'); flash('\u2713 Copied!'); }
+        catch (e) { alert('Copy failed. Select the code manually and copy.'); }
         document.body.removeChild(ta);
       }
     };
   }
   var b1 = document.getElementById('copy-btn');
   var b2 = document.getElementById('copy-btn-fr');
-  if (b1) b1.addEventListener('click', makeCopyHandler(b1));
-  if (b2) b2.addEventListener('click', makeCopyHandler(b2));
+  if (b1) b1.addEventListener('click', copyHandler(b1));
+  if (b2) b2.addEventListener('click', copyHandler(b2));
 })();
 
-// Auto-detect French browser language
 if (navigator.language && navigator.language.toLowerCase().startsWith('fr')) {
   document.body.classList.add('lang-fr');
   document.querySelectorAll('.lang-switch button').forEach(function(b) {
@@ -549,6 +482,5 @@ if (navigator.language && navigator.language.toLowerCase().startsWith('fr')) {
   });
 }
 </script>
-
 </body>
 </html>

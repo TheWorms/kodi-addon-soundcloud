@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.6001" provider-name="TheWorms">
+<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.6002" provider-name="TheWorms">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.29.0"/>
@@ -36,7 +36,14 @@
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
         <credits>jaylinski (original add-on), bromix, SLiX</credits>
-        <news>5.9.6001 (2026-06-28) - helper page redesigned: console snippet instead of bookmarklet
+        <news>5.9.6002 (2026-06-29) - helper page: multi-strategy token discovery + manual method as first-class
+The previous snippet only hooked window.fetch and triggered /me, which often failed silently because SoundCloud's frontend caches the fetch reference at startup — patching it after the snippet runs doesn't intercept their requests. New approach searches multiple places in order: 1) document.cookie, 2) localStorage values, 3) sessionStorage values, 4) hook fetch+XHR and trigger /me/track_likes as last resort.
+
+Verbose console output at every step so the user can see exactly what is happening: "[SC] Step 1/4 cookies: miss", "[SC] Step 2/4 localStorage (47 keys): HIT", "[SC] Token found: 2-XXXXXX...". Token is also printed in green in the console so even if the popup fails, the user can copy from there. Both an alert() AND a custom DOM popup are tried (alert is a guaranteed fallback if the popup creation fails).
+
+The manual Network-tab method is now documented as a full first-class section on the helper page (not hidden in a fallback details/summary), with the clear honest note that SoundCloud sometimes keeps the token out of reach for scripts and the manual method is the reliable fallback.
+
+5.9.6001 (2026-06-28) - helper page redesigned: console snippet instead of bookmarklet
 The bookmarklet approach didn't work in practice because SoundCloud serves a strict Content-Security-Policy header that blocks javascript: URIs from bookmark clicks (a known limitation of modern sites). Switched the helper page to a different approach: a code snippet to copy-paste into the browser's DevTools console (which is exempt from CSP).
 
 New flow on the helper page: 1) open soundcloud.com signed in, 2) press F12 to open the Console tab, 3) click "Copy snippet" on the helper page and paste in the console, 4) press Enter — a popup appears with the token. Still no token sent anywhere; everything runs in your browser.
