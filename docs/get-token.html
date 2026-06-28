@@ -26,9 +26,10 @@ body {
   color: var(--fg);
   line-height: 1.6;
   padding: 0 16px;
+  min-height: 100vh;
 }
 .container {
-  max-width: 720px;
+  max-width: 880px;
   margin: 0 auto;
   padding: 48px 0;
 }
@@ -42,7 +43,7 @@ header .logo {
   margin-bottom: 16px;
 }
 h1 {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 600;
   margin-bottom: 8px;
 }
@@ -58,7 +59,7 @@ section {
   border: 1px solid var(--border);
 }
 section h2 {
-  font-size: 20px;
+  font-size: 22px;
   margin-bottom: 16px;
   display: flex;
   align-items: center;
@@ -81,35 +82,46 @@ p { margin-bottom: 12px; color: var(--fg); }
 p.subtle { color: var(--fg-dim); font-size: 14px; }
 a { color: var(--accent); text-decoration: none; }
 a:hover { color: var(--accent-hover); text-decoration: underline; }
-.bookmarklet {
+#bookmarklet-btn {
   display: inline-block;
   background: var(--accent);
-  color: #000;
-  padding: 12px 24px;
+  color: #000 !important;
+  padding: 14px 28px;
   border-radius: 8px;
-  font-weight: 600;
-  font-size: 16px;
+  font-weight: 700;
+  font-size: 17px;
   text-decoration: none;
   cursor: grab;
   margin: 8px 0;
   user-select: none;
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.15s;
+  border: 2px solid transparent;
 }
-.bookmarklet:hover {
+#bookmarklet-btn:hover {
   background: var(--accent-hover);
   text-decoration: none;
+  color: #000 !important;
+  transform: translateY(-1px);
 }
-.bookmarklet:active { cursor: grabbing; }
+#bookmarklet-btn:active {
+  cursor: grabbing;
+  transform: translateY(0);
+}
 .btn-soundcloud {
   display: inline-block;
   background: #fff;
-  color: #000;
+  color: #000 !important;
   padding: 10px 20px;
   border-radius: 6px;
   font-weight: 500;
   margin: 8px 0;
+  text-decoration: none;
 }
-.btn-soundcloud:hover { background: #f0f0f0; text-decoration: none; color: #000; }
+.btn-soundcloud:hover {
+  background: #f0f0f0;
+  text-decoration: none;
+  color: #000 !important;
+}
 code, .code-block {
   font-family: "SF Mono", Menlo, Consolas, monospace;
   background: var(--bg-code);
@@ -148,7 +160,15 @@ ol li { margin-bottom: 8px; }
   font-weight: 500;
   padding: 8px 0;
   color: var(--fg-dim);
+  list-style: none;
 }
+.fallback summary::-webkit-details-marker { display: none; }
+.fallback summary::before {
+  content: '\25B6  ';
+  color: var(--accent);
+  font-size: 12px;
+}
+.fallback[open] summary::before { content: '\25BC  '; }
 .fallback summary:hover { color: var(--fg); }
 .fallback[open] summary { margin-bottom: 16px; }
 footer {
@@ -183,6 +203,7 @@ body.lang-fr [data-lang-fr] { display: block; }
 body.lang-fr [data-lang-en] { display: none; }
 body.lang-fr .lang-switch button[data-lang="en"] { background: transparent; color: var(--fg-dim); }
 body.lang-fr .lang-switch button[data-lang="fr"] { background: var(--border); color: var(--fg); }
+.center { text-align: center; margin: 24px 0; }
 </style>
 </head>
 <body>
@@ -194,7 +215,7 @@ body.lang-fr .lang-switch button[data-lang="fr"] { background: var(--border); co
 </div>
 
 <header>
-  <div class="logo">🎵</div>
+  <div class="logo">&#127925;</div>
   <h1 data-lang-en>Get your SoundCloud token</h1>
   <h1 data-lang-fr>Obtenez votre jeton SoundCloud</h1>
   <p data-lang-en>For the <a href="https://github.com/TheWorms/kodi-addon-soundcloud">TheWorms Kodi SoundCloud addon</a>.</p>
@@ -202,51 +223,67 @@ body.lang-fr .lang-switch button[data-lang="fr"] { background: var(--border); co
 </header>
 
 <section>
-  <h2><span class="step-num">1</span> <span data-lang-en>Drag this button to your bookmarks bar</span><span data-lang-fr>Glissez ce bouton dans votre barre de favoris</span></h2>
-  <p data-lang-en>This is a <strong>bookmarklet</strong> — a small piece of JavaScript saved as a bookmark. You only need to do this once.</p>
-  <p data-lang-fr>C'est un <strong>bookmarklet</strong> — un petit script JavaScript sauvegardé comme favori. À faire une seule fois.</p>
+  <h2>
+    <span class="step-num">1</span>
+    <span data-lang-en>Drag this button to your bookmarks bar</span>
+    <span data-lang-fr>Glissez ce bouton dans votre barre de favoris</span>
+  </h2>
+  <p data-lang-en>This is a <strong>bookmarklet</strong> &mdash; a small piece of JavaScript saved as a bookmark. You only need to do this once.</p>
+  <p data-lang-fr>C'est un <strong>bookmarklet</strong> &mdash; un petit script JavaScript sauvegard&eacute; comme favori. &Agrave; faire une seule fois.</p>
 
-  <p style="text-align: center; margin: 24px 0;">
-    <a class="bookmarklet" href="javascript:(function(){var _f=window.fetch;var _x=window.XMLHttpRequest.prototype.open;var _xs=window.XMLHttpRequest.prototype.setRequestHeader;var _t=null;function _show(t){if(t&&t.startsWith('OAuth ')){t=t.substring(6);}if(!t){alert('Token not found. Make sure you are logged into SoundCloud and try refreshing the page first.');return;}var b=document.createElement('div');b.style.cssText='position:fixed;top:0;left:0;width:100%25;height:100%25;background:rgba(0,0,0,0.85);z-index:2147483647;display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif;';var p=document.createElement('div');p.style.cssText='background:%23242424;color:%23f0f0f0;padding:32px;border-radius:12px;max-width:520px;width:90%25;box-shadow:0 20px 60px rgba(0,0,0,0.5);border:1px solid %23333;';p.innerHTML='<h2 style=\"font-size:20px;margin:0 0 16px 0;color:%23ff5500;\">Token found!</h2><p style=\"margin:0 0 12px 0;color:%23aaa;\">Copy this token and paste it into the Kodi addon settings:</p><textarea readonly style=\"width:100%25;font-family:monospace;font-size:13px;padding:12px;background:%230e0e0e;color:%23f0f0f0;border:1px solid %23444;border-radius:6px;resize:none;height:80px;word-break:break-all;\" id=\"_sct\">'+t+'</textarea><div style=\"display:flex;gap:8px;margin-top:16px;\"><button id=\"_scc\" style=\"flex:1;background:%23ff5500;color:%23000;border:0;padding:10px;border-radius:6px;font-weight:600;cursor:pointer;font-size:14px;\">Copy</button><button id=\"_scx\" style=\"flex:1;background:transparent;color:%23aaa;border:1px solid %23444;padding:10px;border-radius:6px;cursor:pointer;font-size:14px;\">Close</button></div>';b.appendChild(p);document.body.appendChild(b);document.getElementById('_scc').onclick=function(){var ta=document.getElementById('_sct');ta.select();document.execCommand('copy');this.textContent='Copied!';this.style.background='%234caf50';};document.getElementById('_scx').onclick=function(){b.remove();};b.onclick=function(e){if(e.target===b)b.remove();};}window.fetch=function(){var args=arguments;if(args[1]&&args[1].headers){var h=args[1].headers;if(h instanceof Headers){var a=h.get('Authorization');if(a&&!_t){_t=a;}}else if(typeof h==='object'){var a=h.Authorization||h.authorization;if(a&&!_t){_t=a;}}}return _f.apply(this,args);};window.XMLHttpRequest.prototype.setRequestHeader=function(n,v){if(n.toLowerCase()==='authorization'&&v&&!_t){_t=v;}return _xs.apply(this,arguments);};fetch('https://api-v2.soundcloud.com/me').then(function(r){setTimeout(function(){_show(_t);},100);}).catch(function(){_show(_t);});})();">🎵 Get SoundCloud Token</a>
-  </p>
+  <div class="center">
+    <a id="bookmarklet-btn" href="#" onclick="return false;" draggable="true">&#127925; Get SoundCloud Token</a>
+  </div>
 
-  <p class="subtle" data-lang-en>Drag the orange button above into your browser's bookmarks bar. If you don't see a bookmarks bar, press <code>Ctrl+Shift+B</code> (Windows/Linux) or <code>Cmd+Shift+B</code> (Mac) to show it.</p>
+  <p class="subtle" data-lang-en>Drag the orange button above into your browser's bookmarks bar. If you don't see the bookmarks bar, press <code>Ctrl+Shift+B</code> (Windows/Linux) or <code>Cmd+Shift+B</code> (Mac) to show it.</p>
   <p class="subtle" data-lang-fr>Glissez le bouton orange ci-dessus dans la barre de favoris de votre navigateur. Si vous ne voyez pas la barre de favoris, appuyez sur <code>Ctrl+Maj+B</code> (Windows/Linux) ou <code>Cmd+Maj+B</code> (Mac) pour l'afficher.</p>
 </section>
 
 <section>
-  <h2><span class="step-num">2</span> <span data-lang-en>Go to SoundCloud and sign in</span><span data-lang-fr>Allez sur SoundCloud et connectez-vous</span></h2>
+  <h2>
+    <span class="step-num">2</span>
+    <span data-lang-en>Go to SoundCloud and sign in</span>
+    <span data-lang-fr>Allez sur SoundCloud et connectez-vous</span>
+  </h2>
   <p data-lang-en>Open SoundCloud in this same browser and sign in with your account.</p>
-  <p data-lang-fr>Ouvrez SoundCloud dans ce même navigateur et connectez-vous à votre compte.</p>
-  <p style="text-align: center; margin: 16px 0;">
-    <a href="https://soundcloud.com" target="_blank" class="btn-soundcloud" data-lang-en>Open soundcloud.com →</a>
-    <a href="https://soundcloud.com" target="_blank" class="btn-soundcloud" data-lang-fr>Ouvrir soundcloud.com →</a>
-  </p>
+  <p data-lang-fr>Ouvrez SoundCloud dans ce m&ecirc;me navigateur et connectez-vous &agrave; votre compte.</p>
+  <div class="center">
+    <a href="https://soundcloud.com" target="_blank" rel="noopener" class="btn-soundcloud" data-lang-en>Open soundcloud.com &rarr;</a>
+    <a href="https://soundcloud.com" target="_blank" rel="noopener" class="btn-soundcloud" data-lang-fr>Ouvrir soundcloud.com &rarr;</a>
+  </div>
   <p class="subtle" data-lang-en>Verify your avatar appears in the top-right corner.</p>
-  <p class="subtle" data-lang-fr>Vérifiez que votre avatar apparaît en haut à droite.</p>
+  <p class="subtle" data-lang-fr>V&eacute;rifiez que votre avatar appara&icirc;t en haut &agrave; droite.</p>
 </section>
 
 <section>
-  <h2><span class="step-num">3</span> <span data-lang-en>Click the bookmarklet</span><span data-lang-fr>Cliquez sur le bookmarklet</span></h2>
-  <p data-lang-en>Once you're on soundcloud.com and signed in, click the <strong>🎵 Get SoundCloud Token</strong> bookmark in your bookmarks bar.</p>
-  <p data-lang-fr>Une fois sur soundcloud.com et connecté, cliquez sur le favori <strong>🎵 Get SoundCloud Token</strong> dans votre barre de favoris.</p>
+  <h2>
+    <span class="step-num">3</span>
+    <span data-lang-en>Click the bookmarklet</span>
+    <span data-lang-fr>Cliquez sur le bookmarklet</span>
+  </h2>
+  <p data-lang-en>Once you're on soundcloud.com and signed in, click the <strong>&#127925; Get SoundCloud Token</strong> bookmark in your bookmarks bar.</p>
+  <p data-lang-fr>Une fois sur soundcloud.com et connect&eacute;, cliquez sur le favori <strong>&#127925; Get SoundCloud Token</strong> dans votre barre de favoris.</p>
   <p data-lang-en>A popup will appear showing your token, with a <strong>Copy</strong> button.</p>
-  <p data-lang-fr>Une popup apparaîtra avec votre jeton et un bouton <strong>Copy</strong>.</p>
+  <p data-lang-fr>Une popup appara&icirc;tra avec votre jeton et un bouton <strong>Copy</strong>.</p>
 
   <div class="note">
     <strong data-lang-en>Privacy note:</strong>
-    <strong data-lang-fr>Note sur la confidentialité :</strong>
-    <span data-lang-en> the bookmarklet runs entirely in your browser. The token is NEVER sent to any server — not to TheWorms, not to GitHub, not to anyone. It only goes from soundcloud.com to your clipboard.</span>
-    <span data-lang-fr> le bookmarklet s'exécute entièrement dans votre navigateur. Le jeton n'est JAMAIS envoyé à un serveur — ni à TheWorms, ni à GitHub, à personne. Il va uniquement de soundcloud.com vers votre presse-papier.</span>
+    <strong data-lang-fr>Note sur la confidentialit&eacute; :</strong>
+    <span data-lang-en> the bookmarklet runs entirely in your browser. The token is NEVER sent to any server &mdash; not to TheWorms, not to GitHub, not to anyone. It only goes from soundcloud.com to your clipboard.</span>
+    <span data-lang-fr> le bookmarklet s'ex&eacute;cute enti&egrave;rement dans votre navigateur. Le jeton n'est JAMAIS envoy&eacute; &agrave; un serveur &mdash; ni &agrave; TheWorms, ni &agrave; GitHub, &agrave; personne. Il va uniquement de soundcloud.com vers votre presse-papier.</span>
   </div>
 </section>
 
 <section>
-  <h2><span class="step-num">4</span> <span data-lang-en>Paste into Kodi</span><span data-lang-fr>Collez dans Kodi</span></h2>
-  <p data-lang-en>Open Kodi → SoundCloud addon settings → <code>Account → OAuth token</code> and paste the token there.</p>
-  <p data-lang-fr>Ouvrez Kodi → paramètres du module SoundCloud → <code>Compte → Jeton OAuth</code> et collez le jeton.</p>
-  <p data-lang-en>Click <strong>Test OAuth token</strong> to verify it works. You should see "Token valid: &lt;your username&gt;".</p>
-  <p data-lang-fr>Cliquez sur <strong>Tester le jeton</strong> pour vérifier. Vous devriez voir "Jeton valide : &lt;votre nom d'utilisateur&gt;".</p>
+  <h2>
+    <span class="step-num">4</span>
+    <span data-lang-en>Paste into Kodi</span>
+    <span data-lang-fr>Collez dans Kodi</span>
+  </h2>
+  <p data-lang-en>Open Kodi &rarr; SoundCloud addon settings &rarr; <code>Account &rarr; OAuth token</code> and paste the token there.</p>
+  <p data-lang-fr>Ouvrez Kodi &rarr; param&egrave;tres du module SoundCloud &rarr; <code>Compte &rarr; Jeton OAuth</code> et collez le jeton.</p>
+  <p data-lang-en>Click <strong>Test OAuth token</strong> to verify it works.</p>
+  <p data-lang-fr>Cliquez sur <strong>Tester le jeton</strong> pour v&eacute;rifier.</p>
 </section>
 
 <details class="fallback">
@@ -254,52 +291,176 @@ body.lang-fr .lang-switch button[data-lang="fr"] { background: var(--border); co
   <summary data-lang-fr>Le bookmarklet ne fonctionne pas ? Voir les instructions manuelles</summary>
 
   <p data-lang-en>If the bookmarklet doesn't work (some browser policies block them), follow this manual procedure:</p>
-  <p data-lang-fr>Si le bookmarklet ne fonctionne pas (certaines politiques de navigateur les bloquent), suivez cette procédure manuelle :</p>
+  <p data-lang-fr>Si le bookmarklet ne fonctionne pas (certaines politiques de navigateur les bloquent), suivez cette proc&eacute;dure manuelle :</p>
 
-  <ol>
-    <li data-lang-en>Open <a href="https://soundcloud.com" target="_blank">https://soundcloud.com</a> and sign in.</li>
-    <li data-lang-fr>Ouvrez <a href="https://soundcloud.com" target="_blank">https://soundcloud.com</a> et connectez-vous.</li>
-
-    <li data-lang-en>Press <code>F12</code> to open Developer Tools.</li>
-    <li data-lang-fr>Appuyez sur <code>F12</code> pour ouvrir les outils développeur.</li>
-
-    <li data-lang-en>Click the <strong>Network</strong> tab.</li>
-    <li data-lang-fr>Cliquez sur l'onglet <strong>Network</strong>.</li>
-
-    <li data-lang-en>In the filter box, type: <code>api-v2</code></li>
-    <li data-lang-fr>Dans le filtre, tapez : <code>api-v2</code></li>
-
-    <li data-lang-en>Reload the page with <code>F5</code>.</li>
-    <li data-lang-fr>Rechargez la page avec <code>F5</code>.</li>
-
-    <li data-lang-en>Click any request in the list (e.g. <code>me</code> or <code>featured-tracks</code>).</li>
-    <li data-lang-fr>Cliquez sur une requête (ex. <code>me</code> ou <code>featured-tracks</code>).</li>
-
-    <li data-lang-en>Scroll to <strong>Request Headers</strong> in the right panel.</li>
-    <li data-lang-fr>Défilez jusqu'à <strong>Request Headers</strong> dans le panneau de droite.</li>
-
-    <li data-lang-en>Find the line <code>Authorization: OAuth XXXXXX</code>.</li>
-    <li data-lang-fr>Trouvez la ligne <code>Authorization: OAuth XXXXXX</code>.</li>
-
-    <li data-lang-en>Copy <strong>only what comes after</strong> <code>OAuth </code> (no leading space).</li>
-    <li data-lang-fr>Copiez <strong>uniquement ce qui suit</strong> <code>OAuth </code> (sans espace au début).</li>
-
-    <li data-lang-en>Paste into Kodi addon settings → Account → OAuth token.</li>
-    <li data-lang-fr>Collez dans les paramètres Kodi → Compte → Jeton OAuth.</li>
+  <ol data-lang-en>
+    <li>Open <a href="https://soundcloud.com" target="_blank" rel="noopener">https://soundcloud.com</a> and sign in.</li>
+    <li>Press <code>F12</code> to open Developer Tools.</li>
+    <li>Click the <strong>Network</strong> tab.</li>
+    <li>In the filter box, type: <code>api-v2</code></li>
+    <li>Reload the page with <code>F5</code>.</li>
+    <li>Click any request in the list (e.g. <code>me</code> or <code>featured-tracks</code>).</li>
+    <li>Scroll to <strong>Request Headers</strong> in the right panel.</li>
+    <li>Find the line <code>Authorization: OAuth XXXXXX</code>.</li>
+    <li>Copy <strong>only what comes after</strong> <code>OAuth&nbsp;</code> (no leading space).</li>
+    <li>Paste into Kodi addon settings &rarr; Account &rarr; OAuth token.</li>
   </ol>
 
-  <p class="subtle" data-lang-en><strong>Common mistake:</strong> do not copy the cookie named <code>oauth_token</code> (under Application → Cookies). It looks similar but is rejected by the API.</p>
-  <p class="subtle" data-lang-fr><strong>Erreur courante :</strong> ne copiez pas le cookie nommé <code>oauth_token</code> (sous Application → Cookies). Il ressemble beaucoup mais est rejeté par l'API.</p>
+  <ol data-lang-fr>
+    <li>Ouvrez <a href="https://soundcloud.com" target="_blank" rel="noopener">https://soundcloud.com</a> et connectez-vous.</li>
+    <li>Appuyez sur <code>F12</code> pour ouvrir les outils d&eacute;veloppeur.</li>
+    <li>Cliquez sur l'onglet <strong>Network</strong>.</li>
+    <li>Dans le filtre, tapez : <code>api-v2</code></li>
+    <li>Rechargez la page avec <code>F5</code>.</li>
+    <li>Cliquez sur une requ&ecirc;te (ex. <code>me</code> ou <code>featured-tracks</code>).</li>
+    <li>D&eacute;filez jusqu'&agrave; <strong>Request Headers</strong> dans le panneau de droite.</li>
+    <li>Trouvez la ligne <code>Authorization: OAuth XXXXXX</code>.</li>
+    <li>Copiez <strong>uniquement ce qui suit</strong> <code>OAuth&nbsp;</code> (sans espace au d&eacute;but).</li>
+    <li>Collez dans les param&egrave;tres Kodi &rarr; Compte &rarr; Jeton OAuth.</li>
+  </ol>
+
+  <p class="subtle" data-lang-en><strong>Common mistake:</strong> do not copy the cookie named <code>oauth_token</code> (under Application &rarr; Cookies). It looks similar but is rejected by the API.</p>
+  <p class="subtle" data-lang-fr><strong>Erreur courante :</strong> ne copiez pas le cookie nomm&eacute; <code>oauth_token</code> (sous Application &rarr; Cookies). Il ressemble beaucoup mais est rejet&eacute; par l'API.</p>
 </details>
 
 <footer>
-  <p data-lang-en>Open source · MIT license · <a href="https://github.com/TheWorms/kodi-addon-soundcloud">View on GitHub</a></p>
-  <p data-lang-fr>Open source · Licence MIT · <a href="https://github.com/TheWorms/kodi-addon-soundcloud">Voir sur GitHub</a></p>
+  <p data-lang-en>Open source &middot; MIT license &middot; <a href="https://github.com/TheWorms/kodi-addon-soundcloud">View on GitHub</a></p>
+  <p data-lang-fr>Open source &middot; Licence MIT &middot; <a href="https://github.com/TheWorms/kodi-addon-soundcloud">Voir sur GitHub</a></p>
 </footer>
 
 </div>
 
 <script>
+/* Build the bookmarklet href programmatically.
+ * Doing this in JS (instead of writing javascript:... inline in HTML)
+ * keeps any DOM elements the bookmarklet builds out of the page parser:
+ * literal angle brackets inside the bookmarklet source never appear in
+ * the page HTML, only inside a string we assign to .href.
+ */
+(function() {
+  function bookmarkletFn() {
+    var _t = null;
+    var _origFetch = window.fetch;
+    var _origXhrSetHeader = window.XMLHttpRequest.prototype.setRequestHeader;
+
+    window.fetch = function() {
+      try {
+        var args = arguments;
+        if (args[1] && args[1].headers) {
+          var h = args[1].headers;
+          if (h instanceof Headers) {
+            var a = h.get('Authorization');
+            if (a && !_t) _t = a;
+          } else if (typeof h === 'object') {
+            var a2 = h.Authorization || h.authorization;
+            if (a2 && !_t) _t = a2;
+          }
+        }
+      } catch (e) {}
+      return _origFetch.apply(this, arguments);
+    };
+
+    window.XMLHttpRequest.prototype.setRequestHeader = function(name, value) {
+      try {
+        if (name && name.toLowerCase() === 'authorization' && value && !_t) {
+          _t = value;
+        }
+      } catch (e) {}
+      return _origXhrSetHeader.apply(this, arguments);
+    };
+
+    function showPopup(token) {
+      if (token && token.indexOf('OAuth ') === 0) {
+        token = token.substring(6);
+      }
+      if (!token) {
+        alert('SoundCloud token not found. Make sure you are signed in to soundcloud.com (avatar visible top-right) and try again. If the page just loaded, wait a few seconds for SoundCloud to make its API calls, then click the bookmarklet again.');
+        return;
+      }
+
+      var overlay = document.createElement('div');
+      overlay.id = '_sc_token_overlay';
+      overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:2147483647;display:flex;align-items:center;justify-content:center;font-family:system-ui,-apple-system,sans-serif;';
+
+      var panel = document.createElement('div');
+      panel.style.cssText = 'background:#242424;color:#f0f0f0;padding:32px;border-radius:12px;max-width:560px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.5);border:1px solid #333;';
+
+      var title = document.createElement('h2');
+      title.textContent = 'Token found!';
+      title.style.cssText = 'font-size:20px;margin:0 0 16px 0;color:#ff5500;font-weight:600;';
+      panel.appendChild(title);
+
+      var desc = document.createElement('p');
+      desc.textContent = 'Copy this token and paste it into the Kodi addon settings (Account > OAuth token):';
+      desc.style.cssText = 'margin:0 0 12px 0;color:#aaa;font-size:14px;';
+      panel.appendChild(desc);
+
+      var ta = document.createElement('textarea');
+      ta.readOnly = true;
+      ta.value = token;
+      ta.style.cssText = 'width:100%;font-family:monospace;font-size:13px;padding:12px;background:#0e0e0e;color:#f0f0f0;border:1px solid #444;border-radius:6px;resize:none;height:80px;word-break:break-all;box-sizing:border-box;';
+      panel.appendChild(ta);
+
+      var btnRow = document.createElement('div');
+      btnRow.style.cssText = 'display:flex;gap:8px;margin-top:16px;';
+
+      var copyBtn = document.createElement('button');
+      copyBtn.textContent = 'Copy to clipboard';
+      copyBtn.style.cssText = 'flex:1;background:#ff5500;color:#000;border:0;padding:12px;border-radius:6px;font-weight:600;cursor:pointer;font-size:14px;';
+      copyBtn.onclick = function() {
+        ta.select();
+        try {
+          document.execCommand('copy');
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(token).catch(function(){});
+          }
+          copyBtn.textContent = 'Copied!';
+          copyBtn.style.background = '#4caf50';
+        } catch (e) {
+          copyBtn.textContent = 'Copy failed - select manually';
+        }
+      };
+      btnRow.appendChild(copyBtn);
+
+      var closeBtn = document.createElement('button');
+      closeBtn.textContent = 'Close';
+      closeBtn.style.cssText = 'flex:0 0 100px;background:transparent;color:#aaa;border:1px solid #444;padding:12px;border-radius:6px;cursor:pointer;font-size:14px;';
+      closeBtn.onclick = function() { overlay.remove(); };
+      btnRow.appendChild(closeBtn);
+
+      panel.appendChild(btnRow);
+      overlay.appendChild(panel);
+
+      overlay.onclick = function(e) {
+        if (e.target === overlay) overlay.remove();
+      };
+
+      document.body.appendChild(overlay);
+      setTimeout(function() { ta.select(); }, 50);
+    }
+
+    fetch('https://api-v2.soundcloud.com/me')
+      .then(function() {
+        setTimeout(function() { showPopup(_t); }, 100);
+      })
+      .catch(function() {
+        showPopup(_t);
+      });
+  }
+
+  // Compact the function source, then URL-encode for the href.
+  var src = '(' + bookmarkletFn.toString() + ')();';
+  src = src.replace(/\/\*[\s\S]*?\*\//g, '');
+  src = src.replace(/\/\/[^\n]*/g, '');
+  src = src.replace(/\s+/g, ' ');
+  var href = 'javascript:' + encodeURIComponent(src);
+
+  var btn = document.getElementById('bookmarklet-btn');
+  if (btn) {
+    btn.href = href;
+  }
+})();
+
 // Auto-detect French browser language
 if (navigator.language && navigator.language.toLowerCase().startsWith('fr')) {
   document.body.classList.add('lang-fr');
