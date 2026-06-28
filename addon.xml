@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.6004" provider-name="TheWorms">
+<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.6005" provider-name="TheWorms">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.29.0"/>
@@ -36,7 +36,16 @@
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
         <credits>jaylinski (original add-on), bromix, SLiX</credits>
-        <news>5.9.6004 (2026-06-29) - playback fixed + auth test fixed + help dialog simplified
+        <news>5.9.6005 (2026-06-29) - api: Origin/Referer headers + auth test cascade + tier detection
+Three fixes diagnosed by testing endpoints directly from a browser console:
+
+API HEADERS: SoundCloud's edge started returning HTTP 403 on /me (and 404 on /me/play-history) for requests that don't look like they come from soundcloud.com. The fix: every api-v2 request now sends Origin: https://soundcloud.com and Referer: https://soundcloud.com/ headers alongside the OAuth token. With these headers in place, /me works, /users/{id}/* works, and the addon no longer relies on endpoints SoundCloud has been quietly removing.
+
+AUTH TEST: rewrote the "Test OAuth token" cascade. It now hits /me first (with proper browser headers — should work for everyone), and if that fails, falls back to /users/{my_id}/track_likes which is the same endpoint used for the Likes home row. As long as ANY of these returns 200, auth is confirmed.
+
+ACCOUNT TIER DETECTION: when /me returns 200, the addon now reads consumer_subscription.product.id and displays it in the success dialog ("Account: Free", "Account: Go+", "Account: Pro Unlimited"). The tier is also persisted in settings under account.tier for future use (filter Preview tracks for Free accounts, expose Pro-only options, etc).
+
+5.9.6004 (2026-06-29) - playback fixed + auth test fixed + help dialog simplified
 Three real bugs diagnosed from a user log:
 
 PLAYBACK: every track was failing with HTTP 404 on its /media/.../stream/progressive URL, causing Kodi to skip through the entire playlist. Root cause: since 2025, SoundCloud requires a `track_authorization` query parameter (a JWT, valid ~2h) on stream URLs IN ADDITION to the OAuth token in the Authorization header. We were only passing the OAuth token. Fixed: read `track_authorization` from each track object and stitch it onto the transcoding URL at extraction time.
