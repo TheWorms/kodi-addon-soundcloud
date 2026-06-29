@@ -225,6 +225,22 @@
                         <close>true</close>
                     </control>
                 </setting>
+                <!--
+                    Create favourite button removed in 5.9.6018 — it
+                    was causing crashes on some Kodi installs (likely
+                    related to ReloadSkin() being called from within
+                    a plugin handler). The PATH_SETTINGS_CREATE_FAVOURITE
+                    handler in plugin.py is kept so existing favourites
+                    keep working, but users now create them manually
+                    via the standard Kodi UI: long-press / context menu
+                    on the addon in Music > Add-ons, then "Add to
+                    favourites".
+                -->
+                <setting id="service.preload" type="boolean" label="30290" help="30291">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle" format="boolean"/>
+                </setting>
             </group>
             <group id="3" label="30221">
                 <setting id="search.history.size" type="string" label="30013" help="">

@@ -8,6 +8,7 @@ PATH_SEARCH_LEGACY = "/search/query/"
 PATH_SETTINGS_AUTH_HELP = "/settings/auth/help/"
 PATH_SETTINGS_AUTH_TEST = "/settings/auth/test/"
 PATH_SETTINGS_CACHE_CLEAR = "/settings/cache/clear/"
+PATH_SETTINGS_CREATE_FAVOURITE = "/settings/create_favourite/"
 PATH_USER = "/user/"
 
 # Widget routes — short URLs that skin widget panes can target directly

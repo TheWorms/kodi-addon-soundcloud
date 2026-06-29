@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.6008" provider-name="TheWorms">
+<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.6018" provider-name="TheWorms">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.29.0"/>
@@ -16,6 +16,18 @@
         <provides>audio</provides>
     </extension>
     <extension point="xbmc.python.script" library="script.py">
+        <provides>audio</provides>
+    </extension>
+    <!--
+        Background service: runs from Kodi login to Kodi shutdown.
+        Its only role is to keep a splash window ready to display the
+        moment plugin.py asks for it via the "soundcloud.splash"
+        Window property. Without this, the user would see the music
+        browser for ~500ms after click before our splash appears.
+        Can be disabled via the "service.preload" setting on
+        low-memory devices.
+    -->
+    <extension point="xbmc.service" library="service.py" start="login">
         <provides>audio</provides>
     </extension>
     <extension point="xbmc.addon.metadata">
@@ -36,7 +48,111 @@
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
         <credits>jaylinski (original add-on), bromix, SLiX</credits>
-        <news>5.9.6008 (2026-06-29) - playback keys in the fullscreen overlay
+        <news>5.9.6018 (2026-06-29) - service opt-in by default + create-favourite removed
+Three changes based on user feedback after testing 5.9.6017:
+
+SERVICE OFF BY DEFAULT: the background service is now disabled out of the box. Users who want the faster open have to opt in via Settings > Account > "Background service (faster open)" and then restart Kodi. Defaults to off so users on low-RAM boxes don't unknowingly consume memory. The help text now says "REQUIRES A KODI RESTART after toggling" explicitly. To make this even harder to miss: when plugin.py is invoked and detects the service is enabled but not actually running (the service hasn't set its "alive" property), it shows a one-shot notification reminding the user to restart Kodi.
+
+CREATE-FAVOURITE BUTTON REMOVED: the "Create Kodi favourite" button in settings was crashing on some setups (likely because we called ReloadSkin() from within a plugin handler, which Kodi doesn't like). Removed the button from the UI. Users wanting a favourite can use the standard Kodi long-press / context menu on the addon in the music browser, then "Add to favourites" — works reliably across all skins. The underlying handler stays in plugin.py for any existing favourites that point at it.
+
+SERVICE.PRELOAD LOGIC: changed from "true unless explicitly 'false'" to "false unless explicitly 'true'". This means the service stays off until the user makes a conscious choice to enable it.
+
+5.9.6017 (2026-06-29) - background service for instant splash (EmbyCon-inspired)
+Looking at how EmbyCon (plugin.video.embycon) starts up gave the idea for this release. They run a small xbmc.service from Kodi login until Kodi shutdown, which keeps things warm in the background. We adapted the approach for our specific bottleneck: the splash window.
+
+What it does:
+  - service.py starts at Kodi login and runs in the background
+  - At startup, it reads our heavy Python module files into the OS page cache (so cold imports are faster the first time the user opens the addon)
+  - It then polls every 50ms for a window property "soundcloud.splash"
+  - When plugin.py is invoked (user clicks the addon), it sets that property to "show" — the service picks it up within ~50ms and displays the splash window
+  - When script.py finishes loading and is ready to open the home, it sets the property to "hide" — the service closes the splash
+
+Net effect: the splash appears within ~50ms of the click instead of ~330ms (waiting for script.py to cold-start). No more music browser flash for users who launch via Music > Add-ons > Run.
+
+Memory cost: a few MB of resident Python interpreter, plus the splash window when it's actually displayed. Disable via Settings > Account > "Background service (faster open)" if you're on a low-RAM device.
+
+For Arctic Zephyr Reloaded users: the service approach works regardless of how you launch the addon (plugin URL, favourite, skin shortcut), so you no longer NEED to set up a favourite to avoid the flash. The favourite is still faster though, because it skips plugin.py entirely.
+
+5.9.6016 (2026-06-29) - critical: UnboundLocalError on every plugin call (5.9.6014/15 regression)
+The create-favourite handler added in 5.9.6014 did `addon_id = addon.getAddonInfo("id")` inside the run() function. Python sees ANY assignment to a name inside a function as making that name local for the WHOLE function body — even references that happen BEFORE the assignment line. So when an earlier code path (the launch-UI section, line 136) did `xbmc.executebuiltin("RunScript(" + addon_id + ")")`, Python raised UnboundLocalError because the local `addon_id` wasn't bound yet.
+
+Fix: dropped the redundant local assignment and use the module-level `addon_id` directly (it's the same value). Also added a static analysis pass to the build that walks the AST of plugin.py and warns if any function re-assigns a module global — so this whole category of bug can't slip through again.
+
+Sorry about that — the 5.9.6014 and 5.9.6015 builds were unusable.
+
+5.9.6015 (2026-06-29) - bridge the bootstrap with Kodi's busy dialog
+The 5.9.6014 log showed the music browser was still visible for ~500ms between click and splash, even though our splash itself was rendering fast. The reason: our splash is owned by script.py, which doesn't get scheduled until plugin.py has exited (T+140ms), then needs another ~190ms to load enough Python to instantiate the splash window. Between T+0 and T+330ms the music browser was the only thing on screen.
+
+Fix: plugin.py now activates Kodi's NATIVE busy dialog at T+0ms — before launching RunScript. The busy dialog is owned by Kodi (not by our Python script), so it survives the death of plugin.py and stays visible until script.py reaches the point where our pretty SoundCloud splash takes over. Right after script.py shows the splash, it closes the busy dialog. The transition busy → splash is essentially seamless.
+
+Net result: instead of 500ms of music browser visible, you now see a Kodi spinner for ~300ms (matches the skin look), then the SoundCloud splash with the orange ring, then the home. No more music browser flash.
+
+This works even when launching via the "Run" button on the addon in the music browser — which was the user's actual scenario.
+
+5.9.6014 (2026-06-29) - localized splash + favourite-creation button
+LOCALIZED SPLASH: the splash screen now reads "Chargement..." in French, "Lädt..." in German, "Laden..." in Dutch (was always "Loading..."). Implemented via the standard Kodi $ADDON[plugin.audio.soundcloud 30248] skin variable, which picks up the user's Kodi UI language at runtime.
+
+CREATE-FAVOURITE BUTTON: added a new button in Settings > Advanced (next to "Clear cache") labeled "Create Kodi favourite (fast open)". When clicked, it writes a favourites.xml entry pointing at RunScript(plugin.audio.soundcloud). The favourite then appears in Kodi's standard Favourites menu, and skin shortcut managers (like Arctic Zephyr Reloaded's home menu editor) can pick it up as a menu target.
+
+Why: Arctic Zephyr Reloaded (and several other skins) don't expose a raw "RunScript" option in their menu editor, only Plugins and Favourites. Users who wanted instant-open (no music browser flash) had to manually edit favourites.xml — now it's one button click.
+
+The handler is defensive: parses the existing favourites.xml without destroying it, deduplicates if the entry already exists, backs up if it's corrupt, and reloads the skin so the new favourite appears immediately without a Kodi restart.
+
+5.9.6013 (2026-06-29) - hotfix for 5.9.6012 broken addon.xml
+The 5.9.6012 release notes contained a literal XML tag inside the news text that wasn't escaped, which made addon.xml invalid and caused Kodi to refuse the install with "Error reading end tag" at line 455. This release fixes just that. Functionally identical to 5.9.6012: animated orange spinner on the splash, with the same PNG and rotate animation.
+
+5.9.6012 (2026-06-29) - splash now has an animated orange spinner
+The static "Loading..." label was replaced with a proper animated loading spinner. The PNG itself (spinner.png, 128x128) is an orange ring with a gradient fade tail and a rounded head — the standard look for spinners. The XML applies a continuous Kodi rotate animation (effect=rotate, loop=true) to it, so the spinner turns smoothly (1.2 seconds per turn) while the rest of the bootstrap finishes loading. Kodi renders the rotation on the GPU compositor, so it costs effectively nothing CPU-wise.
+
+The "Loading..." label is kept below the spinner for accessibility.
+
+For users (like Arctic Zephyr Reloaded skin users) who already have a home menu shortcut to SoundCloud and still see the music browser flash: the shortcut is probably pointing at "plugin://plugin.audio.soundcloud/" instead of "RunScript(plugin.audio.soundcloud)". The plugin:// path forces Kodi to navigate into the music browser as the directory container. RunScript starts our script process directly with no music browser involved. Editing the shortcut to use RunScript will eliminate the flash entirely.
+
+5.9.6011 (2026-06-29) - critical .po fix + favourite bypass for instant open
+Two issues from a user log:
+
+POPARSER ERROR FIXED: the 30026 strings (Help dialog body) were broken in all 4 language files because a previous regex-based write inserted LITERAL newline characters inside msgid/msgstr instead of escaped \n sequences. Kodi's POParser then refused the entry with "missing msgstr line", which is why the Help dialog was sometimes showing English text or blank content. Rewrote the fix with a callable re.sub replacement to prevent backslash interpretation, and verified the resulting file has no literal newlines inside any string. Help dialog now renders correctly in French.
+
+OPEN-FROM-MUSIC-BROWSER FLASH: as the 5.9.6010 timing logs showed, the music browser is visible for ~460ms before the splash appears (because Kodi navigates into the music browser as part of normal directory loading, then our plugin URL returns failed, then Kodi schedules our RunScript, then our script.py runs, then our splash renders). On a Cortex-A73 there is no realistic way to make this chain shorter from inside the addon.
+
+THE ONLY WAY to eliminate the flash entirely is to bypass the music browser, by launching the addon directly via RunScript. Shipped a ready-to-import Kodi favourite file at docs/soundcloud-favourite.xml — see the readme for the import procedure. With this favourite, the splash appears within ~200ms of click and the music browser is never visible.
+
+5.9.6010 (2026-06-29) - splash screen during the bootstrap phase
+The 5.9.6009 timing logs revealed where the open delay was actually spent on ODROID-N2Plus:
+
+  T+0ms       plugin.py run() entry
+  T+8ms       plugin.py exited
+  T+0ms       script.py entry (Kodi queueing the new Python invoker)
+  T+1238ms    all modules imported     ← 870ms of pure Python imports
+  T+1262ms    SoundCloudHomeWindow onInit (skin XML loaded in 21ms)
+
+The XML parsing is fast (21ms), but importing resources/lib/ui/window.py (1700+ lines plus transitive imports) on a Cortex-A73 ARM CPU takes ~870ms cold. We can't really make Python imports faster without restructuring half the codebase.
+
+What we CAN do: hide the delay behind a splash. This release adds a tiny splash window (script-soundcloud-splash.xml, 3 controls, no animations, no skin conditionals) that script.py shows IMMEDIATELY on entry — before any heavy import. The user sees SoundCloud branding + "Loading..." within ~100-200ms after clicking, instead of the music browser or a frozen screen for 1+ second. The home window then replaces the splash once everything is ready.
+
+Total open time is unchanged. Perceived open time goes from "1.4s of nothing happening" to "instant splash, then home appears". That's a much better feel.
+
+The splash is also defensively wrapped: if its XML or Python instantiation fails for any reason, we silently skip it and proceed with the boot — no risk of breaking the addon for a cosmetic feature.
+
+5.9.6009 (2026-06-29) - timing instrumentation (diagnostic release)
+A user log showed the open-from-music-browser delay jumped from ~932ms to ~5.5 seconds with no obvious cause. Before guessing at fixes, this release adds precise timing logs at every phase of the bootstrap so we can see exactly where the time is spent:
+
+  plugin.py:    T+0ms run() entry
+  plugin.py:    T+Xms after RunScript() call
+  plugin.py:    T+Xms plugin.py exiting
+  script.py:    T+0ms script.py entry
+  script.py:    T+Xms after Dialog.Close + ReplaceWindow
+  script.py:    T+Xms addon loaded
+  script.py:    T+Xms all modules imported
+  script.py:    T+Xms API/settings/cache constructed
+  script.py:    T+Xms calling open_home()
+  window.py:    SoundCloudHomeWindow onInit (skin XML loaded)
+
+Install this version, open the addon, then send the log lines containing "timing T+". The delta between plugin.py exit and script.py entry tells us if Kodi's Python invoker is queueing scripts (likely culprit when other plugins like embycon are loading in parallel). The delta between script.py entry and onInit tells us how long imports + XML parsing take.
+
+No functional changes — just observability.
+
+5.9.6008 (2026-06-29) - playback keys in the fullscreen overlay
 The fullscreen "now playing" overlay was only handling Back/Menu/Exit. The arrow keys did nothing — you couldn't seek inside a track or change track from the overlay. Added the standard music-player key bindings:
 
   Left arrow         seek -10s in the current track

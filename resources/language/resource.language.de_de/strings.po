@@ -67,21 +67,8 @@ msgid "You need to configure an OAuth token to access your profile. Opening sett
 msgstr "Du musst ein OAuth-Token konfigurieren, um auf dein Profil zuzugreifen. Einstellungen werden geöffnet..."
 
 msgctxt "#30026"
-msgid "Get your token from the helper page:
-
-[COLOR=FFFF5500]https://theworms.github.io/kodi-addon-soundcloud/[/COLOR]
-
-The page has a copy-paste console snippet that grabs your token automatically. The snippet runs entirely in your browser - your token is never sent anywhere.
-
-If the snippet doesn't work, the same page documents a manual fallback method."
-msgstr "Token über die Hilfeseite holen:
-
-[COLOR=FFFF5500]https://theworms.github.io/kodi-addon-soundcloud/[/COLOR]
-
-Die Seite bietet ein Konsolen-Snippet zum Kopieren, das Ihren Token automatisch findet. Das Snippet läuft komplett in Ihrem Browser - Ihr Token wird nirgendwo hingesendet.
-
-Falls das Snippet nicht funktioniert, dokumentiert dieselbe Seite eine manuelle Alternative."Anwendung\" (Chrome/Edge) oder \"Speicher\" (Firefox).\n\n4. Klappe in der linken Seitenleiste \"Cookies\" auf und wähle \"https://soundcloud.com\".\n\n5. Suche das Cookie namens \"oauth_token\" und kopiere seinen Wert.\n\n6. Füge den Wert in das Feld \"OAuth-Token\" in den Addon-Einstellungen ein.\n\nAlternative Methode: Suche im Tab \"Netzwerk\" der Entwicklertools eine beliebige Anfrage an api-v2.soundcloud.com, schau in den \"Authorization\"-Request-Header und kopiere den Wert nach \"OAuth \".\n\nHinweis: Das Token läuft gelegentlich ab — in dem Fall wiederhole die Schritte, um ein frisches zu erhalten."
-
+msgid "Get your token from the helper page:\n\n[COLOR=FFFF5500]https://theworms.github.io/kodi-addon-soundcloud/[/COLOR]\n\nThe page has a copy-paste console snippet that grabs your token automatically. The snippet runs entirely in your browser - your token is never sent anywhere.\n\nIf the snippet doesn't work, the same page documents a manual fallback method."
+msgstr "Token über die Hilfeseite holen:\n\n[COLOR=FFFF5500]https://theworms.github.io/kodi-addon-soundcloud/[/COLOR]\n\nDie Seite bietet ein Konsolen-Snippet zum Kopieren, das Ihren Token automatisch findet. Das Snippet läuft komplett in Ihrem Browser - Ihr Token wird nirgendwo hingesendet.\n\nFalls das Snippet nicht funktioniert, dokumentiert dieselbe Seite eine manuelle Alternative."
 msgctxt "#30060"
 msgid "API v2"
 msgstr "API v2"
@@ -471,6 +458,10 @@ msgctxt "#30247"
 msgid "Account: {0}"
 msgstr "Konto: {0}"
 
+msgctxt "#30248"
+msgid "Loading..."
+msgstr "Lädt..."
+
 msgctxt "#30250"
 msgid "Widgets"
 msgstr "Widgets"
@@ -575,3 +566,30 @@ msgctxt "#32117"
 msgid "NOW PLAYING"
 msgstr "JETZT ANHÖREN"
 
+msgctxt "#30280"
+msgid "A Kodi favourite for SoundCloud already exists. You can find it in the Favourites menu and assign it to your skin home menu."
+msgstr "Ein Kodi-Favorit für SoundCloud existiert bereits. Sie finden ihn im Favoriten-Menü und können ihn Ihrem Skin-Hauptmenü zuweisen."
+
+msgctxt "#30281"
+msgid "Kodi favourite \"SoundCloud\" created. You can find it in the Favourites menu and use it as a home menu item in Arctic Zephyr Reloaded or any other skin (much faster than launching via the plugin browser)."
+msgstr "Kodi-Favorit \"SoundCloud\" erstellt. Sie finden ihn im Favoriten-Menü und können ihn als Hauptmenü-Eintrag in Arctic Zephyr Reloaded oder einem anderen Skin verwenden (viel schneller als der Start über den Plugin-Browser)."
+
+msgctxt "#30282"
+msgid "Could not create favourite: {0}"
+msgstr "Favorit konnte nicht erstellt werden: {0}"
+
+msgctxt "#30283"
+msgid "Create Kodi favourite (fast open)"
+msgstr "Kodi-Favorit erstellen (schnelles Öffnen)"
+
+msgctxt "#30290"
+msgid "Background service (faster open)"
+msgstr "Hintergrunddienst (schnelleres Öffnen)"
+
+msgctxt "#30291"
+msgid "Run a small service from Kodi startup that pre-creates the splash window. Makes the addon open visibly faster (no music browser flash) but uses a few MB of RAM continuously. REQUIRES A KODI RESTART after toggling. Disable on low-memory devices."
+msgstr "Startet einen kleinen Dienst beim Kodi-Start, der das Splash-Fenster vorbereitet. Das Addon öffnet sich sichtbar schneller (kein Musik-Browser-Flash), verbraucht aber einige MB RAM dauerhaft. KODI-NEUSTART NACH ÄNDERUNG ERFORDERLICH. Auf Geräten mit wenig Speicher deaktivieren."
+
+msgctxt "#30292"
+msgid "Background service activated. Restart Kodi to take effect."
+msgstr "Hintergrunddienst aktiviert. Kodi neu starten zur Aktivierung."

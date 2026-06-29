@@ -1048,6 +1048,12 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
     # =====================================================================
 
     def onInit(self):
+        xbmc.log(
+            "plugin.audio.soundcloud::SoundCloudHomeWindow onInit "
+            "(skin XML loaded, ready to populate)",
+            xbmc.LOGINFO,
+        )
+
         # Apply layout from settings.
         layout_setting = self.settings.get("ui.layout") or "1"
         layout = "sidebar" if layout_setting == "1" else "rows"
