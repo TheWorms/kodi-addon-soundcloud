@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.6019" provider-name="TheWorms">
+<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.6020" provider-name="TheWorms">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.29.0"/>
@@ -48,7 +48,16 @@
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
         <credits>jaylinski (original add-on), bromix, SLiX</credits>
-        <news>5.9.6019 (2026-06-29) - multilingual readme (EN + FR)
+        <news>5.9.6020 (2026-06-29) - widgets now show real artwork, not generic icons
+Two related bugs in the artwork extraction were causing skin widgets (Likes, Playlists, Following, Trending, Discover) to fall back to Kodi's default icons for many items:
+
+BUG 1: dict.get() default ignored on explicit null. SoundCloud commonly returns "artwork_url": null when a track or playlist doesn't have a custom cover. Python's dict.get("artwork_url", fallback) returns the explicit None, NOT the fallback — so the chain to avatar_url was never reached. Switched to "or" chaining which treats nulls and missing keys the same way.
+
+BUG 2: tracks without artwork had no fallback at all. soundcloud.com itself falls back to the uploading artist's avatar (track.user.avatar_url) when a track has no cover. We now do the same. Result: every track widget tile gets a meaningful image — either the track's own artwork or the artist's avatar.
+
+This affects all artwork extraction across the addon: home screen, widgets, search results, playlists, the now-playing overlay. Tracks and playlists that previously showed generic Kodi icons should now display the artist's avatar at minimum.
+
+5.9.6019 (2026-06-29) - multilingual readme (EN + FR)
 Updated the readme.md to cover all the v5.9.6xxx features: background service, splash screen, Free-tier playback fix, account tier detection, keyboard shortcuts in Now Playing, and the updated launching options. Also bumped the Kodi version badge from v19 Matrix to v21 Omega.
 
 Added readme.fr.md as a full French translation. Both files have a language switcher at the top. German and Dutch translations to follow.
