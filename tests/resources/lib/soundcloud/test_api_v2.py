@@ -97,7 +97,15 @@ class ApiV2TestCase(TestCase):
 
         self.assertEqual(res.items[1].label, "NOISIA")
         self.assertEqual(res.items[1].info["artist"], "Samuel Harris")
-        self.assertEqual(res.items[1].thumb, None)
+        # Since 5.9.6020: when a playlist has no custom artwork
+        # (artwork_url: null), we fall back to the uploading user's
+        # avatar — same behaviour as soundcloud.com itself, so widget
+        # tiles always have a meaningful image instead of a Kodi
+        # default icon.
+        self.assertEqual(
+            res.items[1].thumb,
+            "https://i1.sndcdn.com/avatars-000224527424-fgc1z7-t500x500.jpg",
+        )
 
     def test_search_users(self):
         with open("./tests/mocks/api_v2_search_users.json") as f:

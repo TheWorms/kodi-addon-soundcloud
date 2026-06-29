@@ -653,6 +653,10 @@ class ApiV2(ApiInterface):
     @staticmethod
     def _get_thumbnail(item, size):
         """
+        Extracts the best available artwork URL from a SoundCloud
+        API item (track, playlist or user) and rewrites it to the
+        requested thumbnail size.
+
         availableSizes: [
           [ 20, 't20x20'],
           [ 50, 't50x50'],
@@ -660,16 +664,40 @@ class ApiV2(ApiInterface):
           [200, 't200x200'],
           [500, 't500x500']
         ]
+
+        SoundCloud returns `"artwork_url": null` for tracks that don't
+        have a custom cover uploaded — a very common case. Python's
+        `dict.get(key, default)` returns the explicit None, NOT the
+        default, so we use `or` chaining instead. We also fall back to
+        the uploading artist's avatar (track["user"]["avatar_url"])
+        like soundcloud.com itself does — this is the behaviour users
+        expect when they see a track widget on their home screen.
         """
-        url = item.get(
-            "artwork_url", item.get("avatar_url", item.get("calculated_artwork_url", False))
+        # Priority order: explicit artwork on the item itself, then
+        # the calculated artwork (some endpoints provide this for
+        # tracks that inherit from their playlist), then avatar_url
+        # for user objects.
+        url = (
+            item.get("artwork_url")
+            or item.get("calculated_artwork_url")
+            or item.get("avatar_url")
         )
+
+        # Track without its own artwork? Fall back to the artist's
+        # avatar — that's what shows on soundcloud.com.
+        if not url:
+            user = item.get("user")
+            if isinstance(user, dict):
+                url = user.get("avatar_url")
+
+        if not url:
+            return None
 
         return re.sub(
             r"^(.*/)(\w+)-([-a-zA-Z0-9]+)-([a-z0-9]+)\.(jpg|png|gif).*$",
             r"\1\2-\3-t{x}x{y}.\5".format(x=size, y=size),
             url
-        ) if url else None
+        )
 
     @staticmethod
     def _get_user_banner(item):
