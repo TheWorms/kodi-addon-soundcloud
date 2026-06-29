@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.6018" provider-name="TheWorms">
+<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.6019" provider-name="TheWorms">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.29.0"/>
@@ -48,7 +48,12 @@
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
         <credits>jaylinski (original add-on), bromix, SLiX</credits>
-        <news>5.9.6018 (2026-06-29) - service opt-in by default + create-favourite removed
+        <news>5.9.6019 (2026-06-29) - multilingual readme (EN + FR)
+Updated the readme.md to cover all the v5.9.6xxx features: background service, splash screen, Free-tier playback fix, account tier detection, keyboard shortcuts in Now Playing, and the updated launching options. Also bumped the Kodi version badge from v19 Matrix to v21 Omega.
+
+Added readme.fr.md as a full French translation. Both files have a language switcher at the top. German and Dutch translations to follow.
+
+5.9.6018 (2026-06-29) - service opt-in by default + create-favourite removed
 Three changes based on user feedback after testing 5.9.6017:
 
 SERVICE OFF BY DEFAULT: the background service is now disabled out of the box. Users who want the faster open have to opt in via Settings > Account > "Background service (faster open)" and then restart Kodi. Defaults to off so users on low-RAM boxes don't unknowingly consume memory. The help text now says "REQUIRES A KODI RESTART after toggling" explicitly. To make this even harder to miss: when plugin.py is invoked and detects the service is enabled but not actually running (the service hasn't set its "alive" property), it shows a one-shot notification reminding the user to restart Kodi.
