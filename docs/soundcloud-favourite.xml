@@ -1,0 +1,3 @@
+<favourites>
+    <favourite name="SoundCloud" thumb="special://home/addons/plugin.audio.soundcloud/resources/icon.png">RunScript(plugin.audio.soundcloud)</favourite>
+</favourites>

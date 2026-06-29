@@ -28,6 +28,13 @@ listItems = Items(addon, addon_base, search_history, api=api)
 
 
 def run():
+    import time as _t
+    _t0 = _t.time()
+    xbmc.log(
+        "plugin.audio.soundcloud::plugin.py timing T+0ms run() entry",
+        xbmc.LOGINFO,
+    )
+
     url = urllib.parse.urlparse(sys.argv[0])
     path = url.path
     handle = int(sys.argv[1])
@@ -119,24 +126,72 @@ def run():
             if not is_widget_call:
                 # User-initiated open: launch the full-screen UI.
                 #
-                # Order matters: RunScript is now FIRST so the script
-                # process (which has to load Python modules, parse the
-                # window XML, query the API) starts immediately and runs
-                # in parallel with Kodi's music-browser cleanup. With the
-                # previous order (cleanup first, RunScript last), the user
-                # saw the music browser for ~1.4s on lower-end devices
-                # (ODROID-N2Plus etc.) before the UI appeared.
-                #
-                # The trade-off: there's a brief moment where the script
-                # is starting to load but the music browser is still
-                # visible. That's still better than seeing the music
-                # browser fully painted before the UI starts.
+                # Step 1: signal the background service to show the
+                # splash window. If the service is running, it picks
+                # up this signal within ~50ms and shows the splash.
+                # If the service is disabled (or hasn't been started
+                # because the user just enabled it without restarting
+                # Kodi), the signal is harmless and script.py will
+                # fall back to creating its own splash later.
+                home_signal = xbmcgui.Window(10000)
+
+                # Detect "enabled but not running" — set a sentinel
+                # property that the service clears on its first poll.
+                # If the property is still there when plugin.py runs,
+                # it means the service hasn't seen a single poll yet,
+                # which on a running service shouldn't happen. We use
+                # this to nudge the user about the required restart.
+                service_setting = settings.get("service.preload")
+                service_alive = home_signal.getProperty(
+                    "soundcloud.service.alive"
+                ) == "1"
+                if service_setting == "true" and not service_alive:
+                    # User enabled the service but it's not running.
+                    # Show a one-shot notification (gated by another
+                    # property so we don't spam on every click).
+                    if home_signal.getProperty(
+                        "soundcloud.restart.notified"
+                    ) != "1":
+                        xbmcgui.Dialog().notification(
+                            "SoundCloud",
+                            addon.getLocalizedString(30292),
+                            xbmcgui.NOTIFICATION_INFO,
+                            5000,
+                        )
+                        home_signal.setProperty(
+                            "soundcloud.restart.notified", "1"
+                        )
+
+                home_signal.setProperty("soundcloud.splash", "show")
+
+                # Step 2: launch script.py via RunScript. Python's
+                # process scheduler will let it start in parallel with
+                # the music-browser cleanup below.
                 xbmc.executebuiltin("RunScript(" + addon_id + ")")
+                xbmc.log(
+                    "plugin.audio.soundcloud::plugin.py timing T+%dms "
+                    "after RunScript() call" %
+                    int((_t.time() - _t0) * 1000),
+                    xbmc.LOGINFO,
+                )
+
+                # Step 3: tell Kodi this plugin call returns no items
+                # (so the music browser doesn't try to populate itself
+                # with a non-existent listing).
                 xbmcplugin.endOfDirectory(
                     handle, succeeded=False, cacheToDisc=False
                 )
-                xbmc.executebuiltin("Dialog.Close(all,true)")
+
+                # Step 4: replace the music browser with home. The
+                # service's splash, if it succeeded in showing, will
+                # be on top of home and stays visible.
                 xbmc.executebuiltin("ReplaceWindow(home)")
+                xbmc.log(
+                    "plugin.audio.soundcloud::plugin.py timing T+%dms "
+                    "plugin.py exiting (service should be showing splash)" %
+                    int((_t.time() - _t0) * 1000),
+                    xbmc.LOGINFO,
+                )
                 return
 
             # Widget call: return the flat directory of widget shortcuts
@@ -577,6 +632,94 @@ def run():
         vfs_cache.destroy()
         dialog = xbmcgui.Dialog()
         dialog.ok("SoundCloud", addon.getLocalizedString(30501))
+
+    elif path == PATH_SETTINGS_CREATE_FAVOURITE:
+        # Create a Kodi favourite that points at RunScript(plugin.audio.soundcloud).
+        # The favourite can then be picked from skin menu editors that don't
+        # let the user type a RunScript command directly (Arctic Zephyr
+        # Reloaded, Estuary, etc.). Launching the addon via the favourite
+        # bypasses the music browser entirely — the splash appears within
+        # ~200ms instead of ~600ms after click.
+        #
+        # We edit favourites.xml directly because there's no public Kodi
+        # API to add a favourite from a script. The file lives at
+        # special://userdata/favourites.xml (a single XML doc with
+        # <favourites><favourite>...</favourite></favourites>).
+        import xml.etree.ElementTree as ET
+
+        dialog = xbmcgui.Dialog()
+        fav_path = xbmcvfs.translatePath("special://userdata/favourites.xml")
+        # NOTE: we deliberately don't name this local variable `addon_id` —
+        # there's already an `addon_id` at module scope (line 18). Assigning
+        # to `addon_id` here would make Python treat the whole `run()` body
+        # as having a local `addon_id`, including the `xbmc.executebuiltin
+        # ("RunScript(" + addon_id + ")")` call ~500 lines earlier, which
+        # then raises UnboundLocalError at runtime. The module-level value
+        # is identical, so we just use it.
+        thumb_path = "special://home/addons/%s/resources/icon.png" % addon_id
+        runscript = "RunScript(%s)" % addon_id
+        fav_name = "SoundCloud"
+
+        try:
+            # Load existing favourites.xml or start a new tree.
+            if os.path.exists(fav_path):
+                try:
+                    tree = ET.parse(fav_path)
+                    root = tree.getroot()
+                except ET.ParseError:
+                    # Existing file is corrupt — back it up and start fresh
+                    # rather than blow it away silently.
+                    import time as _bt
+                    backup = fav_path + ".bak." + str(int(_bt.time()))
+                    os.rename(fav_path, backup)
+                    xbmc.log(
+                        "plugin.audio.soundcloud::create_favourite "
+                        "favourites.xml was corrupt, backed up to %s" % backup,
+                        xbmc.LOGWARNING,
+                    )
+                    root = ET.Element("favourites")
+                    tree = ET.ElementTree(root)
+            else:
+                root = ET.Element("favourites")
+                tree = ET.ElementTree(root)
+
+            # Look for an existing entry pointing at our RunScript so we
+            # don't add a duplicate every time the user clicks the button.
+            already_present = False
+            for fav in root.findall("favourite"):
+                if (fav.text or "").strip() == runscript:
+                    already_present = True
+                    # Refresh thumb + name in case they were stale.
+                    fav.set("name", fav_name)
+                    fav.set("thumb", thumb_path)
+                    break
+
+            if not already_present:
+                new_fav = ET.SubElement(root, "favourite")
+                new_fav.set("name", fav_name)
+                new_fav.set("thumb", thumb_path)
+                new_fav.text = runscript
+
+            tree.write(fav_path, encoding="utf-8", xml_declaration=True)
+
+            # Tell Kodi to reload favourites so the new entry shows up
+            # immediately without a restart.
+            xbmc.executebuiltin("ReloadSkin()")
+
+            if already_present:
+                msg = addon.getLocalizedString(30280)  # already exists
+            else:
+                msg = addon.getLocalizedString(30281)  # created
+            dialog.ok("SoundCloud", msg)
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::create_favourite failed: %s" % str(e),
+                xbmc.LOGERROR,
+            )
+            dialog.ok(
+                "SoundCloud",
+                addon.getLocalizedString(30282).format(str(e))
+            )
 
     else:
         xbmc.log(addon_id + ": Path not found", xbmc.LOGERROR)

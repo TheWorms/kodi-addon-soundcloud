@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+    Splash screen displayed during the ~1s bootstrap phase of the
+    full-screen UI on slower devices (ODROID-N2Plus etc.). Kept
+    intentionally minimal so Kodi parses and renders it as fast as
+    possible:
+      - 4 controls (opaque background + spinner + 2 labels)
+      - Single looping rotate animation on the spinner — Kodi handles
+        the animation natively, no Python tick needed
+      - Uses only standard Kodi fonts (font13_title, font13)
+    Goal: visible in <100ms after script.py starts.
+-->
+<window>
+    <controls>
+        <!--
+            Opaque black background. WindowXMLDialog draws OVER the
+            previous window without hiding it, so we need a full-screen
+            opaque rect to mask the Kodi home / music browser behind us.
+        -->
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture>black.png</texture>
+        </control>
+        <!-- SoundCloud wordmark in brand orange, centered. -->
+        <control type="label">
+            <left>0</left>
+            <top>420</top>
+            <width>1920</width>
+            <height>80</height>
+            <align>center</align>
+            <font>font13_title</font>
+            <textcolor>FFFF5500</textcolor>
+            <label>SoundCloud</label>
+        </control>
+        <!--
+            Orange loading spinner. PNG is a 270-degree ring with a
+            fade-out tail and a rounded head. The animation rotates
+            it continuously (1.5 seconds per turn, looped forever).
+            Kodi's rotate animation is done by the GPU compositor —
+            very cheap CPU-wise.
+        -->
+        <control type="image">
+            <left>912</left>
+            <top>520</top>
+            <width>96</width>
+            <height>96</height>
+            <texture>spinner.png</texture>
+            <aspectratio>keep</aspectratio>
+            <animation effect="rotate" start="0" end="360" center="auto" time="1200" loop="true" condition="true">Conditional</animation>
+        </control>
+        <!-- "Loading..." indicator below the spinner (localized). -->
+        <control type="label">
+            <left>0</left>
+            <top>640</top>
+            <width>1920</width>
+            <height>40</height>
+            <align>center</align>
+            <font>font13</font>
+            <textcolor>FFAAAAAA</textcolor>
+            <label>$ADDON[plugin.audio.soundcloud 30248]</label>
+        </control>
+    </controls>
+</window>

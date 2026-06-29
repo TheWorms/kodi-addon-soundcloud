@@ -66,21 +66,8 @@ msgid "You need to configure an OAuth token to access your profile. Opening sett
 msgstr "Je moet een OAuth-token configureren om toegang te krijgen tot je profiel. Instellingen worden geopend..."
 
 msgctxt "#30026"
-msgid "Get your token from the helper page:
-
-[COLOR=FFFF5500]https://theworms.github.io/kodi-addon-soundcloud/[/COLOR]
-
-The page has a copy-paste console snippet that grabs your token automatically. The snippet runs entirely in your browser - your token is never sent anywhere.
-
-If the snippet doesn't work, the same page documents a manual fallback method."
-msgstr "Verkrijg uw token via de hulppagina:
-
-[COLOR=FFFF5500]https://theworms.github.io/kodi-addon-soundcloud/[/COLOR]
-
-De pagina biedt een console-snippet om te kopiëren dat uw token automatisch vindt. Het snippet draait volledig in uw browser - uw token wordt nergens heen gestuurd.
-
-Als het snippet niet werkt, documenteert dezelfde pagina een handmatige alternatieve methode."
-
+msgid "Get your token from the helper page:\n\n[COLOR=FFFF5500]https://theworms.github.io/kodi-addon-soundcloud/[/COLOR]\n\nThe page has a copy-paste console snippet that grabs your token automatically. The snippet runs entirely in your browser - your token is never sent anywhere.\n\nIf the snippet doesn't work, the same page documents a manual fallback method."
+msgstr "Verkrijg uw token via de hulppagina:\n\n[COLOR=FFFF5500]https://theworms.github.io/kodi-addon-soundcloud/[/COLOR]\n\nDe pagina biedt een console-snippet om te kopiëren dat uw token automatisch vindt. Het snippet draait volledig in uw browser - uw token wordt nergens heen gestuurd.\n\nAls het snippet niet werkt, documenteert dezelfde pagina een handmatige alternatieve methode."
 msgctxt "#30060"
 msgid "API v2"
 msgstr ""
@@ -470,6 +457,10 @@ msgctxt "#30247"
 msgid "Account: {0}"
 msgstr "Account: {0}"
 
+msgctxt "#30248"
+msgid "Loading..."
+msgstr "Laden..."
+
 msgctxt "#30250"
 msgid "Widgets"
 msgstr "Widgets"
@@ -574,3 +565,30 @@ msgctxt "#32117"
 msgid "NOW PLAYING"
 msgstr "NU SPELEND"
 
+msgctxt "#30280"
+msgid "A Kodi favourite for SoundCloud already exists. You can find it in the Favourites menu and assign it to your skin home menu."
+msgstr "Een Kodi-favoriet voor SoundCloud bestaat al. U kunt deze vinden in het Favorieten-menu en toewijzen aan uw skin-hoofdmenu."
+
+msgctxt "#30281"
+msgid "Kodi favourite \"SoundCloud\" created. You can find it in the Favourites menu and use it as a home menu item in Arctic Zephyr Reloaded or any other skin (much faster than launching via the plugin browser)."
+msgstr "Kodi-favoriet \"SoundCloud\" aangemaakt. U kunt deze vinden in het Favorieten-menu en gebruiken als hoofdmenu-item in Arctic Zephyr Reloaded of een andere skin (veel sneller dan starten via de plugin-browser)."
+
+msgctxt "#30282"
+msgid "Could not create favourite: {0}"
+msgstr "Favoriet kon niet worden aangemaakt: {0}"
+
+msgctxt "#30283"
+msgid "Create Kodi favourite (fast open)"
+msgstr "Kodi-favoriet aanmaken (snel openen)"
+
+msgctxt "#30290"
+msgid "Background service (faster open)"
+msgstr "Achtergrondservice (sneller openen)"
+
+msgctxt "#30291"
+msgid "Run a small service from Kodi startup that pre-creates the splash window. Makes the addon open visibly faster (no music browser flash) but uses a few MB of RAM continuously. REQUIRES A KODI RESTART after toggling. Disable on low-memory devices."
+msgstr "Start een kleine service bij Kodi-opstarten die het splash-venster voorbereidt. De add-on opent zichtbaar sneller (geen muziekbrowser-flash) maar gebruikt continu enkele MB RAM. KODI HERSTART VEREIST NA WIJZIGING. Uitschakelen op apparaten met weinig geheugen."
+
+msgctxt "#30292"
+msgid "Background service activated. Restart Kodi to take effect."
+msgstr "Achtergrondservice geactiveerd. Herstart Kodi om in werking te treden."
