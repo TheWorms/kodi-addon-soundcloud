@@ -110,33 +110,16 @@ continuent de fonctionner via les routes dédiées `/widget/*` (voir
 
 ## Installation
 
-### Dépôt Kodi
+**Recommandé — dépôt TheWorms** (mises à jour automatiques).
 
-Suivez les instructions sur [https://kodi.wiki/view/Add-on:SoundCloud](https://kodi.wiki/view/Add-on:SoundCloud).
+Télécharge le dépôt en cliquant **[ICI](https://raw.githubusercontent.com/TheWorms/kodi-repo/main/zips/repository.theworms/repository.theworms.zip)**, puis dans Kodi :
 
-### Manuelle
+1. **Add-ons** → **Installer depuis un fichier zip** → sélectionne le zip téléchargé
+   *(si Kodi bloque, active **Sources inconnues** dans Système → Add-ons)*
+2. **Installer depuis un dépôt** → **TheWorms Repository** → choisis l'addon
+3. Les mises à jour seront ensuite automatiques
 
-* [Téléchargez la dernière version depuis ce fork](https://github.com/TheWorms/kodi-addon-soundcloud/releases) (`plugin.audio.soundcloud-X.Y.Z.zip`)
-* Copiez le fichier zip sur votre système Kodi
-* Ouvrez Kodi, allez dans Add-ons et sélectionnez « Installer depuis un fichier zip »
-* Sélectionnez le fichier `plugin.audio.soundcloud-X.Y.Z.zip`
-
-### Dépendance optionnelle — Pillow
-
-Les superpositions plein écran « En lecture »
-(Cinéma/Vagues/Éditorial/Vinyle) sont nettement plus belles avec
-[Pillow](https://pypi.org/project/Pillow/) installé, car Pillow permet
-à l'addon de générer une vraie version floutée Gaussienne de la
-pochette pour l'arrière-plan. Sans Pillow, la pochette est juste
-affichée assombrie.
-
-Pour installer : Kodi → *Add-ons → Installer depuis le dépôt → Dépôt
-Kodi → Apparence → Pillow* (ou cherchez directement
-`script.module.pil`). L'addon le détecte automatiquement à la
-prochaine lecture.
-
-Pillow est **optionnel** : l'addon fonctionne sans, vous perdez
-seulement l'effet de flou.
+**Installation manuelle (alternative) :** télécharge le zip de l'addon depuis la page [Releases](../../releases), puis **Add-ons** → **Installer depuis un fichier zip**.
 
 ## Lancer SoundCloud sans le flash du navigateur musique
 
