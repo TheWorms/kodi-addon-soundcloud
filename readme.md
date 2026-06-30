@@ -1,15 +1,17 @@
 # SoundCloud Add-on for [Kodi](https://github.com/xbmc/xbmc) — v5+ fork
 
-## Installation via le dépôt TheWorms (recommandé)
+## Installation
 
-Tous les addons sont distribués et mis à jour via le dépôt — **il n'y a pas de Release** à télécharger ici.
+**Recommended — TheWorms repository** (automatic updates).
 
-Télécharge le dépôt en cliquant **[ICI](https://raw.githubusercontent.com/TheWorms/kodi-repo/main/zips/repository.theworms/repository.theworms.zip)**, puis dans Kodi :
+Download the repository by clicking **[HERE](https://raw.githubusercontent.com/TheWorms/kodi-repo/main/zips/repository.theworms/repository.theworms.zip)**, then in Kodi:
 
-1. **Add-ons** → **Installer depuis un fichier zip** → sélectionne le zip téléchargé
-   *(si Kodi bloque, active **Sources inconnues** dans Système → Add-ons)*
-2. **Installer depuis un dépôt** → **TheWorms Repository** → choisis l'addon
-3. Les mises à jour seront ensuite automatiques
+1. **Add-ons** → **Install from zip file** → select the downloaded zip
+   *(if Kodi blocks it, enable **Unknown sources** under Settings → Add-ons)*
+2. **Install from repository** → **TheWorms Repository** → pick the add-on
+3. Updates will then be automatic
+
+**Manual install (alternative):** download the add-on zip from the [Releases](../../releases) page, then **Add-ons** → **Install from zip file**.
 
 ## What's new in v5.9
 
