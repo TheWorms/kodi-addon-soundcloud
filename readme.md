@@ -2,37 +2,14 @@
 
 ## Installation via le dépôt TheWorms (recommandé)
 
-Le dépôt gère les mises à jour automatiquement.
+Tous les addons sont distribués et mis à jour via le dépôt — **il n'y a pas de Release** à télécharger ici.
 
-1. Télécharge le zip du dépôt : [https://raw.githubusercontent.com/TheWorms/kodi-repo/main/zips/repository.theworms/repository.theworms.zip](https://raw.githubusercontent.com/TheWorms/kodi-repo/main/zips/repository.theworms/repository.theworms.zip)
-2. Kodi → **Add-ons** → **Installer depuis un fichier zip** → sélectionne ce zip
+Télécharge le dépôt en cliquant **[ICI](https://raw.githubusercontent.com/TheWorms/kodi-repo/main/zips/repository.theworms/repository.theworms.zip)**, puis dans Kodi :
+
+1. **Add-ons** → **Installer depuis un fichier zip** → sélectionne le zip téléchargé
    *(si Kodi bloque, active **Sources inconnues** dans Système → Add-ons)*
-3. **Installer depuis un dépôt** → **TheWorms Repository** → choisis l'addon
-4. Les mises à jour seront ensuite proposées automatiquement
-
-**English** &nbsp;|&nbsp; [Français](./readme.fr.md)
-
-<img align="right" src="https://github.com/xbmc/xbmc/raw/master/addons/webinterface.default/icon-128.png" alt="Kodi logo">
-
-[![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/TheWorms/kodi-addon-soundcloud.svg)](https://github.com/TheWorms/kodi-addon-soundcloud/releases)
-[![Link to Kodi forum](https://img.shields.io/badge/Kodi-Forum-informational.svg)](https://forum.kodi.tv/showthread.php?tid=206635)
-[![Link to Kodi wiki](https://img.shields.io/badge/Kodi-Wiki-informational.svg)](https://kodi.wiki/view/Add-on:SoundCloud)
-[![Link to Kodi releases](https://img.shields.io/badge/Kodi-v21%20%22Omega%22-green.svg)](https://kodi.wiki/view/Releases)
-
-> 🍴 **This is a community fork** of
-> [jaylinski/kodi-addon-soundcloud](https://github.com/jaylinski/kodi-addon-soundcloud)
-> maintained at
-> [github.com/TheWorms/kodi-addon-soundcloud](https://github.com/TheWorms/kodi-addon-soundcloud).
-> It adds a full-screen "app-like" interface, OAuth token authentication,
-> a French translation, skin home widgets and fullscreen now-playing
-> overlays on top of the upstream addon. Bug reports and pull requests
-> for v5+ features should go to **this** fork; for the classic plugin
-> menu (v4 and earlier), please refer to the upstream project.
-
-This [Kodi](https://github.com/xbmc/xbmc) Add-on provides a full-screen, modern
-interface for SoundCloud, with a sidebar, horizontal carousel rows on the home
-screen, autoplay, an integrated mini-player and four optional fullscreen
-"now playing" overlay styles (Cinema, Waveform, Editorial, Vinyl).
+2. **Installer depuis un dépôt** → **TheWorms Repository** → choisis l'addon
+3. Les mises à jour seront ensuite automatiques
 
 ## What's new in v5.9
 
