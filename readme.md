@@ -3,7 +3,7 @@
 # Add-on SoundCloud pour [Kodi](https://github.com/xbmc/xbmc) — fork v5+
 
 <!-- version:auto -->
-**Version : 5.9.6020**
+**Version : 5.9.6022**
 <!-- /version:auto -->
 
 
