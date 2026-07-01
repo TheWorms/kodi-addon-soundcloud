@@ -2,6 +2,10 @@
 
 # Add-on SoundCloud pour [Kodi](https://github.com/xbmc/xbmc) — fork v5+
 
+<!-- version:auto -->
+**Version : 5.9.6020**
+<!-- /version:auto -->
+
 
 <img align="right" src="https://github.com/xbmc/xbmc/raw/master/addons/webinterface.default/icon-128.png" alt="Logo Kodi">
 
