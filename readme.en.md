@@ -15,33 +15,6 @@ Download the repository by clicking **[HERE](https://raw.githubusercontent.com/T
 
 **Manual install (alternative):** download the add-on zip from the [Releases](../../releases) page, then **Add-ons** → **Install from zip file**.
 
-## What's new in v5.9
-
-The 5.9 line focuses on **boot time, polish, and Free-tier reliability**:
-
-* **Background service for instant splash** (v5.9.6017+) — an optional
-  service that runs from Kodi login and pre-creates the loading splash
-  so the addon opens in ~700-800 ms instead of ~1.4 s. Opt in via
-  *Settings → Account → Background service*, then restart Kodi. Costs
-  a few MB of RAM continuously; off by default.
-* **Animated splash screen with SoundCloud-orange spinner** (v5.9.6012+)
-  — a custom loading screen masks the music browser between click and
-  full UI ready.
-* **Free-tier playback fix** (v5.9.6004+) — SoundCloud added a
-  `track_authorization` JWT to stream URLs in late 2025; the addon now
-  injects it correctly, so Free accounts can play their tracks again.
-* **Account tier detection** (v5.9.6005+) — the addon reads your
-  consumer subscription product from `/me` and stores it (Free /
-  Go / Go+) so future code paths can adapt.
-* **Keyboard navigation in fullscreen Now Playing** (v5.9.6008+) —
-  Left/Right seek ±10 s, Up skips to next track, Down restarts the
-  current track (or jumps to previous if you're within the first 3
-  seconds), OK toggles pause/play.
-* **One-click token helper page** (v5.9.6+) — a companion web page at
-  [theworms.github.io/kodi-addon-soundcloud](https://theworms.github.io/kodi-addon-soundcloud/)
-  with a console snippet that grabs your SoundCloud OAuth token in a
-  single click — no more F12 / Network tab manual fiddling.
-
 ## What's new in v5
 
 The v5 release introduced a **brand-new full-screen interface** that replaces
@@ -64,7 +37,18 @@ the classic plugin-style menu with an "app-like" experience:
   audio visualizer), *Editorial* (magazine layout with pull quote from
   the track description), *Vinyl* (spinning record with cover in the
   central label). Disable entirely if you prefer the mini-player only.
-
+* **Account tier detection** — the addon reads your
+  consumer subscription product from `/me` and stores it (Free /
+  Go / Go+) so future code paths can adapt.
+* **Keyboard navigation in fullscreen Now Playing**  —
+  Left/Right seek ±10 s, Up skips to next track, Down restarts the
+  current track (or jumps to previous if you're within the first 3
+  seconds), OK toggles pause/play.
+* **One-click token helper page** — a companion web page at
+  [theworms.github.io/kodi-addon-soundcloud](https://theworms.github.io/kodi-addon-soundcloud/)
+  with a console snippet that grabs your SoundCloud OAuth token in a
+  single click — no more F12 / Network tab manual fiddling.
+  
 Since v5.7 the full-screen UI is the only interface — the classic
 plugin-style menu was removed. Skin home widgets continue to work via
 the dedicated `/widget/*` routes (see "Widgets" below).
