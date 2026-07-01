@@ -24,15 +24,17 @@ class User(ListItem):
         list_item.setIsFolder(True)
         list_item.setProperty("isPlayable", "false")
 
-        # Use the `music` infotype with the artist mediatype so music-oriented
-        # skins (Estuary's music view, Arctic Zephyr's artist panels, etc.)
-        # display the entry correctly. `comment` carries the bio — most skins
-        # render it in the detail pane.
-        list_item.setInfo("music", {
-            "artist": self.label,
-            "comment": self._build_comment(),
-            "mediatype": "artist",
-        })
+        # Kodi 20+ InfoTagMusic API — see rationale in track.py.
+        # Artists map to mediatype="artist" so music-oriented skins
+        # (Estuary's music view, Arctic Zephyr's artist panels, etc.)
+        # display the entry correctly.
+        tag = list_item.getMusicInfoTag()
+        tag.setMediaType("artist")
+        tag.setArtist(self.label)
+
+        comment = self._build_comment()
+        if comment:
+            tag.setComment(comment)
 
         url = addon_base + PATH_USER + "?" + urllib.parse.urlencode({
             "id": self.id,
