@@ -29,38 +29,6 @@ automatique, un mini-lecteur intégré et quatre styles optionnels de
 superposition « en lecture » plein écran (Cinéma, Vagues, Éditorial,
 Vinyle).
 
-## Nouveautés en v5.9
-
-La série 5.9 se concentre sur **le temps de démarrage, les finitions
-et la fiabilité pour les comptes Free** :
-
-* **Service en arrière-plan pour un splash instantané** (v5.9.6017+) —
-  un service optionnel qui tourne depuis le démarrage de Kodi et
-  pré-crée l'écran de chargement pour que l'addon s'ouvre en
-  ~700-800 ms au lieu de ~1,4 s. Activez-le via *Paramètres → Compte →
-  Service en arrière-plan*, puis redémarrez Kodi. Coûte quelques Mo de
-  RAM en continu ; désactivé par défaut.
-* **Écran de chargement animé avec spinner orange SoundCloud**
-  (v5.9.6012+) — un écran de chargement custom masque le navigateur
-  musique entre le clic et l'affichage de l'interface complète.
-* **Correctif lecture compte Free** (v5.9.6004+) — SoundCloud a ajouté
-  un JWT `track_authorization` aux URLs de streaming fin 2025 ;
-  l'addon l'injecte maintenant correctement, donc les comptes Free
-  peuvent à nouveau lire leurs morceaux.
-* **Détection du type d'abonnement** (v5.9.6005+) — l'addon lit votre
-  abonnement consumer depuis `/me` et le mémorise (Free / Go / Go+)
-  pour que les futures fonctionnalités puissent s'y adapter.
-* **Navigation au clavier dans le plein écran « En lecture »**
-  (v5.9.6008+) — Gauche/Droite avance/recule de 10 s, Haut passe au
-  morceau suivant, Bas redémarre le morceau actuel (ou saute au
-  précédent si on est dans les 3 premières secondes), OK met en
-  pause / reprend.
-* **Page d'aide pour récupérer le jeton en un clic** (v5.9.6+) — une
-  page web compagnon sur
-  [theworms.github.io/kodi-addon-soundcloud](https://theworms.github.io/kodi-addon-soundcloud/)
-  avec un snippet console qui récupère votre jeton OAuth SoundCloud en
-  un clic — fini la manipulation manuelle F12 / onglet Network.
-
 ## Nouveautés en v5
 
 La version v5 a introduit une **toute nouvelle interface plein écran**
@@ -83,12 +51,25 @@ qui remplace le menu plugin classique par une expérience « à la app » :
 * **Configurable partout** — interrupteurs dans les Paramètres
   (mise en page, mode mini-lecteur, lecture auto, lecture aléatoire,
   contenu des rangées)
-* **Superpositions plein écran « En lecture »** (v5.8+) : choisissez
+* **Superpositions plein écran « En lecture »** : choisissez
   parmi 4 styles visuels — *Cinéma* (Ken Burns à la Apple Music),
   *Vagues* (visualiseur audio animé), *Éditorial* (mise en page
   magazine avec citation extraite de la description du morceau),
   *Vinyle* (disque tournant avec pochette au centre). Désactivable
-  entièrement si vous préférez le mini-lecteur uniquement.
+* **Détection du type d'abonnement** — l'addon lit votre
+  abonnement consumer depuis `/me` et le mémorise (Free / Go / Go+)
+  pour que les futures fonctionnalités puissent s'y adapter.
+* **Navigation au clavier dans le plein écran « En lecture »**
+  (v5.9.6008+) — Gauche/Droite avance/recule de 10 s, Haut passe au
+  morceau suivant, Bas redémarre le morceau actuel (ou saute au
+  précédent si on est dans les 3 premières secondes), OK met en
+  pause / reprend.
+* **Page d'aide pour récupérer le jeton en un clic** — une
+  page web compagnon sur
+  [theworms.github.io/kodi-addon-soundcloud](https://theworms.github.io/kodi-addon-soundcloud/)
+  avec un snippet console qui récupère votre jeton OAuth SoundCloud en
+  un clic — fini la manipulation manuelle F12 / onglet Network.
+    entièrement si vous préférez le mini-lecteur uniquement.
 
 Depuis la v5.7, l'interface plein écran est la seule disponible — le
 menu plugin classique a été retiré. Les widgets skin pour l'accueil
