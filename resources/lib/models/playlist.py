@@ -24,19 +24,20 @@ class Playlist(ListItem):
         list_item.setIsFolder(True)
         list_item.setProperty("isPlayable", "false")
 
-        # Use the "music" infotype so skins treat this as an album/playlist.
-        # `comment` carries the description — most music-oriented skins render
-        # it in the detail panel, which is what the previous "video"/plot
-        # hack was trying to achieve. We use the "album" mediatype for both
-        # albums and plain playlists because Kodi music skins handle any
-        # folder-of-tracks as an album-like container.
-        music_info = {
-            "artist": self.info.get("artist"),
-            "album": self.label,
-            "comment": self._build_comment(),
-            "mediatype": "album",
-        }
-        list_item.setInfo("music", music_info)
+        # Kodi 20+ InfoTagMusic API — see rationale in track.py.
+        # Playlists/albums map to mediatype="album" so music-oriented
+        # skins render them as folder-of-tracks containers.
+        tag = list_item.getMusicInfoTag()
+        tag.setMediaType("album")
+        tag.setAlbum(self.label)
+
+        artist = self.info.get("artist")
+        if artist:
+            tag.setArtist(artist)
+
+        comment = self._build_comment()
+        if comment:
+            tag.setComment(comment)
 
         url = addon_base + "/?" + urllib.parse.urlencode({
             "action": "call",

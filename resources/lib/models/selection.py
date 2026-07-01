@@ -9,9 +9,10 @@ class Selection(ListItem):
 
     def to_list_item(self, addon_base):
         list_item = xbmcgui.ListItem(label=self.label, label2=self.label2)
-        list_item.setInfo("music", {
-            "title": self.info.get("description")
-        })
+        # Kodi 20+ InfoTagMusic API — see rationale in track.py.
+        description = self.info.get("description")
+        if description:
+            list_item.getMusicInfoTag().setTitle(description)
         url = addon_base + PATH_DISCOVER + "?" + urllib.parse.urlencode({
             "selection": self.id
         })
