@@ -1019,6 +1019,10 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         self.addon = kwargs.get("addon")
         self.settings = kwargs.get("settings")
 
+        # Optional track id to play immediately after the window opens
+        # (widget track click → full UI with the track playing).
+        self._startup_track_id = kwargs.get("startup_track_id")
+
         # Track which collections we have loaded for which control id, so
         # onClick can resolve the index back to the actual track to play.
         # Key: control_id, Value: list of (play_url, ListItem) tuples.
@@ -1103,6 +1107,64 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 str(e),
                 xbmc.LOGWARNING,
             )
+
+        # Widget track click: start playback of the requested track now
+        # that the UI is fully up. Done last so a playback failure can't
+        # break the window construction.
+        if self._startup_track_id:
+            track_id, self._startup_track_id = self._startup_track_id, None
+            self._play_startup_track(track_id)
+
+    def _play_startup_track(self, track_id):
+        """
+        Fetch a track by id and start playing it. Used by the widget
+        click-through (plugin root ?play_track=<id> → RunScript →
+        open_home(startup_track_id=...)).
+        """
+        try:
+            collection = self.api.resolve_id(track_id)
+            items = getattr(collection, "items", None) or []
+            if not items:
+                xbmc.log(
+                    "plugin.audio.soundcloud::HomeWindow startup track %s "
+                    "not found via resolve_id" % track_id,
+                    xbmc.LOGWARNING,
+                )
+                self._notify(self.addon.getLocalizedString(30126))
+                return
+            track = items[0]
+            _, list_item, _ = track.to_list_item(
+                "plugin://" + self.addon.getAddonInfo("id")
+            )
+
+            # Same window props the normal click path sets, so the
+            # now-playing overlay can identify the track.
+            self.setProperty(
+                "soundcloud.last_played_track_id",
+                str(track.id) if track.id is not None else "",
+            )
+            self.setProperty(
+                "soundcloud.last_played_waveform_url",
+                track.info.get("waveform_url") or "",
+            )
+            self.setProperty(
+                "soundcloud.last_played_description",
+                track.info.get("description") or "",
+            )
+
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow playing startup "
+                "track %s (%s)" % (track_id, track.label),
+                xbmc.LOGINFO,
+            )
+            self._play_track(track.media, list_item)
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow startup track failed: %s"
+                % str(e),
+                xbmc.LOGERROR,
+            )
+            self._notify(self.addon.getLocalizedString(30126))
 
     # =====================================================================
     # Input handling
@@ -1779,8 +1841,15 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                     return
 
 
-def open_home(api, addon, settings):
-    """Public entry point — build and show the window modally."""
+def open_home(api, addon, settings, startup_track_id=None):
+    """
+    Public entry point — build and show the window modally.
+
+    startup_track_id: optional SoundCloud track id. When provided
+    (widget track click), the window starts playback of that track
+    right after its initial population, so the user lands in the full
+    UI with their chosen track playing (now-playing overlay included).
+    """
     addon_path = addon.getAddonInfo("path")
     window = SoundCloudHomeWindow(
         WINDOW_XML,
@@ -1790,6 +1859,7 @@ def open_home(api, addon, settings):
         api=api,
         addon=addon,
         settings=settings,
+        startup_track_id=startup_track_id,
     )
     window.doModal()
     del window

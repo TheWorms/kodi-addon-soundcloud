@@ -57,6 +57,15 @@ if __name__ == "__main__":
     t0 = time.time()
     _t(t0, "script.py entry")
 
+    # Optional argument from RunScript(plugin.audio.soundcloud,play_track=<id>)
+    # — used by widget track clicks to open the UI with a track playing.
+    startup_track_id = None
+    for _arg in sys.argv[1:]:
+        if isinstance(_arg, str) and _arg.startswith("play_track="):
+            startup_track_id = _arg.split("=", 1)[1].strip() or None
+    if startup_track_id:
+        _t(t0, "startup track requested: %s" % startup_track_id)
+
     home_window = xbmcgui.Window(10000)
 
     # Re-entrancy guard: if the UI is already open, don't open another.
@@ -137,7 +146,12 @@ if __name__ == "__main__":
                 )
 
         _t(t0, "calling open_home()")
-        open_home(api=api, addon=addon, settings=settings)
+        open_home(
+            api=api,
+            addon=addon,
+            settings=settings,
+            startup_track_id=startup_track_id,
+        )
         _t(t0, "open_home() returned (UI closed)")
     finally:
         # Cleanup. The service should already have closed its splash

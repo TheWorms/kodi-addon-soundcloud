@@ -40,6 +40,29 @@ def run():
     handle = int(sys.argv[1])
     args = urllib.parse.parse_qs(sys.argv[2][1:])
 
+    # Widget track click → open the full-screen UI playing that track.
+    # Widget track items point at /?play_track=<id> (not /play/) since
+    # 5.9.6023, so that clicking a track on the skin home screen opens
+    # the SoundCloud experience (home UI + now-playing overlay) instead
+    # of Kodi's bare native player. Must be handled BEFORE the
+    # widget.mode redirect below, which would otherwise swallow the
+    # root call.
+    if path == PATH_ROOT and "play_track" in args:
+        track_id = args["play_track"][0]
+        xbmc.log(
+            addon_id + ": widget track click — launching UI with "
+            "play_track=%s" % track_id,
+            xbmc.LOGINFO,
+        )
+        home_signal = xbmcgui.Window(10000)
+        home_signal.setProperty("soundcloud.splash", "show")
+        xbmc.executebuiltin(
+            "RunScript(%s,play_track=%s)" % (addon_id, track_id)
+        )
+        xbmcplugin.endOfDirectory(handle, succeeded=False, cacheToDisc=False)
+        xbmc.executebuiltin("ReplaceWindow(home)")
+        return
+
     # Widget mode redirection (must happen BEFORE the main dispatch).
     # When the user has set widget.mode to something other than "off",
     # any call to the plugin root returns directly the items for that
@@ -560,7 +583,9 @@ def run():
                 api_result = api.call(
                     "/users/%d/track_likes?limit=%d" % (user_id, limit)
                 )
-                collection = listItems.from_collection(api_result)
+                collection = _widgetify_tracks(
+                    listItems.from_collection(api_result)
+                )
                 _add_song_sort_methods(handle)
                 xbmcplugin.addDirectoryItems(handle, collection, len(collection))
         except Exception as e:
@@ -609,7 +634,9 @@ def run():
                 "genre": "soundcloud:genres:all-music",
                 "limit": limit,
             })
-            collection = listItems.from_collection(api_result)
+            collection = _widgetify_tracks(
+                listItems.from_collection(api_result)
+            )
             _add_song_sort_methods(handle)
             xbmcplugin.addDirectoryItems(handle, collection, len(collection))
         except Exception as e:
@@ -622,7 +649,9 @@ def run():
         # (personalisation by SoundCloud).
         xbmcplugin.setContent(handle, "songs")
         try:
-            collection = listItems.from_collection(api.discover(None))
+            collection = _widgetify_tracks(
+                listItems.from_collection(api.discover(None))
+            )
             xbmcplugin.addDirectoryItems(handle, collection, len(collection))
         except Exception as e:
             xbmc.log(addon_id + ": widget/discover failed: %s" % str(e), xbmc.LOGERROR)
@@ -723,6 +752,35 @@ def run():
 
     else:
         xbmc.log(addon_id + ": Path not found", xbmc.LOGERROR)
+
+
+def _widgetify_tracks(collection_items):
+    """
+    Rewrites track items for widget display: instead of the /play/
+    route (which resolves the stream and plays in Kodi's bare native
+    player), tracks point at the plugin root with a play_track=<id>
+    parameter. Clicking such an item launches the full SoundCloud UI
+    with that track playing — home window, mini-player, now-playing
+    overlay, the works.
+
+    Non-track items (playlists, artists, "next page") pass through
+    unchanged: they are folders and navigate normally.
+    """
+    out = []
+    for url, list_item, is_folder in collection_items:
+        track_id = list_item.getProperty("soundcloud.track_id")
+        if track_id and not is_folder:
+            # Not "playable" anymore from Kodi's point of view: the
+            # click should invoke the plugin (which launches the UI),
+            # not resolve to a stream URL.
+            list_item.setProperty("isPlayable", "false")
+            new_url = addon_base + "/?" + urllib.parse.urlencode(
+                {"play_track": track_id}
+            )
+            out.append((new_url, list_item, False))
+        else:
+            out.append((url, list_item, is_folder))
+    return out
 
 
 def _set_content_for_collection(handle, collection):

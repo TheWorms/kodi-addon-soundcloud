@@ -24,7 +24,7 @@
   Settings > Playback > Fullscreen style = "vinyl".
 -->
 <window type="dialog" id="13103">
-    <defaultcontrol>9001</defaultcontrol>
+    <defaultcontrol>9099</defaultcontrol>
     <coordinates>
         <system>1</system>
     </coordinates>
@@ -50,7 +50,7 @@
             <aspectratio>scale</aspectratio>
             <colordiffuse>33FFFFFF</colordiffuse>
             <animation effect="zoom" start="100" end="106" center="auto"
-                       time="22000" pulse="true" tween="sine">Conditional</animation>
+                       time="22000" pulse="true" tween="sine" condition="true">Conditional</animation>
         </control>
 
         <!-- 2. Dark scrim for legibility -->
@@ -86,7 +86,7 @@
             <aspectratio>scale</aspectratio>
             <animation effect="rotate" start="0" end="360"
                        time="12000" loop="true"
-                       center="auto">Conditional</animation>
+                       center="auto" condition="true">Conditional</animation>
         </control>
 
         <!-- 2b. The vinyl disc PNG (overlays the cover, the central
@@ -100,7 +100,7 @@
             <texture>vinyl-disc.png</texture>
             <animation effect="rotate" start="0" end="360"
                        time="12000" loop="true"
-                       center="auto">Conditional</animation>
+                       center="auto" condition="true">Conditional</animation>
         </control>
 
         <!-- ============================================================
@@ -205,5 +205,22 @@
             <label>$ADDON[plugin.audio.soundcloud 32116]</label>
         </control>
 
+    
+        <!-- Invisible focus sink. All visible controls in this overlay
+             are labels/images, which Kodi cannot focus. If defaultcontrol
+             points at a label, Kodi retries the focus forever and spams
+             "Control 9001 ... has been asked to focus, but it can't"
+             in the log every few seconds. This 1x1 off-screen button
+             gives Kodi something focusable; key presses still reach
+             the window's onAction handler as before. -->
+        <control type="button" id="9099">
+            <left>-100</left>
+            <top>-100</top>
+            <width>1</width>
+            <height>1</height>
+            <label></label>
+            <texturefocus></texturefocus>
+            <texturenofocus></texturenofocus>
+        </control>
     </controls>
 </window>
