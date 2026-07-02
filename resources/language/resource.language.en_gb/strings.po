@@ -601,3 +601,7 @@ msgstr "Continue with widget category after track ends"
 msgctxt "#30294"
 msgid "When a track launched from a skin home widget finishes, keep playing the other tracks from the same widget category (Likes, Trending, Discover) instead of stopping."
 msgstr "When a track launched from a skin home widget finishes, keep playing the other tracks from the same widget category (Likes, Trending, Discover) instead of stopping."
+
+msgctxt "#30295"
+msgid "Stream interrupted — resuming…"
+msgstr "Stream interrupted — resuming…"

@@ -165,6 +165,22 @@ class _ProgressUpdater(threading.Thread):
         controls_w = int(self.CONTROLS_BAR_WIDTH * ratio)
         compact_w = int(self.COMPACT_BAR_WIDTH * ratio)
 
+        # Remember the playback position for the premature-end resume
+        # logic in _PlayerObserver.onPlayBackEnded. SoundCloud's signed
+        # CDN URLs can expire mid-track on very long mixes; when that
+        # happens the stream EOFs early and Kodi thinks the track is
+        # over. These breadcrumbs let the observer detect the early end
+        # and restart the track at the interrupted position with a
+        # freshly-resolved URL.
+        try:
+            self._window._last_elapsed = elapsed
+            self._window._last_duration = duration
+            self._window._last_playlist_pos = xbmc.PlayList(
+                xbmc.PLAYLIST_MUSIC
+            ).getposition()
+        except Exception:
+            pass
+
         # Log progress every ~5 seconds (every 10 ticks at 500ms)
         if self._tick_count % 10 == 0:
             xbmc.log(
@@ -177,6 +193,32 @@ class _ProgressUpdater(threading.Thread):
 
         self._set_width(self.ID_FILL_CONTROLS, controls_w)
         self._set_width(self.ID_FILL_COMPACT, compact_w)
+
+
+class _AbortWatcher(threading.Thread):
+    """
+    Closes the home window when Kodi shuts down. Without this, the
+    modal doModal() loop keeps the script alive at shutdown; Kodi
+    waits 5 seconds then force-kills the interpreter ("script didn't
+    stop in 5 seconds - let's kill it" + a threading SystemExit
+    traceback in the log). Daemon thread: costs nothing while idle.
+    """
+    def __init__(self, window):
+        super().__init__(daemon=True)
+        self._window = window
+
+    def run(self):
+        monitor = xbmc.Monitor()
+        monitor.waitForAbort()
+        try:
+            self._window.close()
+            xbmc.log(
+                "plugin.audio.soundcloud::AbortWatcher closed home "
+                "window on Kodi shutdown",
+                xbmc.LOGINFO,
+            )
+        except Exception:
+            pass
 
 
 class _PlayerObserver(xbmc.Player):
@@ -234,7 +276,110 @@ class _PlayerObserver(xbmc.Player):
         # the fullscreen window between tracks (it would flash). So we
         # leave the dialog open here and rely on Player.* infolabels to
         # update inside the still-open dialog.
-        pass
+        #
+        # We DO check whether this "end" was premature: SoundCloud's
+        # signed CDN URLs (CloudFront Policy/Signature query params)
+        # can expire mid-track on very long mixes. Kodi's file cache
+        # then reads 0 bytes, retries with the same expired URL for a
+        # while, and finally EOFs — ending the track way before its
+        # real duration. When we detect that, we restart the same
+        # playlist position (which re-resolves a FRESH stream URL via
+        # our /play/ handler) and seek back to where it broke.
+        try:
+            self._maybe_resume_interrupted()
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::PlayerObserver resume check "
+                "failed: %s" % str(e),
+                xbmc.LOGWARNING,
+            )
+
+    # How many seconds before the real end an "ended" event must occur
+    # to be considered an interruption rather than a normal end.
+    RESUME_MARGIN_SECONDS = 60
+    # Give up after this many resume attempts for the same track, to
+    # avoid an infinite loop if the stream is truly dead.
+    MAX_RESUME_ATTEMPTS = 2
+
+    def _maybe_resume_interrupted(self):
+        w = self._window
+        elapsed = getattr(w, "_last_elapsed", 0.0) or 0.0
+        duration = getattr(w, "_last_duration", 0.0) or 0.0
+        pos = getattr(w, "_last_playlist_pos", -1)
+
+        if duration <= 0 or elapsed <= 0:
+            return
+        if elapsed >= duration - self.RESUME_MARGIN_SECONDS:
+            return  # normal end of track
+
+        key = (pos, int(duration))
+        attempts = w._resume_attempts.get(key, 0)
+        if attempts >= self.MAX_RESUME_ATTEMPTS:
+            xbmc.log(
+                "plugin.audio.soundcloud::PlayerObserver track at "
+                "playlist pos %d keeps dying at %.0fs/%.0fs — giving up "
+                "after %d resume attempts" %
+                (pos, elapsed, duration, attempts),
+                xbmc.LOGWARNING,
+            )
+            return
+        w._resume_attempts[key] = attempts + 1
+
+        playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
+        if pos < 0 or pos >= playlist.size():
+            return
+
+        xbmc.log(
+            "plugin.audio.soundcloud::PlayerObserver stream ended "
+            "prematurely at %.0fs of %.0fs (playlist pos %d) — "
+            "re-resolving and resuming (attempt %d)" %
+            (elapsed, duration, pos, attempts + 1),
+            xbmc.LOGINFO,
+        )
+        try:
+            w._notify(w.addon.getLocalizedString(30295))
+        except Exception:
+            pass
+
+        # Re-play the same playlist position. Kodi calls our /play/
+        # handler again, which resolves a fresh stream URL (new
+        # track_authorization JWT + fresh CloudFront signature). The
+        # rest of the queue stays intact for the tracks after this one.
+        target = max(0.0, elapsed - 5.0)
+        xbmc.Player().play(playlist, startpos=pos)
+        threading.Thread(
+            target=self._seek_when_ready, args=(target,), daemon=True
+        ).start()
+
+    @staticmethod
+    def _seek_when_ready(target_seconds):
+        """
+        Wait (max 20 s) for the restarted stream to become seekable,
+        then jump to the interrupted position.
+        """
+        player = xbmc.Player()
+        monitor = xbmc.Monitor()
+        waited = 0.0
+        while waited < 20.0 and not monitor.abortRequested():
+            try:
+                if player.isPlayingAudio() and player.getTotalTime() > 0:
+                    player.seekTime(target_seconds)
+                    xbmc.log(
+                        "plugin.audio.soundcloud::PlayerObserver resumed "
+                        "at %.0fs" % target_seconds,
+                        xbmc.LOGINFO,
+                    )
+                    return
+            except Exception:
+                pass
+            if monitor.waitForAbort(0.5):
+                return
+            waited += 0.5
+        xbmc.log(
+            "plugin.audio.soundcloud::PlayerObserver resume seek timed "
+            "out (stream never became seekable)",
+            xbmc.LOGWARNING,
+        )
 
     def _maybe_open_now_playing(self):
         """Open the configured fullscreen overlay, if any, and only if
@@ -1043,6 +1188,17 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         # We keep a reference so it doesn't get garbage-collected.
         self._player_observer = _PlayerObserver(self)
 
+        # Breadcrumbs written by _ProgressUpdater and read by the
+        # observer's premature-end resume logic.
+        self._last_elapsed = 0.0
+        self._last_duration = 0.0
+        self._last_playlist_pos = -1
+        self._resume_attempts = {}
+
+        # Closes this window on Kodi shutdown so the script exits
+        # cleanly instead of being force-killed after 5 seconds.
+        self._abort_watcher = _AbortWatcher(self)
+
         # Progress bar updater — created here, started in onInit() once
         # the controls actually exist in the GUI tree. Starting it from
         # __init__ would be too early: getControl() would fail because
@@ -1109,6 +1265,14 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 str(e),
                 xbmc.LOGWARNING,
             )
+
+        # Watch for Kodi shutdown so the modal window closes itself
+        # instead of getting force-killed after 5 seconds.
+        try:
+            if not self._abort_watcher.is_alive():
+                self._abort_watcher.start()
+        except Exception:
+            pass
 
         # Widget track click: start playback of the requested track now
         # that the UI is fully up. Done last so a playback failure can't
@@ -1994,5 +2158,28 @@ def open_home(api, addon, settings, startup_track_id=None,
         startup_track_id=startup_track_id,
         startup_track_source=startup_track_source,
     )
+
+    # Abort watchdog: doModal() blocks until the window is closed, and
+    # Kodi does NOT close Python windows on shutdown — it waits 5
+    # seconds then force-kills the interpreter ("script didn't stop in
+    # 5 seconds - let's kill it" in the log), delaying every Kodi
+    # shutdown/restart by 5s while our UI is open. This daemon thread
+    # waits for the abort signal and closes the window so doModal()
+    # returns immediately and the script exits cleanly.
+    import threading
+
+    def _close_on_abort(win):
+        monitor = xbmc.Monitor()
+        monitor.waitForAbort()
+        try:
+            win.close()
+        except Exception:
+            pass
+
+    watchdog = threading.Thread(
+        target=_close_on_abort, args=(window,), daemon=True
+    )
+    watchdog.start()
+
     window.doModal()
     del window

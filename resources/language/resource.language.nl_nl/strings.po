@@ -600,3 +600,7 @@ msgstr "Doorgaan met widget-categorie na afloop van track"
 msgctxt "#30294"
 msgid "When a track launched from a skin home widget finishes, keep playing the other tracks from the same widget category (Likes, Trending, Discover) instead of stopping."
 msgstr "Wanneer een via een widget gestarte track eindigt, blijven de andere tracks uit dezelfde categorie (Likes, Trending, Ontdekken) spelen in plaats van te stoppen."
+
+msgctxt "#30295"
+msgid "Stream interrupted — resuming…"
+msgstr "Stream onderbroken — hervatten…"

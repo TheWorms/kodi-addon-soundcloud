@@ -601,3 +601,7 @@ msgstr "Enchaîner sur la catégorie du widget après le morceau"
 msgctxt "#30294"
 msgid "When a track launched from a skin home widget finishes, keep playing the other tracks from the same widget category (Likes, Trending, Discover) instead of stopping."
 msgstr "Quand un morceau lancé depuis un widget d'accueil se termine, continue la lecture avec les autres morceaux de la même catégorie (J'aime, Tendances, Découvertes) au lieu de s'arrêter."
+
+msgctxt "#30295"
+msgid "Stream interrupted — resuming…"
+msgstr "Flux interrompu — reprise…"

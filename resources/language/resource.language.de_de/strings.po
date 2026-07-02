@@ -601,3 +601,7 @@ msgstr "Nach Titelende mit Widget-Kategorie fortfahren"
 msgctxt "#30294"
 msgid "When a track launched from a skin home widget finishes, keep playing the other tracks from the same widget category (Likes, Trending, Discover) instead of stopping."
 msgstr "Wenn ein über ein Widget gestarteter Titel endet, werden die anderen Titel derselben Kategorie (Likes, Trends, Entdecken) weitergespielt, statt zu stoppen."
+
+msgctxt "#30295"
+msgid "Stream interrupted — resuming…"
+msgstr "Stream unterbrochen — Wiederaufnahme…"
