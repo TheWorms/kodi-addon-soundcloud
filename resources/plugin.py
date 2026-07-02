@@ -49,15 +49,19 @@ def run():
     # root call.
     if path == PATH_ROOT and "play_track" in args:
         track_id = args["play_track"][0]
+        track_source = (args.get("source") or [""])[0]
         xbmc.log(
             addon_id + ": widget track click — launching UI with "
-            "play_track=%s" % track_id,
+            "play_track=%s source=%s" % (track_id, track_source or "-"),
             xbmc.LOGINFO,
         )
         home_signal = xbmcgui.Window(10000)
         home_signal.setProperty("soundcloud.splash", "show")
+        runscript_args = "play_track=%s" % track_id
+        if track_source:
+            runscript_args += ",source=%s" % track_source
         xbmc.executebuiltin(
-            "RunScript(%s,play_track=%s)" % (addon_id, track_id)
+            "RunScript(%s,%s)" % (addon_id, runscript_args)
         )
         xbmcplugin.endOfDirectory(handle, succeeded=False, cacheToDisc=False)
         xbmc.executebuiltin("ReplaceWindow(home)")
@@ -584,7 +588,7 @@ def run():
                     "/users/%d/track_likes?limit=%d" % (user_id, limit)
                 )
                 collection = _widgetify_tracks(
-                    listItems.from_collection(api_result)
+                    listItems.from_collection(api_result), source="likes"
                 )
                 _add_song_sort_methods(handle)
                 xbmcplugin.addDirectoryItems(handle, collection, len(collection))
@@ -635,7 +639,7 @@ def run():
                 "limit": limit,
             })
             collection = _widgetify_tracks(
-                listItems.from_collection(api_result)
+                listItems.from_collection(api_result), source="trending"
             )
             _add_song_sort_methods(handle)
             xbmcplugin.addDirectoryItems(handle, collection, len(collection))
@@ -650,7 +654,7 @@ def run():
         xbmcplugin.setContent(handle, "songs")
         try:
             collection = _widgetify_tracks(
-                listItems.from_collection(api.discover(None))
+                listItems.from_collection(api.discover(None)), source="discover"
             )
             xbmcplugin.addDirectoryItems(handle, collection, len(collection))
         except Exception as e:
@@ -754,7 +758,7 @@ def run():
         xbmc.log(addon_id + ": Path not found", xbmc.LOGERROR)
 
 
-def _widgetify_tracks(collection_items):
+def _widgetify_tracks(collection_items, source=None):
     """
     Rewrites track items for widget display: instead of the /play/
     route (which resolves the stream and plays in Kodi's bare native
@@ -762,6 +766,12 @@ def _widgetify_tracks(collection_items):
     parameter. Clicking such an item launches the full SoundCloud UI
     with that track playing — home window, mini-player, now-playing
     overlay, the works.
+
+    source identifies which widget category the track came from
+    (likes / trending / discover). It travels with the click so the
+    home window can queue the REST of that category after the clicked
+    track, giving continuous playback instead of stopping after one
+    track (see window.py _play_startup_track).
 
     Non-track items (playlists, artists, "next page") pass through
     unchanged: they are folders and navigate normally.
@@ -774,9 +784,10 @@ def _widgetify_tracks(collection_items):
             # click should invoke the plugin (which launches the UI),
             # not resolve to a stream URL.
             list_item.setProperty("isPlayable", "false")
-            new_url = addon_base + "/?" + urllib.parse.urlencode(
-                {"play_track": track_id}
-            )
+            params = {"play_track": track_id}
+            if source:
+                params["source"] = source
+            new_url = addon_base + "/?" + urllib.parse.urlencode(params)
             out.append((new_url, list_item, False))
         else:
             out.append((url, list_item, is_folder))

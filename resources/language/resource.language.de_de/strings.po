@@ -593,3 +593,11 @@ msgstr "Startet einen kleinen Dienst beim Kodi-Start, der das Splash-Fenster vor
 msgctxt "#30292"
 msgid "Background service activated. Restart Kodi to take effect."
 msgstr "Hintergrunddienst aktiviert. Kodi neu starten zur Aktivierung."
+
+msgctxt "#30293"
+msgid "Continue with widget category after track ends"
+msgstr "Nach Titelende mit Widget-Kategorie fortfahren"
+
+msgctxt "#30294"
+msgid "When a track launched from a skin home widget finishes, keep playing the other tracks from the same widget category (Likes, Trending, Discover) instead of stopping."
+msgstr "Wenn ein über ein Widget gestarteter Titel endet, werden die anderen Titel derselben Kategorie (Likes, Trends, Entdecken) weitergespielt, statt zu stoppen."

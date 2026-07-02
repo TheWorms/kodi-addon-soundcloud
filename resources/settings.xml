@@ -150,6 +150,11 @@
                     <default>false</default>
                     <control type="toggle"/>
                 </setting>
+                <setting id="widget.autoplay" type="boolean" label="30293" help="30294">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
                 <setting id="search.items.size" type="string" label="30237" help="30238">
                     <level>0</level>
                     <default>20</default>

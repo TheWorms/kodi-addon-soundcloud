@@ -57,14 +57,22 @@ if __name__ == "__main__":
     t0 = time.time()
     _t(t0, "script.py entry")
 
-    # Optional argument from RunScript(plugin.audio.soundcloud,play_track=<id>)
-    # — used by widget track clicks to open the UI with a track playing.
+    # Optional arguments from RunScript(plugin.audio.soundcloud,
+    # play_track=<id>,source=<likes|trending|discover>) — used by
+    # widget track clicks to open the UI with a track playing, and to
+    # queue the rest of the widget category after it.
     startup_track_id = None
+    startup_track_source = None
     for _arg in sys.argv[1:]:
-        if isinstance(_arg, str) and _arg.startswith("play_track="):
+        if not isinstance(_arg, str):
+            continue
+        if _arg.startswith("play_track="):
             startup_track_id = _arg.split("=", 1)[1].strip() or None
+        elif _arg.startswith("source="):
+            startup_track_source = _arg.split("=", 1)[1].strip() or None
     if startup_track_id:
-        _t(t0, "startup track requested: %s" % startup_track_id)
+        _t(t0, "startup track requested: %s (source=%s)" % (
+            startup_track_id, startup_track_source or "-"))
 
     home_window = xbmcgui.Window(10000)
 
@@ -151,6 +159,7 @@ if __name__ == "__main__":
             addon=addon,
             settings=settings,
             startup_track_id=startup_track_id,
+            startup_track_source=startup_track_source,
         )
         _t(t0, "open_home() returned (UI closed)")
     finally:

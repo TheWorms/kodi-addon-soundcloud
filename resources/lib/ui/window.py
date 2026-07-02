@@ -1020,8 +1020,10 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         self.settings = kwargs.get("settings")
 
         # Optional track id to play immediately after the window opens
-        # (widget track click → full UI with the track playing).
+        # (widget track click → full UI with the track playing), plus
+        # the widget category it came from (for continuous playback).
         self._startup_track_id = kwargs.get("startup_track_id")
+        self._startup_track_source = kwargs.get("startup_track_source")
 
         # Track which collections we have loaded for which control id, so
         # onClick can resolve the index back to the actual track to play.
@@ -1113,15 +1115,43 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         # break the window construction.
         if self._startup_track_id:
             track_id, self._startup_track_id = self._startup_track_id, None
-            self._play_startup_track(track_id)
+            source, self._startup_track_source = self._startup_track_source, None
+            self._play_startup_track(track_id, source)
 
-    def _play_startup_track(self, track_id):
+    def _play_startup_track(self, track_id, source=None):
         """
-        Fetch a track by id and start playing it. Used by the widget
-        click-through (plugin root ?play_track=<id> → RunScript →
-        open_home(startup_track_id=...)).
+        Start playback for a widget track click (plugin root
+        ?play_track=<id>&source=<cat> → RunScript → open_home).
+
+        When the "widget.autoplay" setting is enabled (default) and we
+        know which widget category the click came from, we queue the
+        WHOLE category (likes / trending / discover) with the clicked
+        track first — so when it ends, playback continues with the
+        rest of the category instead of stopping on a silent screen.
+
+        When the setting is off, or the category can't be fetched, we
+        fall back to playing just the requested track.
         """
         try:
+            continue_category = (
+                (self.settings.get("widget.autoplay") or "true") == "true"
+            )
+            if continue_category and source:
+                track_items, start = self._build_source_queue(source, track_id)
+                if track_items:
+                    _, li = track_items[start]
+                    self._stash_now_playing_props(li)
+                    xbmc.log(
+                        "plugin.audio.soundcloud::HomeWindow widget "
+                        "startup: queueing %d tracks from '%s', start=%d" %
+                        (len(track_items), source, start),
+                        xbmc.LOGINFO,
+                    )
+                    self._queue_and_play(track_items, start)
+                    return
+
+            # Single-track fallback (setting off, no source, or the
+            # category fetch failed).
             collection = self.api.resolve_id(track_id)
             items = getattr(collection, "items", None) or []
             if not items:
@@ -1136,22 +1166,7 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             _, list_item, _ = track.to_list_item(
                 "plugin://" + self.addon.getAddonInfo("id")
             )
-
-            # Same window props the normal click path sets, so the
-            # now-playing overlay can identify the track.
-            self.setProperty(
-                "soundcloud.last_played_track_id",
-                str(track.id) if track.id is not None else "",
-            )
-            self.setProperty(
-                "soundcloud.last_played_waveform_url",
-                track.info.get("waveform_url") or "",
-            )
-            self.setProperty(
-                "soundcloud.last_played_description",
-                track.info.get("description") or "",
-            )
-
+            self._stash_now_playing_props(list_item)
             xbmc.log(
                 "plugin.audio.soundcloud::HomeWindow playing startup "
                 "track %s (%s)" % (track_id, track.label),
@@ -1165,6 +1180,107 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 xbmc.LOGERROR,
             )
             self._notify(self.addon.getLocalizedString(30126))
+
+    def _stash_now_playing_props(self, list_item):
+        """
+        Copy the track-identifying properties from a ListItem into
+        window properties, so the fullscreen now-playing overlay can
+        identify the playing track. Same props the home-row click path
+        sets.
+        """
+        try:
+            self.setProperty(
+                "soundcloud.last_played_track_id",
+                list_item.getProperty("soundcloud.track_id") or "",
+            )
+            self.setProperty(
+                "soundcloud.last_played_waveform_url",
+                list_item.getProperty("soundcloud.waveform_url") or "",
+            )
+            self.setProperty(
+                "soundcloud.last_played_description",
+                list_item.getProperty("soundcloud.description") or "",
+            )
+        except Exception:
+            pass
+
+    def _build_source_queue(self, source, track_id):
+        """
+        Fetch the widget category's track list and return it as a list
+        of (plugin_play_url, ListItem) pairs plus the index of the
+        clicked track. Returns ([], 0) when the category can't be
+        fetched (auth missing, network error, unknown source).
+
+        If the clicked track isn't in the fetched page (e.g. it fell
+        off the first page since the widget was rendered), it is
+        prepended so the user still hears what they clicked, followed
+        by the category.
+        """
+        try:
+            limit = int(self.settings.get("search.items.size") or 20)
+        except (TypeError, ValueError):
+            limit = 20
+
+        collection = None
+        try:
+            if source == "likes":
+                user_id = self.api.get_my_user_id()
+                if user_id:
+                    collection = self.api.call(
+                        "/users/%d/track_likes?limit=%d" % (user_id, limit)
+                    )
+            elif source == "trending":
+                collection = self.api.charts({
+                    "kind": "trending",
+                    "genre": "soundcloud:genres:all-music",
+                    "limit": limit,
+                })
+            elif source == "discover":
+                collection = self.api.discover(None)
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow source queue fetch "
+                "failed for '%s': %s" % (source, str(e)),
+                xbmc.LOGWARNING,
+            )
+            return [], 0
+
+        if collection is None:
+            return [], 0
+
+        addon_base = "plugin://" + self.addon.getAddonInfo("id")
+        track_items = []
+        start = None
+        for item in getattr(collection, "items", None) or []:
+            # Tracks have a media URL; selections/playlists/users don't.
+            if not getattr(item, "media", ""):
+                continue
+            url, li, _ = item.to_list_item(addon_base)
+            if not li.getProperty("mediaUrl"):
+                continue
+            if start is None and str(getattr(item, "id", "")) == str(track_id):
+                start = len(track_items)
+            track_items.append((url, li))
+
+        if not track_items:
+            return [], 0
+
+        if start is None:
+            # Clicked track not in the page anymore — fetch it alone
+            # and put it first.
+            try:
+                col = self.api.resolve_id(track_id)
+                its = getattr(col, "items", None) or []
+                if its:
+                    url, li, _ = its[0].to_list_item(addon_base)
+                    track_items.insert(0, (url, li))
+                    start = 0
+                else:
+                    return [], 0
+            except Exception:
+                return [], 0
+
+        return track_items, start
 
     # =====================================================================
     # Input handling
@@ -1688,6 +1804,16 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 new_start = i
                 break
 
+        self._queue_and_play(track_items, new_start)
+
+    def _queue_and_play(self, track_items, new_start):
+        """
+        Queue a list of (plugin_play_url, ListItem) pairs into Kodi's
+        music playlist and start playback at new_start. Shared by the
+        home-row click path (_play_with_queue) and the widget startup
+        path (_play_startup_track). Honours the shuffle setting: the
+        selected track stays first, the rest is randomised.
+        """
         try:
             # If the user enabled shuffle, randomise the order of
             # track_items BEFORE building the Kodi playlist. We pin the
@@ -1763,7 +1889,7 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             )
             # Fallback to single-track play so the user at least hears
             # the track they clicked.
-            _, list_item = items[start_position]
+            _, list_item = track_items[new_start]
             media_url = list_item.getProperty("mediaUrl")
             if media_url:
                 self._play_track(media_url, list_item)
@@ -1841,7 +1967,8 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                     return
 
 
-def open_home(api, addon, settings, startup_track_id=None):
+def open_home(api, addon, settings, startup_track_id=None,
+              startup_track_source=None):
     """
     Public entry point — build and show the window modally.
 
@@ -1849,6 +1976,11 @@ def open_home(api, addon, settings, startup_track_id=None):
     (widget track click), the window starts playback of that track
     right after its initial population, so the user lands in the full
     UI with their chosen track playing (now-playing overlay included).
+
+    startup_track_source: optional widget category name the click came
+    from (likes / trending / discover). When present and the
+    widget.autoplay setting is on, the rest of the category is queued
+    after the clicked track for continuous playback.
     """
     addon_path = addon.getAddonInfo("path")
     window = SoundCloudHomeWindow(
@@ -1860,6 +1992,7 @@ def open_home(api, addon, settings, startup_track_id=None):
         addon=addon,
         settings=settings,
         startup_track_id=startup_track_id,
+        startup_track_source=startup_track_source,
     )
     window.doModal()
     del window

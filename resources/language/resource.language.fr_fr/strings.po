@@ -593,3 +593,11 @@ msgstr "Lance un petit service au démarrage de Kodi qui pré-crée la fenêtre 
 msgctxt "#30292"
 msgid "Background service activated. Restart Kodi to take effect."
 msgstr "Service en arrière-plan activé. Redémarrez Kodi pour l'activer."
+
+msgctxt "#30293"
+msgid "Continue with widget category after track ends"
+msgstr "Enchaîner sur la catégorie du widget après le morceau"
+
+msgctxt "#30294"
+msgid "When a track launched from a skin home widget finishes, keep playing the other tracks from the same widget category (Likes, Trending, Discover) instead of stopping."
+msgstr "Quand un morceau lancé depuis un widget d'accueil se termine, continue la lecture avec les autres morceaux de la même catégorie (J'aime, Tendances, Découvertes) au lieu de s'arrêter."
