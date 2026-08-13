@@ -237,7 +237,21 @@ class ApiV2(ApiInterface):
         # Send the request, measuring how long it took.
         import time
         t_start = time.time()
-        raw = requests.get(path, headers=headers, params=payload)
+        # Timeout borné : 5 s pour etablir la connexion, 15 s pour la
+        # reponse. Sans cela, un serveur muet gele la fenetre UI (les
+        # appels API partent du thread GUI) jusqu'au timeout TCP de
+        # l'OS — potentiellement plusieurs minutes sans aucun retour.
+        try:
+            raw = requests.get(
+                path, headers=headers, params=payload, timeout=(5, 15)
+            )
+        except requests.exceptions.RequestException as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::ApiV2() Network error on %s: %s" %
+                (path, str(e)),
+                xbmc.LOGWARNING,
+            )
+            return {"collection": []}
         elapsed_ms = int((time.time() - t_start) * 1000)
 
         # Status-code-aware handling. We log the body on errors (truncated)
@@ -620,7 +634,9 @@ class ApiV2(ApiInterface):
         headers = {"Accept-Encoding": "gzip", "User-Agent": ApiV2.api_user_agent}
 
         # Get the HTML (includes a reference to the JS file we need)
-        html = requests.get("https://soundcloud.com/", headers=headers).text
+        html = requests.get(
+            "https://soundcloud.com/", headers=headers, timeout=(5, 15)
+        ).text
 
         # Extract the HREF to the JS file (which contains the API key)
         matches = re.findall(r"=\"(https://a-v2\.sndcdn\.com/assets/.*.js)\"", html)
@@ -628,7 +644,7 @@ class ApiV2(ApiInterface):
         if matches:
             for match in matches:
                 # Get the JS
-                response = requests.get(match, headers=headers)
+                response = requests.get(match, headers=headers, timeout=(5, 15))
                 response.encoding = "utf-8"  # This speeds up `response.text` by 3 seconds
 
                 # Extract the API key

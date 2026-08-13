@@ -17,6 +17,12 @@ class Cache:
         if file:
             mtime = self.vfs.get_mtime(filename)
             if (int(time.time()) - age * 60) > mtime:
+                # Entree expiree : on la supprime au passage pour que le
+                # dossier cache ne grossisse pas indefiniment.
+                try:
+                    self.vfs.delete(filename)
+                except Exception:
+                    pass
                 return None
 
         return file

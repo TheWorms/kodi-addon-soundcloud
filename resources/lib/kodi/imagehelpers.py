@@ -39,11 +39,52 @@ except ImportError:
 
 
 def _temp_dir():
-    """Return the directory we use for cached PNGs, creating it if missing."""
+    """Return the directory we use for cached PNGs, creating it if missing.
+
+    Contrary to a common belief, special://temp is NOT purged between
+    sessions on CoreELEC/LibreELEC — files accumulate forever. We
+    therefore prune entries older than PURGE_AGE_DAYS, once per
+    process (cheap: a single listdir + stat pass).
+    """
     base = xbmcvfs.translatePath("special://temp/plugin.audio.soundcloud/")
     if not xbmcvfs.exists(base):
         xbmcvfs.mkdirs(base)
+    _purge_old_files(base)
     return base
+
+
+PURGE_AGE_DAYS = 30
+_purge_done = False
+
+
+def _purge_old_files(base):
+    """Delete cached images older than PURGE_AGE_DAYS. Runs once per
+    Python process; every step is wrapped so a filesystem hiccup can
+    never break the caller."""
+    global _purge_done
+    if _purge_done:
+        return
+    _purge_done = True
+    try:
+        import time
+        cutoff = time.time() - PURGE_AGE_DAYS * 86400
+        removed = 0
+        for name in os.listdir(base):
+            full = os.path.join(base, name)
+            try:
+                if os.path.isfile(full) and os.path.getmtime(full) < cutoff:
+                    os.remove(full)
+                    removed += 1
+            except Exception:
+                pass
+        if removed:
+            xbmc.log(
+                "plugin.audio.soundcloud::imagehelpers purged %d cached "
+                "image(s) older than %d days" % (removed, PURGE_AGE_DAYS),
+                xbmc.LOGINFO,
+            )
+    except Exception:
+        pass
 
 
 def _hash_url(url):

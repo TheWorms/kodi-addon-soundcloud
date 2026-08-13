@@ -95,10 +95,10 @@ def _warm_module_files(addon_path):
         "resources/lib/kodi/settings.py",
         "resources/lib/kodi/vfs.py",
         "resources/lib/kodi/cache.py",
+        "resources/lib/kodi/items.py",
         "resources/lib/soundcloud/api_v2.py",
         "resources/lib/ui/window.py",
-        "resources/lib/ui/listItems.py",
-        "resources/lib/soundcloud/objects.py",
+        "resources/plugin.py",
         "resources/skins/default/1080i/script-soundcloud-home.xml",
         "resources/skins/default/1080i/script-soundcloud-splash.xml",
     ]
