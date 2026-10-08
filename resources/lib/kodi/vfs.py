@@ -55,9 +55,13 @@ class VFS:
     def get_json_as_obj(self, filename, default=None):
         string = self.read(filename)
         if string:
-            return json.loads(string)
-        else:
-            return default if default else {}
+            try:
+                return json.loads(string)
+            except ValueError:
+                # Corrupted JSON (e.g. interrupted write) — fall back to
+                # the default instead of crashing the plugin.
+                pass
+        return default if default else {}
 
     def save_obj_to_json(self, filename, obj):
         string = json.dumps(obj)

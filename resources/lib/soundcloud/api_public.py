@@ -8,9 +8,14 @@ class ApiPublic(ApiInterface):
     api_host = "https://api.soundcloud.com/"
 
     def _do_request(self, path, payload):
-        return requests.get(
-            self.api_host + path, params=payload, timeout=(5, 15)
-        ).json()
+        try:
+            return requests.get(
+                self.api_host + path, params=payload, timeout=(5, 15)
+            ).json()
+        except (requests.exceptions.RequestException, ValueError):
+            # Network error or non-JSON response — degrade to an empty
+            # collection instead of crashing the caller.
+            return {"collection": []}
 
     def search(self, query, kind):
         pass

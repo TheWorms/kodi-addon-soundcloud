@@ -32,7 +32,7 @@ def run():
     _t0 = _t.time()
     xbmc.log(
         "plugin.audio.soundcloud::plugin.py timing T+0ms run() entry",
-        xbmc.LOGINFO,
+        xbmc.LOGDEBUG,
     )
 
     url = urllib.parse.urlparse(sys.argv[0])
@@ -199,7 +199,7 @@ def run():
                     "plugin.audio.soundcloud::plugin.py timing T+%dms "
                     "after RunScript() call" %
                     int((_t.time() - _t0) * 1000),
-                    xbmc.LOGINFO,
+                    xbmc.LOGDEBUG,
                 )
 
                 # Step 3: tell Kodi this plugin call returns no items
@@ -217,7 +217,7 @@ def run():
                     "plugin.audio.soundcloud::plugin.py timing T+%dms "
                     "plugin.py exiting (service should be showing splash)" %
                     int((_t.time() - _t0) * 1000),
-                    xbmc.LOGINFO,
+                    xbmc.LOGDEBUG,
                 )
                 return
 
@@ -471,7 +471,7 @@ def run():
                     xbmc.log(
                         "plugin.audio.soundcloud::AuthTest GET %s "
                         "with token len=%d" % (test_url, len(token)),
-                        xbmc.LOGINFO,
+                        xbmc.LOGDEBUG,
                     )
                     r = requests.get(test_url, headers=common_headers,
                                      timeout=10)
@@ -479,7 +479,7 @@ def run():
                     xbmc.log(
                         "plugin.audio.soundcloud::AuthTest %s -> HTTP %d, "
                         "body[:300]=%r" % (test_url, r.status_code, bp),
-                        xbmc.LOGINFO,
+                        xbmc.LOGDEBUG,
                     )
                     parsed = None
                     if r.status_code == 200:

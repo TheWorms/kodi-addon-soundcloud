@@ -74,7 +74,12 @@ class ApiV2(ApiInterface):
 
     def charts(self, filters):
         res = self._do_request("/charts", filters)
-        res = {"collection": [item["track"] for item in res["collection"]]}
+        if not res or "collection" not in res:
+            # Unexpected response (error page, rate limit, ...) — return an
+            # empty listing instead of raising KeyError.
+            return self._map_json_to_collection({"collection": []})
+        res = {"collection": [item["track"] for item in res["collection"]
+                              if isinstance(item, dict) and "track" in item]}
         return self._map_json_to_collection(res)
 
     def call(self, url):
@@ -266,7 +271,7 @@ class ApiV2(ApiInterface):
                 "plugin.audio.soundcloud::ApiV2() AUTH GET %s -> %d in %dms "
                 "(token_len=%d)" %
                 (path, raw.status_code, elapsed_ms, len(oauth_token or "")),
-                xbmc.LOGINFO,
+                xbmc.LOGDEBUG,
             )
 
             # Token lifetime tracking: remember when this specific token
