@@ -82,7 +82,8 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>115</onup>
                 <ondown>111</ondown>
-                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(show_genre_chips),true)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list)">401</onright>
                 <onright>350</onright>
             </control>
@@ -101,7 +102,8 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>110</onup>
                 <ondown>112</ondown>
-                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(show_genre_chips),true)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list)">401</onright>
                 <onright>350</onright>
             </control>
@@ -120,7 +122,8 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>111</onup>
                 <ondown>113</ondown>
-                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(show_genre_chips),true)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list)">401</onright>
                 <onright>350</onright>
             </control>
@@ -139,7 +142,8 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>112</onup>
                 <ondown>114</ondown>
-                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(show_genre_chips),true)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list)">401</onright>
                 <onright>350</onright>
             </control>
@@ -158,7 +162,8 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>113</onup>
                 <ondown>115</ondown>
-                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(show_genre_chips),true)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list)">401</onright>
                 <onright>350</onright>
             </control>
@@ -179,7 +184,8 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>114</onup>
                 <ondown>110</ondown>
-                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(show_genre_chips),true)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list)">401</onright>
                 <onright>350</onright>
             </control>
@@ -230,16 +236,19 @@
         <!-- Ids 360-367, one per trending genre, same order as          -->
         <!-- GENRE_URNS in window.py. The chip matching the current      -->
         <!-- genre (Window.Property(trending_genre)) carries an orange   -->
-        <!-- underline; clicks are handled by window.py. The block lives -->
+        <!-- underline; clicks are handled by window.py. The block lives  -->
         <!-- outside the list-mode group so the TILES layout shows the   -->
-        <!-- chips too.                                                 -->
+        <!-- chips too, sits right under the page title, and is only     -->
+        <!-- shown when a Trending row is configured                    -->
+        <!-- (Window.Property(show_genre_chips), set by window.py - the  -->
+        <!-- genre only affects trending content).                      -->
         <!-- ============================================================ -->
         <control type="group">
             <left>260</left>
-            <top>180</top>
+            <top>130</top>
             <width>1660</width>
             <height>50</height>
-            <visible>String.IsEmpty(Window.Property(page)) | String.IsEqual(Window.Property(page),home)</visible>
+            <visible>String.IsEqual(Window.Property(show_genre_chips),true) + String.IsEmpty(Window.Property(page)) | String.IsEqual(Window.Property(show_genre_chips),true) + String.IsEqual(Window.Property(page),home)</visible>
 
             <!-- Genre chips (ids 360-367, one per trending genre, same
                  order as GENRE_URNS in window.py). The chip matching the
@@ -483,15 +492,15 @@
         <!-- ============================================================ -->
         <control type="group" id="291">
             <left>260</left>
-            <top>240</top>
+            <top>190</top>
             <width>1660</width>
-            <height>720</height>
+            <height>770</height>
 
             <control type="grouplist" id="290">
             <left>0</left>
             <top>0</top>
             <width>1660</width>
-            <height>720</height>
+            <height>770</height>
             <itemgap>16</itemgap>
             <orientation>vertical</orientation>
             <scrolltime tween="sine" easing="out">300</scrolltime>
@@ -523,7 +532,8 @@
                     <preloaditems>2</preloaditems>
                     <onleft>350</onleft>
                     <onright>350</onright>
-                    <onup>360</onup>
+                    <onup condition="String.IsEqual(Window.Property(show_genre_chips),true)">360</onup>
+                    <onup>110</onup>
                     <ondown>351</ondown>
                     <itemlayout width="240" height="240">
                 <control type="group">
@@ -992,12 +1002,13 @@
 
             <control type="list" id="354">
                 <left>0</left>
-                <top>70</top>
+                <top>10</top>
                 <width>1660</width>
-                <height>710</height>
+                <height>750</height>
                 <onleft>110</onleft>
                 <onright>354</onright>
-                <onup>360</onup>
+                <onup condition="String.IsEqual(Window.Property(show_genre_chips),true)">360</onup>
+                <onup>110</onup>
                 <ondown>521</ondown>
                 <scrolltime tween="sine" easing="out">300</scrolltime>
                 <!-- Row style follows the design demo: a dark card per
@@ -1052,34 +1063,66 @@
                             <textcolor>FFA8A8A8</textcolor>
                             <visible>!String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
-                        <!-- Playing equalizer: pulsing orange bars on
-                             the row of the track currently playing. -->
+                        <!-- Playing equalizer: accent-orange bars
+                             bouncing on the row of the track currently
+                             playing, spanning up to the duration. The
+                             animation is a slide (NOT a fade) so the bars
+                             keep their full-strength orange at all times
+                             - a fade washed the colour out and read as
+                             pink on some displays. -->
                         <control type="image">
                             <left>1232</left>
                             <top>70</top>
                             <width>6</width>
-                            <height>16</height>
+                            <height>18</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
                             <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="fade" start="100" end="30" time="450" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1242</left>
-                            <top>60</top>
+                            <top>58</top>
                             <width>6</width>
-                            <height>26</height>
+                            <height>30</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
                             <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="fade" start="100" end="30" time="450" delay="150" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="120" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1252</left>
                             <top>76</top>
                             <width>6</width>
-                            <height>10</height>
+                            <height>12</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
                             <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="fade" start="100" end="30" time="450" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="240" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                        </control>
+                        <control type="image">
+                            <left>1262</left>
+                            <top>64</top>
+                            <width>6</width>
+                            <height>24</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="360" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                        </control>
+                        <control type="image">
+                            <left>1272</left>
+                            <top>72</top>
+                            <width>6</width>
+                            <height>16</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="480" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                        </control>
+                        <control type="image">
+                            <left>1282</left>
+                            <top>60</top>
+                            <width>6</width>
+                            <height>28</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="600" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
                         </control>
                         <control type="label">
                             <left>1296</left>
@@ -1150,34 +1193,66 @@
                             <textcolor>FFFAFAFA</textcolor>
                             <visible>!String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
-                        <!-- Playing equalizer: pulsing orange bars on
-                             the row of the track currently playing. -->
+                        <!-- Playing equalizer: accent-orange bars
+                             bouncing on the row of the track currently
+                             playing, spanning up to the duration. The
+                             animation is a slide (NOT a fade) so the bars
+                             keep their full-strength orange at all times
+                             - a fade washed the colour out and read as
+                             pink on some displays. -->
                         <control type="image">
                             <left>1232</left>
                             <top>70</top>
                             <width>6</width>
-                            <height>16</height>
+                            <height>18</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
                             <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="fade" start="100" end="30" time="450" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1242</left>
-                            <top>60</top>
+                            <top>58</top>
                             <width>6</width>
-                            <height>26</height>
+                            <height>30</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
                             <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="fade" start="100" end="30" time="450" delay="150" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="120" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1252</left>
                             <top>76</top>
                             <width>6</width>
-                            <height>10</height>
+                            <height>12</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
                             <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="fade" start="100" end="30" time="450" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="240" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                        </control>
+                        <control type="image">
+                            <left>1262</left>
+                            <top>64</top>
+                            <width>6</width>
+                            <height>24</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="360" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                        </control>
+                        <control type="image">
+                            <left>1272</left>
+                            <top>72</top>
+                            <width>6</width>
+                            <height>16</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="480" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                        </control>
+                        <control type="image">
+                            <left>1282</left>
+                            <top>60</top>
+                            <width>6</width>
+                            <height>28</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="600" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
                         </control>
                         <control type="label">
                             <left>1296</left>
@@ -1287,34 +1362,66 @@
                             <font>font13</font>
                             <textcolor>FFA8A8A8</textcolor>
                         </control>
-                        <!-- Playing equalizer: pulsing orange bars on
-                             the row of the track currently playing. -->
+                        <!-- Playing equalizer: accent-orange bars
+                             bouncing on the row of the track currently
+                             playing, spanning up to the duration. The
+                             animation is a slide (NOT a fade) so the bars
+                             keep their full-strength orange at all times
+                             - a fade washed the colour out and read as
+                             pink on some displays. -->
                         <control type="image">
                             <left>1232</left>
                             <top>70</top>
                             <width>6</width>
-                            <height>16</height>
+                            <height>18</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
                             <visible>ListItem.IsPlaying</visible>
-                            <animation effect="fade" start="100" end="30" time="450" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1242</left>
-                            <top>60</top>
+                            <top>58</top>
                             <width>6</width>
-                            <height>26</height>
+                            <height>30</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
                             <visible>ListItem.IsPlaying</visible>
-                            <animation effect="fade" start="100" end="30" time="450" delay="150" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="120" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1252</left>
                             <top>76</top>
                             <width>6</width>
-                            <height>10</height>
+                            <height>12</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
                             <visible>ListItem.IsPlaying</visible>
-                            <animation effect="fade" start="100" end="30" time="450" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="240" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                        </control>
+                        <control type="image">
+                            <left>1262</left>
+                            <top>64</top>
+                            <width>6</width>
+                            <height>24</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="360" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                        </control>
+                        <control type="image">
+                            <left>1272</left>
+                            <top>72</top>
+                            <width>6</width>
+                            <height>16</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="480" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                        </control>
+                        <control type="image">
+                            <left>1282</left>
+                            <top>60</top>
+                            <width>6</width>
+                            <height>28</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="600" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
                         </control>
                         <control type="label">
                             <left>1296</left>
@@ -1369,34 +1476,66 @@
                             <font>font13</font>
                             <textcolor>FFFAFAFA</textcolor>
                         </control>
-                        <!-- Playing equalizer: pulsing orange bars on
-                             the row of the track currently playing. -->
+                        <!-- Playing equalizer: accent-orange bars
+                             bouncing on the row of the track currently
+                             playing, spanning up to the duration. The
+                             animation is a slide (NOT a fade) so the bars
+                             keep their full-strength orange at all times
+                             - a fade washed the colour out and read as
+                             pink on some displays. -->
                         <control type="image">
                             <left>1232</left>
                             <top>70</top>
                             <width>6</width>
-                            <height>16</height>
+                            <height>18</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
                             <visible>ListItem.IsPlaying</visible>
-                            <animation effect="fade" start="100" end="30" time="450" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1242</left>
-                            <top>60</top>
+                            <top>58</top>
                             <width>6</width>
-                            <height>26</height>
+                            <height>30</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
                             <visible>ListItem.IsPlaying</visible>
-                            <animation effect="fade" start="100" end="30" time="450" delay="150" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="120" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1252</left>
                             <top>76</top>
                             <width>6</width>
-                            <height>10</height>
+                            <height>12</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
                             <visible>ListItem.IsPlaying</visible>
-                            <animation effect="fade" start="100" end="30" time="450" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="240" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                        </control>
+                        <control type="image">
+                            <left>1262</left>
+                            <top>64</top>
+                            <width>6</width>
+                            <height>24</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="360" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                        </control>
+                        <control type="image">
+                            <left>1272</left>
+                            <top>72</top>
+                            <width>6</width>
+                            <height>16</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="480" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                        </control>
+                        <control type="image">
+                            <left>1282</left>
+                            <top>60</top>
+                            <width>6</width>
+                            <height>28</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="600" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
                         </control>
                         <control type="label">
                             <left>1296</left>

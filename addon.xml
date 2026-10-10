@@ -63,6 +63,9 @@ INTERFACE: list rows on every page are taller and less compact - 110px rows with
 INTERFACE: the home genre chips are now shown in BOTH layouts - the tiles home previously had no way to pick the trending genre from the home page. The chips sit above the content; the tiles rows moved down to make room.
 INTERFACE: selecting a side-menu entry no longer auto-jumps the focus into the content - it stays on the menu and you move to the content yourself (right / down). A fresh open focuses the Home button of the side menu.
 INTERFACE: the track currently playing shows a pulsing orange equalizer on its row in the list layouts.
+INTERFACE: the home genre chips bar now sits right under the page title and is only shown when a Trending row is configured (the genre only affects trending content) - no trending row, no chips bar.
+INTERFACE: changing the home row order/types in the settings now applies immediately when leaving the settings, like the layout and genre - no window reopen needed.
+INTERFACE: the playing-track equalizer is larger (six bars spanning up to the duration) and stays full-strength accent orange at all times - it now bounces instead of fading, which washed the colour out and read as pink on some displays.
 INTERFACE FIX: the mini-player is now reachable with the remote - down from the last item of any content list / the last home row reaches the play/pause button, up from the buttons returns to the content - and its play/pause button showed an empty block instead of an icon: the icon is now kept in sync by the addon (play when paused, pause bars when playing).
 SETTINGS: the layout options are renamed to "Tiles" and "List" (a stale stored value still falls back to tiles).
 

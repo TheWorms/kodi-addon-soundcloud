@@ -1607,6 +1607,17 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             if (self.getProperty("page") or "home") == "home":
                 self._show_home()
 
+        # Home rows (order / types) changed in the settings - applied
+        # immediately, like the layout and the genre. The chips bar
+        # follows too: it is only shown when a Trending row exists.
+        row_fingerprint = ",".join(self._row_configs())
+        if row_fingerprint != (self.getProperty("row_configs") or ""):
+            self.setProperty("row_configs", row_fingerprint)
+            self.setProperty("show_genre_chips",
+                             "true" if "trending" in row_fingerprint else "false")
+            if (self.getProperty("page") or "home") == "home":
+                self._show_home()
+
         mp_setting = self.settings.get("ui.miniplayer") or "2"
         mp_mode = {"0": "off", "1": "compact", "2": "controls"}.get(
             mp_setting, "controls"
@@ -1991,6 +2002,7 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             row_configs = self._row_configs()
             if all(t == "off" for t in row_configs):
                 row_configs = ["trending"]
+            self._apply_home_properties(row_configs)
             if not self._fill_home_sections(row_configs):
                 self.setProperty("page_empty", "true")
             return
@@ -1998,6 +2010,7 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         # Read row config from settings (see _row_configs). Each of
         # the 4 rows has a type setting; a row set to "off" is hidden.
         row_configs = self._row_configs()
+        self._apply_home_properties(row_configs)
 
         list_ids = ID_ROW_LISTS
         for idx, row_type in enumerate(row_configs, start=1):
@@ -2042,6 +2055,20 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 t = defaults[i - 1]
             configs.append(t)
         return configs
+
+    def _apply_home_properties(self, row_configs):
+        """
+        Window properties shared by both home layouts:
+        - show_genre_chips: the genre chips bar is only useful (and
+          only shown) when a Trending row is configured - the genre
+          setting only affects trending content;
+        - row_configs: the row-config fingerprint, compared by
+          _check_live_settings so order/type changes in the settings
+          are applied immediately.
+        """
+        self.setProperty("show_genre_chips",
+                         "true" if "trending" in row_configs else "false")
+        self.setProperty("row_configs", ",".join(row_configs))
 
     def _page_size(self):
         """Read items-per-page from settings, with a sensible default."""
