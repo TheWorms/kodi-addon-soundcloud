@@ -80,9 +80,8 @@ def run():
     # Widget track items point at /?play_track=<id> (not /play/) since
     # 5.9.6023, so that clicking a track on the skin home screen opens
     # the SoundCloud experience (home UI + now-playing overlay) instead
-    # of Kodi's bare native player. Must be handled BEFORE the
-    # widget.mode redirect below, which would otherwise swallow the
-    # root call.
+    # of Kodi's bare native player. Handled first, before the main
+    # root dispatch, so the click is never swallowed by a listing.
     if path == PATH_ROOT and "play_track" in args:
         track_id = args["play_track"][0]
         track_source = (args.get("source") or [""])[0]
@@ -102,51 +101,6 @@ def run():
         xbmcplugin.endOfDirectory(handle, succeeded=False, cacheToDisc=False)
         xbmc.executebuiltin("ReplaceWindow(home)")
         return
-
-    # Kodi caches plugin directory listings per requested URL for the
-    # whole session (in-memory, cleared only on Kodi restart). A listing
-    # served under the ROOT url must therefore never be cached:
-    # widget.mode can be changed in the addon settings at any time,
-    # and until a Kodi restart Kodi would keep serving the old
-    # (redirected) root listing without ever re-invoking the plugin —
-    # exactly the "I disabled the widget but still land on the
-    # following page until I restart Kodi" symptom.
-    requested_path = path
-    cacheable_request = requested_path != PATH_ROOT
-
-    # Widget mode redirection (must happen BEFORE the main dispatch).
-    # When the user has set widget.mode to something other than "off",
-    # any call to the plugin root returns directly the items for that
-    # source instead of launching the UI. This lets skins like
-    # Arctic Zephyr Reloaded — which only let widgets point at the
-    # addon root — show a flat list of tracks as a home widget.
-    if path == PATH_ROOT:
-        widget_mode = (settings.get("widget.mode") or "off").strip()
-        action_param = args.get("action", None)
-        if (
-            action_param is None
-            and widget_mode not in ("", "off")
-        ):
-            redirect_to = {
-                "likes": PATH_WIDGET_LIKES,
-                "playlists": PATH_WIDGET_PLAYLISTS,
-                "following": PATH_WIDGET_FOLLOWING,
-                "trending": PATH_WIDGET_TRENDING,
-                "discover": PATH_WIDGET_DISCOVER,
-            }.get(widget_mode)
-            if redirect_to:
-                xbmc.log(
-                    addon_id + ": widget.mode='%s' — redirecting / to %s "
-                    "(root listing uncached)" %
-                    (widget_mode, redirect_to),
-                    xbmc.LOGINFO,
-                )
-                path = redirect_to
-            else:
-                xbmc.log(
-                    addon_id + ": unknown widget.mode '%s', falling through" %
-                    widget_mode, xbmc.LOGWARNING,
-                )
 
     if path == PATH_ROOT:
         action = args.get("action", None)
@@ -270,8 +224,10 @@ def run():
                 return
 
             # Widget call: return the flat directory of widget shortcuts
-            # so the skin has something playable to render.
-            # Root listing → never cached (see requested_path above).
+            # so the skin has something playable to render. Never cached:
+            # Kodi caches plugin listings per requested URL for the whole
+            # session, and a listing served under the ROOT url must
+            # always be re-invoked to honour the current settings.
             items = listItems.widgets(include_ui_launcher=True)
             xbmcplugin.addDirectoryItems(handle, items, len(items))
             xbmcplugin.endOfDirectory(handle, cacheToDisc=False)
@@ -643,8 +599,8 @@ def run():
                 xbmcplugin.addDirectoryItems(handle, collection, len(collection))
         except Exception as e:
             xbmc.log(addon_id + ": widget/likes failed: %s" % str(e), xbmc.LOGERROR)
-        # Root redirect (widget.mode) → never cache the root listing.
-        xbmcplugin.endOfDirectory(handle, cacheToDisc=cacheable_request)
+        # Direct widget listing — cached by Kodi like any plugin listing.
+        xbmcplugin.endOfDirectory(handle)
 
     elif path == PATH_WIDGET_PLAYLISTS:
         # User's own playlists. Requires OAuth.
@@ -660,8 +616,8 @@ def run():
                 xbmcplugin.addDirectoryItems(handle, collection, len(collection))
         except Exception as e:
             xbmc.log(addon_id + ": widget/playlists failed: %s" % str(e), xbmc.LOGERROR)
-        # Root redirect (widget.mode) → never cache the root listing.
-        xbmcplugin.endOfDirectory(handle, cacheToDisc=cacheable_request)
+        # Direct widget listing — cached by Kodi like any plugin listing.
+        xbmcplugin.endOfDirectory(handle)
 
     elif path == PATH_WIDGET_FOLLOWING:
         # Artists the user follows. Requires OAuth.
@@ -677,8 +633,8 @@ def run():
                 xbmcplugin.addDirectoryItems(handle, collection, len(collection))
         except Exception as e:
             xbmc.log(addon_id + ": widget/following failed: %s" % str(e), xbmc.LOGERROR)
-        # Root redirect (widget.mode) → never cache the root listing.
-        xbmcplugin.endOfDirectory(handle, cacheToDisc=cacheable_request)
+        # Direct widget listing — cached by Kodi like any plugin listing.
+        xbmcplugin.endOfDirectory(handle)
 
     elif path == PATH_WIDGET_TRENDING:
         # Worldwide trending tracks (no OAuth required).
@@ -698,8 +654,8 @@ def run():
             xbmcplugin.addDirectoryItems(handle, collection, len(collection))
         except Exception as e:
             xbmc.log(addon_id + ": widget/trending failed: %s" % str(e), xbmc.LOGERROR)
-        # Root redirect (widget.mode) → never cache the root listing.
-        xbmcplugin.endOfDirectory(handle, cacheToDisc=cacheable_request)
+        # Direct widget listing — cached by Kodi like any plugin listing.
+        xbmcplugin.endOfDirectory(handle)
 
     elif path == PATH_WIDGET_DISCOVER:
         # SoundCloud's "Discover" / mixed-selections endpoint.
@@ -713,8 +669,8 @@ def run():
             xbmcplugin.addDirectoryItems(handle, collection, len(collection))
         except Exception as e:
             xbmc.log(addon_id + ": widget/discover failed: %s" % str(e), xbmc.LOGERROR)
-        # Root redirect (widget.mode) → never cache the root listing.
-        xbmcplugin.endOfDirectory(handle, cacheToDisc=cacheable_request)
+        # Direct widget listing — cached by Kodi like any plugin listing.
+        xbmcplugin.endOfDirectory(handle)
 
     elif path == PATH_SETTINGS_CACHE_CLEAR:
         vfs_cache.destroy()

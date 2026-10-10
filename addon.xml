@@ -75,7 +75,7 @@ LIKES: long-press (context menu) on any track now offers "Add to likes" / "Remov
 
 ENDLESS PLAYBACK: when the queue reaches its last track, related tracks are fetched from SoundCloud and appended automatically, so the music never stops. The extension is defensive: if the related-tracks endpoint ever changes, the option silently becomes a no-op (watch kodi.log).
 
-WIDGET MODE: changing the "Home screen widget" mode in the settings now applies immediately - no Kodi restart needed. The plugin root listing is no longer cached by Kodi (previously the old widget page kept showing until the next restart).
+WIDGET MODE REMOVED: the "Home screen widget" setting has been deleted. When it was set to a category (Likes / Playlists / Following / Trending / Discover), EVERY open of the addon was hijacked into that flat widget listing instead of the interface — with no way back to it, and the stored value survives reinstalls in the addon data. The plugin root now always behaves the same: a user open launches the full interface, a skin home widget gets the widget shortcut list. Skin widgets that need a track list should point at the direct /widget/&lt;category&gt;/ paths instead of the addon root.
 
 5.9.6027 (2026-10-08) - robustness fixes (audit)
 CHARTS: /charts returns an empty listing on an unexpected API response (error page, rate limit) instead of crashing with KeyError.
