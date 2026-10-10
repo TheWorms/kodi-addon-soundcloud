@@ -48,7 +48,7 @@
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
         <credits>jaylinski (original add-on), bromix, SLiX</credits>
-        <news>6.0.0 (2026-10-10) - quick settings, endless playback, sleep timer, likes from the addon, list layout, stations and personalized home rows, simplified mini-player and configurable screensaver, read-only client ID display, playback freeze fix, see more per home row, header band removed
+        <news>6.0.0 (2026-10-10) - quick settings, endless playback, sleep timer, likes from the addon, list layout, stations and personalized home rows, simplified mini-player and configurable screensaver, read-only client ID display, playback freeze fix, see more per home row, header band removed, one-press menu-to-content focus
 
 STATIONS: new "Stations" entry in the side menu, under "Following" - lists the genre stations served by SoundCloud's discover feed (All genres, Techno, House, Hip-hop, Pop, Electronic, R&amp;B, Ambient, ...) and, with an OAuth token, the stations you liked. Selecting a station opens its track list.
 
@@ -79,6 +79,8 @@ INTERFACE: the page header band at the top of the content area (page title, subt
 INTERFACE: each home section (list layout) now ends with a "See more" row when the section filled its limit - it opens the row's dedicated page with the full list and the standard "Next page" pagination (Likes, Trending, Recently played, Mixed for you, Based on what you like, Curated, Buzzing, Playlists, Following).
 
 API FIX: an OAuth token pasted by mistake into the expert "Client ID" override field is now detected and ignored (client IDs are short alphanumeric keys, tokens contain dashes) - the read-only client ID row shows the real ID again and anonymous fallback requests work again in that situation.
+
+INTERFACE FIX: entering the content from the side menu now takes a single Right press in every situation - the menu buttons now target the first visible home row (tiles layout) or the page content instead of a possibly hidden row, and in list layout the home list no longer lands the focus invisibly on a section header (it skips straight to the first playable row).
 
 SETTINGS: new Playback options - configurable seek interval (5/10/15/30 s) for the arrow keys in the fullscreen player, option to skip 30-second Go+ excerpts, endless playback, and a sleep timer (15/30/60/120 min) that counts EFFECTIVE listening time (pause suspends the countdown).
 

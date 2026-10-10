@@ -1907,6 +1907,36 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
     # Input handling
     # =====================================================================
 
+    def onFocus(self, control_id):
+        # In list layout the home list (354) begins with a section
+        # header item, and headers render no focus indication: when
+        # the list gained focus from the side menu, the highlight sat
+        # invisibly on the header and the first Right press looked
+        # like a no-op. Skip over headers to the first actionable
+        # item whenever the list gains focus.
+        if control_id != ID_HOME_LIST:
+            return
+        try:
+            items = self._lists.get(ID_HOME_LIST) or []
+            if not items:
+                return
+            control = self.getControl(ID_HOME_LIST)
+            pos = control.getSelectedPosition()
+            if not (0 <= pos < len(items)):
+                return
+            if items[pos][1].getProperty("isSectionHeader") != "true":
+                return
+            for nxt in range(pos + 1, len(items)):
+                if items[nxt][1].getProperty("isSectionHeader") != "true":
+                    control.selectItem(nxt)
+                    return
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow onFocus skip "
+                "header failed: %s" % str(e),
+                xbmc.LOGDEBUG,
+            )
+
     def onAction(self, action):
         action_id = action.getId()
 
