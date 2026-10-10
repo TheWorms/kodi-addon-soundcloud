@@ -342,6 +342,19 @@ class _PlayerObserver(xbmc.Player):
         self._ss_timer = None
 
     def onAVStarted(self):
+        # Kodi does NOT re-render the window lists when the playing
+        # track changes - ask the window to re-fill them so the playing
+        # markers (orange title/duration, cover wave) follow the track.
+        # Scheduled, never inline: Player callbacks run on Kodi's
+        # application thread (see onPlayBackEnded below).
+        try:
+            self._window._schedule_playing_markers_refresh()
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::PlayerObserver onAVStarted "
+                "refresh: %s" % str(e),
+                xbmc.LOGDEBUG,
+            )
         try:
             self._window._highlight_playing_track()
         except Exception as e:
@@ -360,6 +373,16 @@ class _PlayerObserver(xbmc.Player):
             )
 
     def onAVChange(self):
+        # Fired when the queue moves to another item - same refresh
+        # as onAVStarted (the two events are debounced together).
+        try:
+            self._window._schedule_playing_markers_refresh()
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::PlayerObserver onAVChange "
+                "refresh: %s" % str(e),
+                xbmc.LOGDEBUG,
+            )
         try:
             self._window._highlight_playing_track()
         except Exception as e:
@@ -371,6 +394,16 @@ class _PlayerObserver(xbmc.Player):
     def onPlayBackStopped(self):
         self._cancel_screensaver_timer()
         self._close_now_playing()
+        # Nothing plays anymore - re-render the lists so the playing
+        # markers clear instead of staying frozen on the last track.
+        try:
+            self._window._schedule_playing_markers_refresh()
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::PlayerObserver "
+                "onPlayBackStopped refresh: %s" % str(e),
+                xbmc.LOGDEBUG,
+            )
 
     def onPlayBackEnded(self):
         # When autoplay queues the next track, onPlayBackEnded fires
@@ -385,6 +418,17 @@ class _PlayerObserver(xbmc.Player):
         # callback can deadlock Kodi entirely (frozen UI, no sound —
         # observed once on CoreELEC). The callback therefore only
         # schedules the work on a daemon thread and returns at once.
+        # Re-render the lists: either the queue continues (the fresh
+        # onAVStarted re-schedules a refresh that shows the new track)
+        # or nothing plays anymore and the markers clear.
+        try:
+            self._window._schedule_playing_markers_refresh()
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::PlayerObserver "
+                "onPlayBackEnded refresh: %s" % str(e),
+                xbmc.LOGDEBUG,
+            )
         threading.Thread(
             target=self._on_playback_ended_worker, daemon=True
         ).start()
@@ -1456,6 +1500,11 @@ ID_PAGE_LIST_L = 401
 ID_HOME_LIST = 354
 # Max items per section of the sectioned home list ("list" layout).
 HOME_SECTION_LIMIT = 10
+# Delay (seconds) before the debounced playing-marker re-fill runs.
+# A track change fires onAVChange + onAVStarted back-to-back, and a
+# burst of PlayerControl(Next) presses fires several more - one
+# coalesced re-fill avoids a visible flicker of the lists per event.
+MARKER_REFRESH_DELAY = 0.2
 # Available row types — used to map a setting value to a content loader.
 # Localized titles use the corresponding string ID.
 ROW_TYPES = {
@@ -1499,6 +1548,14 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         # onClick can resolve the index back to the actual track to play.
         # Key: control_id, Value: list of (play_url, ListItem) tuples.
         self._lists = {}
+
+        # Serializes the container fills (window thread) against the
+        # debounced playing-marker re-fill (timer thread), which
+        # re-adds the cached ListItems - see _refresh_playing_markers.
+        self._lists_lock = threading.Lock()
+        # Debounce state for _schedule_playing_markers_refresh.
+        self._marker_refresh_lock = threading.Lock()
+        self._marker_refresh_timer = None
 
         # Cached next-page link for the page list (set by _fill_page_list).
         self._next_href = None
@@ -1705,6 +1762,13 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                             ID_ROW1_LIST if page == "home" else ID_PAGE_LIST)
                 except Exception:
                     pass
+            # The container that just became visible was filled while
+            # hidden: its items were rendered at fill time and still
+            # show the playing markers as they were back then (or miss
+            # the ones that appeared since). Re-fill everything so the
+            # markers match the playing track in the newly visible
+            # layout too (harmless no-op when nothing plays).
+            self._schedule_playing_markers_refresh()
 
         # Trending genre changed in the settings - the trending row
         # and the home lists follow it live, like the layout.
@@ -2455,69 +2519,71 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             )
             return False
 
-        try:
-            control.reset()
-        except Exception:
-            pass
-        self._lists[ID_HOME_LIST] = []
-        self._next_href = None
-
-        addon_base = "plugin://" + self.addon.getAddonInfo("id")
-        limit = min(self._page_size(), HOME_SECTION_LIMIT)
-        added = 0
-        for row_type in row_configs:
-            if row_type == "off":
-                continue
-            collection = self._fetch_home_section(row_type, limit)
-            if collection is None or not collection.items:
-                continue
-            header = xbmcgui.ListItem(
-                label=self.addon.getLocalizedString(ROW_TYPES[row_type]["title_strid"])
-            )
-            header.setProperty("isSectionHeader", "true")
+        # Same fill locking as _fill_list - see there.
+        with self._lists_lock:
             try:
-                control.addItem(header)
-                self._lists[ID_HOME_LIST].append((None, header))
-            except Exception as e:
-                xbmc.log(
-                    "plugin.audio.soundcloud::HomeWindow add_section_header "
-                    "failed: %s" % str(e),
-                    xbmc.LOGWARNING,
+                control.reset()
+            except Exception:
+                pass
+            self._lists[ID_HOME_LIST] = []
+            self._next_href = None
+
+            addon_base = "plugin://" + self.addon.getAddonInfo("id")
+            limit = min(self._page_size(), HOME_SECTION_LIMIT)
+            added = 0
+            for row_type in row_configs:
+                if row_type == "off":
+                    continue
+                collection = self._fetch_home_section(row_type, limit)
+                if collection is None or not collection.items:
+                    continue
+                header = xbmcgui.ListItem(
+                    label=self.addon.getLocalizedString(ROW_TYPES[row_type]["title_strid"])
                 )
-            for item in collection.items:
+                header.setProperty("isSectionHeader", "true")
                 try:
-                    play_url, list_item, _ = item.to_list_item(addon_base)
-                    control.addItem(list_item)
-                    self._lists[ID_HOME_LIST].append((play_url, list_item))
-                    added += 1
+                    control.addItem(header)
+                    self._lists[ID_HOME_LIST].append((None, header))
                 except Exception as e:
                     xbmc.log(
-                        "plugin.audio.soundcloud::HomeWindow skip item: %s" % str(e),
-                        xbmc.LOGWARNING,
-                    )
-            # When a section filled its whole limit, more content
-            # probably exists: end the section with a "See more"
-            # item that opens the row's dedicated page (see
-            # _show_row_page).
-            if len(collection.items) >= limit:
-                see_more = xbmcgui.ListItem(
-                    label=self.addon.getLocalizedString(30400)  # "See more"
-                )
-                see_more.setArt({
-                    "thumb": "DefaultFolderForward.png",
-                    "icon": "DefaultFolderForward.png",
-                })
-                see_more.setProperty("isSeeMore", "true")
-                see_more.setProperty("row_type", row_type)
-                try:
-                    control.addItem(see_more)
-                    self._lists[ID_HOME_LIST].append((None, see_more))
-                except Exception as e:
-                    xbmc.log(
-                        "plugin.audio.soundcloud::HomeWindow add_see_more "
+                        "plugin.audio.soundcloud::HomeWindow add_section_header "
                         "failed: %s" % str(e),
                         xbmc.LOGWARNING,
                     )
+                for item in collection.items:
+                    try:
+                        play_url, list_item, _ = item.to_list_item(addon_base)
+                        control.addItem(list_item)
+                        self._lists[ID_HOME_LIST].append((play_url, list_item))
+                        added += 1
+                    except Exception as e:
+                        xbmc.log(
+                            "plugin.audio.soundcloud::HomeWindow skip item: %s" % str(e),
+                            xbmc.LOGWARNING,
+                        )
+                # When a section filled its whole limit, more content
+                # probably exists: end the section with a "See more"
+                # item that opens the row's dedicated page (see
+                # _show_row_page).
+                if len(collection.items) >= limit:
+                    see_more = xbmcgui.ListItem(
+                        label=self.addon.getLocalizedString(30400)  # "See more"
+                    )
+                    see_more.setArt({
+                        "thumb": "DefaultFolderForward.png",
+                        "icon": "DefaultFolderForward.png",
+                    })
+                    see_more.setProperty("isSeeMore", "true")
+                    see_more.setProperty("row_type", row_type)
+                    try:
+                        control.addItem(see_more)
+                        self._lists[ID_HOME_LIST].append((None, see_more))
+                    except Exception as e:
+                        xbmc.log(
+                            "plugin.audio.soundcloud::HomeWindow add_see_more "
+                            "failed: %s" % str(e),
+                            xbmc.LOGWARNING,
+                        )
         return added > 0
 
     def _show_search(self):
@@ -2690,27 +2756,31 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             )
             return
 
-        # Reset any previous content and our internal cache.
-        try:
-            control.reset()
-        except Exception:
-            pass
-        self._lists[control_id] = []
-
-        if collection is None or not collection.items:
-            return
-
-        addon_base = "plugin://" + self.addon.getAddonInfo("id")
-        for item in collection.items:
+        # Reset any previous content and our internal cache. The lock
+        # keeps the debounced playing-marker re-fill (timer thread)
+        # from interleaving with the fill.
+        with self._lists_lock:
             try:
-                play_url, list_item, _ = item.to_list_item(addon_base)
-                control.addItem(list_item)
-                self._lists[control_id].append((play_url, list_item))
-            except Exception as e:
-                xbmc.log(
-                    "plugin.audio.soundcloud::HomeWindow skip item: %s" % str(e),
-                    xbmc.LOGWARNING,
-                )
+                control.reset()
+            except Exception:
+                pass
+            self._lists[control_id] = []
+
+            if collection is None or not collection.items:
+                return
+
+            addon_base = "plugin://" + self.addon.getAddonInfo("id")
+            for item in collection.items:
+                try:
+                    play_url, list_item, _ = item.to_list_item(addon_base)
+                    control.addItem(list_item)
+                    self._lists[control_id].append((play_url, list_item))
+                except Exception as e:
+                    xbmc.log(
+                        "plugin.audio.soundcloud::HomeWindow skip item: %s"
+                        % str(e),
+                        xbmc.LOGWARNING,
+                    )
 
     def _fill_page_list(self, collection):
         """
@@ -2732,25 +2802,26 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
 
         # Append "Next page" pseudo-item if there's more.
         if self._next_href:
-            for list_id in (ID_PAGE_LIST, ID_PAGE_LIST_L):
-                try:
-                    control = self.getControl(list_id)
-                    next_item = xbmcgui.ListItem(
-                        label=self.addon.getLocalizedString(30901)  # "Next page"
-                    )
-                    next_item.setArt({
-                        "thumb": "DefaultFolderForward.png",
-                        "icon": "DefaultFolderForward.png",
-                    })
-                    next_item.setProperty("isNextPage", "true")
-                    control.addItem(next_item)
-                    self._lists[list_id].append((None, next_item))
-                except Exception as e:
-                    xbmc.log(
-                        "plugin.audio.soundcloud::HomeWindow add_next_page "
-                        "failed: %s" % str(e),
-                        xbmc.LOGWARNING,
-                    )
+            with self._lists_lock:
+                for list_id in (ID_PAGE_LIST, ID_PAGE_LIST_L):
+                    try:
+                        control = self.getControl(list_id)
+                        next_item = xbmcgui.ListItem(
+                            label=self.addon.getLocalizedString(30901)  # "Next page"
+                        )
+                        next_item.setArt({
+                            "thumb": "DefaultFolderForward.png",
+                            "icon": "DefaultFolderForward.png",
+                        })
+                        next_item.setProperty("isNextPage", "true")
+                        control.addItem(next_item)
+                        self._lists[list_id].append((None, next_item))
+                    except Exception as e:
+                        xbmc.log(
+                            "plugin.audio.soundcloud::HomeWindow add_next_page "
+                            "failed: %s" % str(e),
+                            xbmc.LOGWARNING,
+                        )
 
         is_empty = collection is None or not collection.items
         self.setProperty("page_empty", "true" if is_empty else "false")
@@ -3166,6 +3237,82 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                             xbmc.LOGDEBUG,
                         )
                     return
+
+    def _schedule_playing_markers_refresh(self):
+        """
+        Ask for a re-render of the playing markers (orange title and
+        duration, cover wave) MARKER_REFRESH_DELAY seconds from now.
+
+        Debounced: a track change fires onAVChange and onAVStarted
+        back-to-back, and several PlayerControl(Next) presses fire
+        several bursts - coalescing them avoids one visible flicker of
+        the lists per event.
+        """
+        try:
+            with self._marker_refresh_lock:
+                if self._marker_refresh_timer is not None:
+                    self._marker_refresh_timer.cancel()
+                timer = threading.Timer(
+                    MARKER_REFRESH_DELAY, self._refresh_playing_markers
+                )
+                timer.daemon = True
+                timer.start()
+                self._marker_refresh_timer = timer
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow marker refresh "
+                "scheduling failed: %s" % str(e),
+                xbmc.LOGDEBUG,
+            )
+
+    def _refresh_playing_markers(self):
+        """
+        Re-fill every cached container with its cached ListItems.
+
+        Kodi evaluates ListItem.IsPlaying when an item is RENDERED,
+        but it does not re-render a container when the playing track
+        changes: the orange markers and the cover wave stay frozen on
+        the previous track (remote, mini-player, autoplay), and a
+        container that was filled while hidden - e.g. the layout
+        mirror that just became visible - keeps showing fill-time
+        state. Resetting and re-adding the same ListItems forces a
+        fresh render of every layout at once.
+
+        All the containers of this window (lists 354/401, panels 400,
+        fixedlists 350-353) are exposed by Kodi as ControlList, so
+        reset/addItem/getSelectedPosition/selectItem work on each of
+        them. Runs on a timer thread: the shared fill lock keeps the
+        window thread from interleaving a page fill with this pass.
+        """
+        with self._marker_refresh_lock:
+            self._marker_refresh_timer = None
+        for control_id, items in list(self._lists.items()):
+            if not items:
+                continue
+            try:
+                control = self.getControl(control_id)
+            except Exception:
+                continue
+            try:
+                with self._lists_lock:
+                    try:
+                        position = control.getSelectedPosition()
+                    except Exception:
+                        position = -1
+                    control.reset()
+                    for _, list_item in items:
+                        control.addItem(list_item)
+                    if position >= 0:
+                        try:
+                            control.selectItem(position)
+                        except Exception:
+                            pass
+            except Exception as e:
+                xbmc.log(
+                    "plugin.audio.soundcloud::HomeWindow marker refresh "
+                    "on control %d failed: %s" % (control_id, str(e)),
+                    xbmc.LOGDEBUG,
+                )
 
 
 def open_home(api, addon, settings, startup_track_id=None,
