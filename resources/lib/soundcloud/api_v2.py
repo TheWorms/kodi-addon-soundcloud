@@ -220,6 +220,15 @@ class ApiV2(ApiInterface):
         res = self._do_request(
             "/mixed-selections", {}, self.api_cache["discover"]
         )
+        # SoundCloud mixes dashes and underscores between fields and
+        # locales (e.g. tracking_feature_name "mixed_for_you" vs the
+        # "mixed-for-you" keywords, and localized titles like
+        # "Tendances par genre") - normalize both sides to spaces so
+        # the match survives either convention and any UI language.
+        keywords = [
+            str(kw).lower().replace("_", " ").replace("-", " ")
+            for kw in keywords
+        ]
         for category in (res or {}).get("collection", []):
             if not isinstance(category, dict):
                 continue
@@ -227,6 +236,7 @@ class ApiV2(ApiInterface):
                 str(category.get(key) or "")
                 for key in ("urn", "id", "tracking_feature_name", "title")
             ]).lower()
+            hay = hay.replace("_", " ").replace("-", " ")
             if any(kw in hay for kw in keywords):
                 items = category.get("items")
                 if isinstance(items, dict) and items.get("collection"):

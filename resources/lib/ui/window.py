@@ -2354,12 +2354,24 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             )
 
     def _load_foryou(self, list_id, limit=20):
-        # "Mixed for you" - personalized section matched at runtime
-        # from /mixed-selections; trending fallback when not served.
+        # "Mixed for you" - built locally from the user's play history:
+        # each recently played track seeds a /tracks/{id}/related call
+        # and the results are deduplicated against the history itself,
+        # so the row never looks like a copy of "Recently played"
+        # (previously both rows silently fell back to the same trending
+        # list: SoundCloud localizes the /mixed-selections shelf titles
+        # and names the personalized ones with underscores, which the
+        # old keyword match could not hit). Trending fallback when
+        # logged out or without history.
+        if not self.api.settings.get_oauth_token():
+            self._load_trending(list_id, limit=limit)
+            return
         try:
-            collection = self.api.discover_section(
-                ("mixed for you", "mixed-for-you")
-            )
+            history = self.api.play_history(limit)
+            if history is None or not history.items:
+                self._load_trending(list_id, limit=limit)
+                return
+            collection = self._build_foryou_mix(history, limit)
             if collection is None or not collection.items:
                 self._load_trending(list_id, limit=limit)
                 return
@@ -2370,6 +2382,63 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 "failed: %s" % str(e),
                 xbmc.LOGERROR,
             )
+
+    def _build_foryou_mix(self, history, limit):
+        """
+        Build the "Mixed for you" row from play-history seeds: for each
+        recently played track (most recent first), fetch a handful of
+        related tracks and keep the ones not already played, until the
+        row is full. The number of related calls is capped so the home
+        load stays fast even when many candidates are duplicates.
+        Returns an ApiCollection, or None when nothing could be built
+        (logged out, empty history, every call failed).
+        """
+        history_ids = set()
+        for item in history.items:
+            if getattr(item, "id", None):
+                history_ids.add(item.id)
+
+        picked = []
+        picked_ids = set()
+        per_seed = 8
+        max_seeds = 6
+        for seed in history.items[:max_seeds]:
+            if len(picked) >= limit:
+                break
+            seed_id = getattr(seed, "id", None)
+            if not seed_id:
+                continue
+            try:
+                related = self.api.related_tracks(seed_id, limit=per_seed)
+            except Exception as e:
+                xbmc.log(
+                    "plugin.audio.soundcloud::HomeWindow foryou seed "
+                    "%s failed: %s" % (seed_id, str(e)),
+                    xbmc.LOGDEBUG,
+                )
+                continue
+            for cand in (related.items if related is not None else []):
+                if len(picked) >= limit:
+                    break
+                cand_id = getattr(cand, "id", None)
+                if (
+                    not cand_id
+                    or cand_id in history_ids
+                    or cand_id in picked_ids
+                    or getattr(cand, "blocked", False)
+                    or getattr(cand, "preview", False)
+                ):
+                    continue
+                picked_ids.add(cand_id)
+                picked.append(cand)
+
+        if not picked:
+            return None
+        collection = ApiCollection()
+        collection.items = picked
+        collection.load = []
+        collection.next_href = None
+        return collection
 
     def _load_based(self, list_id, limit=20):
         # "More of what you like" / "Based on what you like" -
@@ -2442,13 +2511,18 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                     if history is not None and history.items:
                         return history
             elif row_type == "foryou":
-                # "Mixed for you" - personalized section matched at
-                # runtime from /mixed-selections (user-specific ids).
-                collection = self.api.discover_section(
-                    ("mixed for you", "mixed-for-you")
-                )
-                if collection is not None and collection.items:
-                    return collection
+                # "Mixed for you" - built locally from play-history
+                # seeds (see _load_foryou) so the section differs from
+                # "Recently played" instead of falling back to the
+                # same trending list.
+                if self.api.settings.get_oauth_token():
+                    history = self.api.play_history(limit)
+                    if history is not None and history.items:
+                        collection = self._build_foryou_mix(
+                            history, limit
+                        )
+                        if collection is not None and collection.items:
+                            return collection
             elif row_type == "based":
                 # "More of what you like" / "Based on what you like".
                 collection = self.api.discover_section(

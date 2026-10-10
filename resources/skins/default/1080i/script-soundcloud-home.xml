@@ -129,6 +129,30 @@
                 <textoffsetx>16</textoffsetx>
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>111</onup>
+                <ondown>116</ondown>
+
+                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEmpty(Window.Property(page)) | String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list) + !String.IsEmpty(Window.Property(page)) + !String.IsEqual(Window.Property(page),home)">401</onright>
+                <onright condition="String.IsEmpty(Window.Property(page)) + String.IsEqual(Window.Property(row1_visible),true) | String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(row1_visible),true)">350</onright>
+                <onright condition="String.IsEmpty(Window.Property(page)) + String.IsEqual(Window.Property(row2_visible),true) | String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(row2_visible),true)">351</onright>
+                <onright condition="String.IsEmpty(Window.Property(page)) + String.IsEqual(Window.Property(row3_visible),true) | String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(row3_visible),true)">352</onright>
+                <onright condition="String.IsEmpty(Window.Property(page)) + String.IsEqual(Window.Property(row4_visible),true) | String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(row4_visible),true)">353</onright>
+                <onright>400</onright>
+            </control>
+            <control type="button" id="116">
+                <left>10</left>
+                <top>248</top>
+                <width>220</width>
+                <height>50</height>
+                <label>$ADDON[plugin.audio.soundcloud 30381]</label>
+                <font>font13</font>
+                <textcolor>FFA8A8A8</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <align>left</align>
+                <aligny>center</aligny>
+                <textoffsetx>16</textoffsetx>
+                <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
+                <onup>112</onup>
                 <ondown>113</ondown>
 
                 <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEmpty(Window.Property(page)) | String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
@@ -141,7 +165,7 @@
             </control>
             <control type="button" id="113">
                 <left>10</left>
-                <top>248</top>
+                <top>304</top>
                 <width>220</width>
                 <height>50</height>
                 <label>$ADDON[plugin.audio.soundcloud 30402]</label>
@@ -152,7 +176,7 @@
                 <aligny>center</aligny>
                 <textoffsetx>16</textoffsetx>
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
-                <onup>112</onup>
+                <onup>116</onup>
                 <ondown>114</ondown>
 
                 <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEmpty(Window.Property(page)) | String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
@@ -165,7 +189,7 @@
             </control>
             <control type="button" id="114">
                 <left>10</left>
-                <top>304</top>
+                <top>360</top>
                 <width>220</width>
                 <height>50</height>
                 <label>$ADDON[plugin.audio.soundcloud 30403]</label>
@@ -177,31 +201,6 @@
                 <textoffsetx>16</textoffsetx>
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>113</onup>
-                <ondown>116</ondown>
-
-                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEmpty(Window.Property(page)) | String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
-                <onright condition="String.IsEqual(Window.Property(layout),list) + !String.IsEmpty(Window.Property(page)) + !String.IsEqual(Window.Property(page),home)">401</onright>
-                <onright condition="String.IsEmpty(Window.Property(page)) + String.IsEqual(Window.Property(row1_visible),true) | String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(row1_visible),true)">350</onright>
-                <onright condition="String.IsEmpty(Window.Property(page)) + String.IsEqual(Window.Property(row2_visible),true) | String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(row2_visible),true)">351</onright>
-                <onright condition="String.IsEmpty(Window.Property(page)) + String.IsEqual(Window.Property(row3_visible),true) | String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(row3_visible),true)">352</onright>
-                <onright condition="String.IsEmpty(Window.Property(page)) + String.IsEqual(Window.Property(row4_visible),true) | String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(row4_visible),true)">353</onright>
-                <onright>400</onright>
-            </control>
-
-            <control type="button" id="116">
-                <left>10</left>
-                <top>360</top>
-                <width>220</width>
-                <height>50</height>
-                <label>$ADDON[plugin.audio.soundcloud 30381]</label>
-                <font>font13</font>
-                <textcolor>FFA8A8A8</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <align>left</align>
-                <aligny>center</aligny>
-                <textoffsetx>16</textoffsetx>
-                <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
-                <onup>114</onup>
                 <ondown>115</ondown>
 
                 <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEmpty(Window.Property(page)) | String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
@@ -227,7 +226,7 @@
                 <aligny>center</aligny>
                 <textoffsetx>16</textoffsetx>
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
-                <onup>116</onup>
+                <onup>114</onup>
                 <ondown>110</ondown>
 
                 <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEmpty(Window.Property(page)) | String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
