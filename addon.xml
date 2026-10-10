@@ -48,7 +48,7 @@
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
         <credits>jaylinski (original add-on), bromix, SLiX</credits>
-        <news>6.0.0 (2026-10-10) - quick settings, endless playback, sleep timer, likes from the addon, list layout, stations and personalized home rows, simplified mini-player and configurable screensaver, read-only client ID display
+        <news>6.0.0 (2026-10-10) - quick settings, endless playback, sleep timer, likes from the addon, list layout, stations and personalized home rows, simplified mini-player and configurable screensaver, read-only client ID display, playback freeze fix
 
 STATIONS: new "Stations" entry in the side menu, under "Following" - lists the genre stations served by SoundCloud's discover feed (All genres, Techno, House, Hip-hop, Pop, Electronic, R&amp;B, Ambient, ...) and, with an OAuth token, the stations you liked. Selecting a station opens its track list.
 
@@ -71,6 +71,8 @@ INTERFACE: the title and artist of the track currently playing are now accent or
 SETTINGS: the Account section now shows the API client ID actually in use, as a read-only row placed above the OAuth token field. The value is resolved automatically at every add-on start (custom override, 24-hour cache, or live extraction from soundcloud.com) and displays whether you browse anonymously or with a token; it cannot be edited there. The editable expert-level override stays in the Advanced group.
 
 SETTINGS: the mini-player option is now simply "Show" or "Hide" - the compact bar with cover, title and progress bar, or the content using the full screen height.
+
+PLAYBACK FIX: the addon could freeze Kodi completely during playback (frozen UI, no sound, only a restart recovers) - the track-end handler (premature-stream auto-resume, endless-queue extension) ran network requests and player.play() inside Kodi's own player callback, which can deadlock the application thread. The work now runs on a background thread and the callback returns immediately; the fullscreen overlay with a zero delay also opens via the timer thread instead of the callback.
 
 SETTINGS: new Playback options - configurable seek interval (5/10/15/30 s) for the arrow keys in the fullscreen player, option to skip 30-second Go+ excerpts, endless playback, and a sleep timer (15/30/60/120 min) that counts EFFECTIVE listening time (pause suspends the countdown).
 

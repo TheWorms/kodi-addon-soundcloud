@@ -378,6 +378,17 @@ class _PlayerObserver(xbmc.Player):
         # leave the dialog open here and rely on Player.* infolabels to
         # update inside the still-open dialog.
         #
+        # Kodi invokes Player callbacks on its application thread. The
+        # track-end work below does network requests and calls
+        # player.play(); doing that re-entrantly from inside the
+        # callback can deadlock Kodi entirely (frozen UI, no sound —
+        # observed once on CoreELEC). The callback therefore only
+        # schedules the work on a daemon thread and returns at once.
+        threading.Thread(
+            target=self._on_playback_ended_worker, daemon=True
+        ).start()
+
+    def _on_playback_ended_worker(self):
         # We DO check whether this "end" was premature: SoundCloud's
         # signed CDN URLs (CloudFront Policy/Signature query params)
         # can expire mid-track on very long mixes. Kodi's file cache
@@ -628,7 +639,17 @@ class _PlayerObserver(xbmc.Player):
         except Exception:
             delay = 30
         if delay <= 0:
-            self._open_now_playing()
+            # Never open the overlay directly from inside the Player
+            # callback (Kodi's application thread): creating and
+            # showing a dialog there can deadlock Kodi. Route through
+            # the timer thread like the delayed case, with a minimal
+            # delay.
+            self._cancel_screensaver_timer()
+            self._ss_timer = threading.Timer(
+                0.1, self._open_now_playing_safely
+            )
+            self._ss_timer.daemon = True
+            self._ss_timer.start()
             return
         self._cancel_screensaver_timer()
         self._ss_timer = threading.Timer(delay, self._open_now_playing_safely)
