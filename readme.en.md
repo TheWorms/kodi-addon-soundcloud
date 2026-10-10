@@ -6,6 +6,30 @@
 **Version : 5.9.6027**
 <!-- /version:auto -->
 
+<img align="right" src="https://github.com/xbmc/xbmc/raw/master/addons/webinterface.default/icon-128.png" alt="Kodi logo">
+
+[![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/TheWorms/kodi-addon-soundcloud.svg)](https://github.com/TheWorms/kodi-addon-soundcloud/releases)
+[![Kodi forum link](https://img.shields.io/badge/Kodi-Forum-informational.svg)](https://forum.kodi.tv/showthread.php?tid=206635)
+[![Kodi wiki link](https://img.shields.io/badge/Kodi-Wiki-informational.svg)](https://kodi.wiki/view/Add-on:SoundCloud)
+[![Kodi versions link](https://img.shields.io/badge/Kodi-v21%20%22Omega%22-green.svg)](https://kodi.wiki/view/Releases)
+
+> 🍴 **This is a community fork** of
+> [jaylinski/kodi-addon-soundcloud](https://github.com/jaylinski/kodi-addon-soundcloud)
+> maintained at
+> [github.com/TheWorms/kodi-addon-soundcloud](https://github.com/TheWorms/kodi-addon-soundcloud).
+> It adds an "app-like" full-screen interface, OAuth token
+> authentication, a French translation, skin home-screen widgets and
+> fullscreen "now playing" overlays on top of the original add-on.
+> Bug reports and pull requests for the v5+ features should go to
+> **this** fork; for the classic plugin-style menu (v4 and earlier),
+> refer to the original project.
+
+This [Kodi](https://github.com/xbmc/xbmc) add-on provides a modern
+full-screen interface for SoundCloud, with a sidebar, horizontal
+carousel rows on the home screen, autoplay, a built-in mini-player and
+four optional fullscreen "now playing" overlay styles (Cinema,
+Waveform, Editorial, Vinyl).
+
 ## Installation
 
 **Recommended — TheWorms repository** (automatic updates).
@@ -33,8 +57,9 @@ stability/security pass**:
   listening (pausing suspends the countdown)
 * **Likes from the addon** — long-press (context menu) a track to add
   or remove it from your SoundCloud likes
-* **List layout** — third display mode: sidebar + a large vertical
-  trending list
+* **List layout** — third display mode: sidebar + large vertical
+  lists on every page; the home screen shows one section per
+  configured row
 * **Stations** — dedicated sidebar entry: the genre stations from the
   discover feed, plus your liked stations with an OAuth token
 * **5 new configurable home rows** — "Recently played", "Mixed for
@@ -97,7 +122,7 @@ the classic plugin-style menu with an "app-like" experience:
   [theworms.github.io/kodi-addon-soundcloud](https://theworms.github.io/kodi-addon-soundcloud/)
   with a console snippet that grabs your SoundCloud OAuth token in a
   single click — no more F12 / Network tab manual fiddling.
-  
+
 Since v5.7 the full-screen UI is the only interface — the classic
 plugin-style menu was removed. Skin home widgets continue to work via
 the dedicated `/widget/*` routes (see "Widgets" below).
@@ -113,20 +138,7 @@ the dedicated `/widget/*` routes (see "Widgets" below).
 * Keyboard shortcuts in fullscreen Now Playing (v5.9.6008+)
 * Optional background service for instant startup (v5.9.6017+)
 
-## Installation
-
-### Kodi Repository
-
-Follow the instructions on [https://kodi.wiki/view/Add-on:SoundCloud](https://kodi.wiki/view/Add-on:SoundCloud).
-
-### Manual
-
-* [Download the latest release from this fork](https://github.com/TheWorms/kodi-addon-soundcloud/releases) (`plugin.audio.soundcloud-X.Y.Z.zip`)
-* Copy the zip file to your Kodi system
-* Open Kodi, go to Add-ons and select "Install from zip file"
-* Select the file `plugin.audio.soundcloud-X.Y.Z.zip`
-
-### Optional dependency — Pillow
+## Optional dependency — Pillow
 
 The fullscreen "Now Playing" overlays (Cinema/Waveform/Editorial/Vinyl)
 look noticeably better with [Pillow](https://pypi.org/project/Pillow/)
@@ -349,7 +361,7 @@ want directly without needing the Widget mode workaround.
 
 ## Attributions
 
-This v5+ fork is maintained by **[TheWorms](https://github.com/TheWorms)**,
+This fork is maintained by **[TheWorms](https://github.com/TheWorms)**,
 who contributed the full-screen interface, OAuth token integration, the
 widget routes, the four fullscreen "now playing" overlay styles, the
 French translation, the background service architecture, and many UX

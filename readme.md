@@ -47,8 +47,9 @@ stabilité et sécurité** :
   d'écoute *effective* (la pause suspend le compte à rebours)
 * **J'aime depuis l'addon** — appui long (menu contextuel) sur un morceau
   pour l'ajouter ou le retirer de vos likes SoundCloud
-* **Mode « Liste »** — troisième mise en page : barre latérale + grande
-  liste verticale des tendances
+* **Mode « Liste »** — troisième mise en page : barre latérale + grandes
+  listes verticales sur toutes les pages ; l'accueil affiche une
+  section par rangée configurée
 * **Stations** — entrée dédiée dans la barre latérale : les stations de
   genre du feed discover, plus vos stations likées avec un jeton OAuth
 * **5 nouvelles rangées d'accueil configurables** — « Récemment écouté »,
@@ -109,6 +110,7 @@ qui remplace le menu plugin classique par une expérience « à la app » :
   *Vagues* (visualiseur audio animé), *Éditorial* (mise en page
   magazine avec citation extraite de la description du morceau),
   *Vinyle* (disque tournant avec pochette au centre). Désactivable
+  entièrement si vous préférez le mini-lecteur uniquement.
 * **Détection du type d'abonnement** — l'addon lit votre
   abonnement consumer depuis `/me` et le mémorise (Free / Go / Go+)
   pour que les futures fonctionnalités puissent s'y adapter.
@@ -122,7 +124,6 @@ qui remplace le menu plugin classique par une expérience « à la app » :
   [theworms.github.io/kodi-addon-soundcloud](https://theworms.github.io/kodi-addon-soundcloud/)
   avec un snippet console qui récupère votre jeton OAuth SoundCloud en
   un clic — fini la manipulation manuelle F12 / onglet Network.
-    entièrement si vous préférez le mini-lecteur uniquement.
 
 Depuis la v5.7, l'interface plein écran est la seule disponible — le
 menu plugin classique a été retiré. Les widgets skin pour l'accueil
@@ -155,6 +156,23 @@ Télécharge le dépôt en cliquant **[ICI](https://raw.githubusercontent.com/Th
 3. Les mises à jour seront ensuite automatiques
 
 **Installation manuelle (alternative) :** télécharge le zip de l'addon depuis la page [Releases](../../releases), puis **Add-ons** → **Installer depuis un fichier zip**.
+
+## Dépendance optionnelle — Pillow
+
+Les superpositions plein écran « En lecture » (Cinéma/Vagues/
+Éditorial/Vinyle) sont nettement plus jolies avec
+[Pillow](https://pypi.org/project/Pillow/) installé : Pillow permet à
+l'addon de générer un vrai flou gaussien de la pochette pour
+l'arrière-plan. Sans Pillow, la pochette est simplement affichée
+assombrie.
+
+Pour installer : Kodi → *Add-ons → Installer depuis un dépôt → Dépôt
+Kodi → Apparence → Pillow* (ou chercher directement
+`script.module.pil`). L'addon le détectera automatiquement au prochain
+morceau joué.
+
+Pillow est **optionnel** : l'addon fonctionne sans, vous perdez juste
+l'effet de flou.
 
 ## Lancer SoundCloud sans le flash du navigateur musique
 
@@ -387,7 +405,7 @@ contournement par Mode widget.
 
 ## Crédits
 
-Ce fork v5+ est maintenu par
+Ce fork est maintenu par
 **[TheWorms](https://github.com/TheWorms)**, qui a contribué
 l'interface plein écran, l'intégration du jeton OAuth, les routes de
 widget, les quatre styles de superposition « en lecture » plein
