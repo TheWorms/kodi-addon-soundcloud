@@ -226,6 +226,255 @@
         </control>
 
         <!-- ============================================================ -->
+        <!-- HOME GENRE CHIPS (both layouts, home page only)             -->
+        <!-- Ids 360-367, one per trending genre, same order as          -->
+        <!-- GENRE_URNS in window.py. The chip matching the current      -->
+        <!-- genre (Window.Property(trending_genre)) carries an orange   -->
+        <!-- underline; clicks are handled by window.py. The block lives -->
+        <!-- outside the list-mode group so the TILES layout shows the   -->
+        <!-- chips too.                                                 -->
+        <!-- ============================================================ -->
+        <control type="group">
+            <left>260</left>
+            <top>180</top>
+            <width>1660</width>
+            <height>50</height>
+            <visible>String.IsEmpty(Window.Property(page)) | String.IsEqual(Window.Property(page),home)</visible>
+
+            <!-- Genre chips (ids 360-367, one per trending genre, same
+                 order as GENRE_URNS in window.py). The chip matching the
+                 current genre (Window.Property(trending_genre)) carries
+                 an orange underline; clicks are handled by window.py. -->
+            <control type="button" id="360">
+                <left>0</left>
+                <top>0</top>
+                <width>190</width>
+                <height>44</height>
+                <label>$ADDON[plugin.audio.soundcloud 30365]</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <textcolor>FFA8A8A8</textcolor>
+                <focusedcolor>FFFF5500</focusedcolor>
+                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
+                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
+                <onleft>110</onleft>
+                <onright>361</onright>
+                <onup condition="String.IsEqual(Window.Property(layout),list)">354</onup>
+                <onup>110</onup>
+                <ondown condition="String.IsEqual(Window.Property(layout),list)">354</ondown>
+                <ondown>350</ondown>
+            </control>
+            <control type="button" id="361">
+                <left>210</left>
+                <top>0</top>
+                <width>190</width>
+                <height>44</height>
+                <label>$ADDON[plugin.audio.soundcloud 30370]</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <textcolor>FFA8A8A8</textcolor>
+                <focusedcolor>FFFF5500</focusedcolor>
+                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
+                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
+                <onleft>360</onleft>
+                <onright>362</onright>
+                <onup condition="String.IsEqual(Window.Property(layout),list)">354</onup>
+                <onup>110</onup>
+                <ondown condition="String.IsEqual(Window.Property(layout),list)">354</ondown>
+                <ondown>350</ondown>
+            </control>
+            <control type="button" id="362">
+                <left>420</left>
+                <top>0</top>
+                <width>190</width>
+                <height>44</height>
+                <label>$ADDON[plugin.audio.soundcloud 30371]</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <textcolor>FFA8A8A8</textcolor>
+                <focusedcolor>FFFF5500</focusedcolor>
+                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
+                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
+                <onleft>361</onleft>
+                <onright>363</onright>
+                <onup condition="String.IsEqual(Window.Property(layout),list)">354</onup>
+                <onup>110</onup>
+                <ondown condition="String.IsEqual(Window.Property(layout),list)">354</ondown>
+                <ondown>350</ondown>
+            </control>
+            <control type="button" id="363">
+                <left>630</left>
+                <top>0</top>
+                <width>190</width>
+                <height>44</height>
+                <label>$ADDON[plugin.audio.soundcloud 30372]</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <textcolor>FFA8A8A8</textcolor>
+                <focusedcolor>FFFF5500</focusedcolor>
+                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
+                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
+                <onleft>362</onleft>
+                <onright>364</onright>
+                <onup condition="String.IsEqual(Window.Property(layout),list)">354</onup>
+                <onup>110</onup>
+                <ondown condition="String.IsEqual(Window.Property(layout),list)">354</ondown>
+                <ondown>350</ondown>
+            </control>
+            <control type="button" id="364">
+                <left>840</left>
+                <top>0</top>
+                <width>190</width>
+                <height>44</height>
+                <label>$ADDON[plugin.audio.soundcloud 30373]</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <textcolor>FFA8A8A8</textcolor>
+                <focusedcolor>FFFF5500</focusedcolor>
+                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
+                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
+                <onleft>363</onleft>
+                <onright>365</onright>
+                <onup condition="String.IsEqual(Window.Property(layout),list)">354</onup>
+                <onup>110</onup>
+                <ondown condition="String.IsEqual(Window.Property(layout),list)">354</ondown>
+                <ondown>350</ondown>
+            </control>
+            <control type="button" id="365">
+                <left>1050</left>
+                <top>0</top>
+                <width>190</width>
+                <height>44</height>
+                <label>$ADDON[plugin.audio.soundcloud 30374]</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <textcolor>FFA8A8A8</textcolor>
+                <focusedcolor>FFFF5500</focusedcolor>
+                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
+                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
+                <onleft>364</onleft>
+                <onright>366</onright>
+                <onup condition="String.IsEqual(Window.Property(layout),list)">354</onup>
+                <onup>110</onup>
+                <ondown condition="String.IsEqual(Window.Property(layout),list)">354</ondown>
+                <ondown>350</ondown>
+            </control>
+            <control type="button" id="366">
+                <left>1260</left>
+                <top>0</top>
+                <width>190</width>
+                <height>44</height>
+                <label>$ADDON[plugin.audio.soundcloud 30375]</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <textcolor>FFA8A8A8</textcolor>
+                <focusedcolor>FFFF5500</focusedcolor>
+                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
+                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
+                <onleft>365</onleft>
+                <onright>367</onright>
+                <onup condition="String.IsEqual(Window.Property(layout),list)">354</onup>
+                <onup>110</onup>
+                <ondown condition="String.IsEqual(Window.Property(layout),list)">354</ondown>
+                <ondown>350</ondown>
+            </control>
+            <control type="button" id="367">
+                <left>1470</left>
+                <top>0</top>
+                <width>190</width>
+                <height>44</height>
+                <label>$ADDON[plugin.audio.soundcloud 30376]</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <textcolor>FFA8A8A8</textcolor>
+                <focusedcolor>FFFF5500</focusedcolor>
+                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
+                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
+                <onleft>366</onleft>
+                <onright>367</onright>
+                <onup condition="String.IsEqual(Window.Property(layout),list)">354</onup>
+                <onup>110</onup>
+                <ondown condition="String.IsEqual(Window.Property(layout),list)">354</ondown>
+                <ondown>350</ondown>
+            </control>
+
+            <!-- Orange underline marking the selected genre chip. -->
+            <control type="image">
+                <left>0</left>
+                <top>46</top>
+                <width>190</width>
+                <height>3</height>
+                <texture colordiffuse="FFFF5500">white.png</texture>
+                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:all-music)</visible>
+            </control>
+            <control type="image">
+                <left>210</left>
+                <top>46</top>
+                <width>190</width>
+                <height>3</height>
+                <texture colordiffuse="FFFF5500">white.png</texture>
+                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:techno)</visible>
+            </control>
+            <control type="image">
+                <left>420</left>
+                <top>46</top>
+                <width>190</width>
+                <height>3</height>
+                <texture colordiffuse="FFFF5500">white.png</texture>
+                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:house)</visible>
+            </control>
+            <control type="image">
+                <left>630</left>
+                <top>46</top>
+                <width>190</width>
+                <height>3</height>
+                <texture colordiffuse="FFFF5500">white.png</texture>
+                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:deephouse)</visible>
+            </control>
+            <control type="image">
+                <left>840</left>
+                <top>46</top>
+                <width>190</width>
+                <height>3</height>
+                <texture colordiffuse="FFFF5500">white.png</texture>
+                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:electronic)</visible>
+            </control>
+            <control type="image">
+                <left>1050</left>
+                <top>46</top>
+                <width>190</width>
+                <height>3</height>
+                <texture colordiffuse="FFFF5500">white.png</texture>
+                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:hiphop)</visible>
+            </control>
+            <control type="image">
+                <left>1260</left>
+                <top>46</top>
+                <width>190</width>
+                <height>3</height>
+                <texture colordiffuse="FFFF5500">white.png</texture>
+                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:ambient)</visible>
+            </control>
+            <control type="image">
+                <left>1470</left>
+                <top>46</top>
+                <width>190</width>
+                <height>3</height>
+                <texture colordiffuse="FFFF5500">white.png</texture>
+                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:jazz)</visible>
+            </control>
+
+        </control>
+
+        <!-- ============================================================ -->
         <!-- HOME ROWS (only visible when page=home)                     -->
         <!-- The rows grouplist (290) sits inside a plain group (291).   -->
         <!-- The side menu is always visible now, so nothing gets        -->
@@ -234,15 +483,15 @@
         <!-- ============================================================ -->
         <control type="group" id="291">
             <left>260</left>
-            <top>180</top>
+            <top>240</top>
             <width>1660</width>
-            <height>780</height>
+            <height>720</height>
 
             <control type="grouplist" id="290">
             <left>0</left>
             <top>0</top>
             <width>1660</width>
-            <height>780</height>
+            <height>720</height>
             <itemgap>16</itemgap>
             <orientation>vertical</orientation>
             <scrolltime tween="sine" easing="out">300</scrolltime>
@@ -274,7 +523,7 @@
                     <preloaditems>2</preloaditems>
                     <onleft>350</onleft>
                     <onright>350</onright>
-                    <onup>110</onup>
+                    <onup>360</onup>
                     <ondown>351</ondown>
                     <itemlayout width="240" height="240">
                 <control type="group">
@@ -635,7 +884,7 @@
                     <onleft>353</onleft>
                     <onright>353</onright>
                     <onup>352</onup>
-                    <ondown>110</ondown>
+                    <ondown>521</ondown>
                     <itemlayout width="240" height="240">
                 <control type="group">
                     <left>20</left>
@@ -741,221 +990,6 @@
             <height>780</height>
             <visible>String.IsEqual(Window.Property(layout),list) + String.IsEmpty(Window.Property(page)) | String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)</visible>
 
-            <!-- Genre chips (ids 360-367, one per trending genre, same
-                 order as GENRE_URNS in window.py). The chip matching the
-                 current genre (Window.Property(trending_genre)) carries
-                 an orange underline; clicks are handled by window.py. -->
-            <control type="button" id="360">
-                <left>0</left>
-                <top>0</top>
-                <width>190</width>
-                <height>44</height>
-                <label>$ADDON[plugin.audio.soundcloud 30365]</label>
-                <font>font12</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <textcolor>FFA8A8A8</textcolor>
-                <focusedcolor>FFFF5500</focusedcolor>
-                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
-                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
-                <onleft>110</onleft>
-                <onright>361</onright>
-                <onup>354</onup>
-                <ondown>354</ondown>
-            </control>
-            <control type="button" id="361">
-                <left>210</left>
-                <top>0</top>
-                <width>190</width>
-                <height>44</height>
-                <label>$ADDON[plugin.audio.soundcloud 30370]</label>
-                <font>font12</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <textcolor>FFA8A8A8</textcolor>
-                <focusedcolor>FFFF5500</focusedcolor>
-                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
-                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
-                <onleft>360</onleft>
-                <onright>362</onright>
-                <onup>354</onup>
-                <ondown>354</ondown>
-            </control>
-            <control type="button" id="362">
-                <left>420</left>
-                <top>0</top>
-                <width>190</width>
-                <height>44</height>
-                <label>$ADDON[plugin.audio.soundcloud 30371]</label>
-                <font>font12</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <textcolor>FFA8A8A8</textcolor>
-                <focusedcolor>FFFF5500</focusedcolor>
-                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
-                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
-                <onleft>361</onleft>
-                <onright>363</onright>
-                <onup>354</onup>
-                <ondown>354</ondown>
-            </control>
-            <control type="button" id="363">
-                <left>630</left>
-                <top>0</top>
-                <width>190</width>
-                <height>44</height>
-                <label>$ADDON[plugin.audio.soundcloud 30372]</label>
-                <font>font12</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <textcolor>FFA8A8A8</textcolor>
-                <focusedcolor>FFFF5500</focusedcolor>
-                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
-                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
-                <onleft>362</onleft>
-                <onright>364</onright>
-                <onup>354</onup>
-                <ondown>354</ondown>
-            </control>
-            <control type="button" id="364">
-                <left>840</left>
-                <top>0</top>
-                <width>190</width>
-                <height>44</height>
-                <label>$ADDON[plugin.audio.soundcloud 30373]</label>
-                <font>font12</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <textcolor>FFA8A8A8</textcolor>
-                <focusedcolor>FFFF5500</focusedcolor>
-                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
-                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
-                <onleft>363</onleft>
-                <onright>365</onright>
-                <onup>354</onup>
-                <ondown>354</ondown>
-            </control>
-            <control type="button" id="365">
-                <left>1050</left>
-                <top>0</top>
-                <width>190</width>
-                <height>44</height>
-                <label>$ADDON[plugin.audio.soundcloud 30374]</label>
-                <font>font12</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <textcolor>FFA8A8A8</textcolor>
-                <focusedcolor>FFFF5500</focusedcolor>
-                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
-                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
-                <onleft>364</onleft>
-                <onright>366</onright>
-                <onup>354</onup>
-                <ondown>354</ondown>
-            </control>
-            <control type="button" id="366">
-                <left>1260</left>
-                <top>0</top>
-                <width>190</width>
-                <height>44</height>
-                <label>$ADDON[plugin.audio.soundcloud 30375]</label>
-                <font>font12</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <textcolor>FFA8A8A8</textcolor>
-                <focusedcolor>FFFF5500</focusedcolor>
-                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
-                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
-                <onleft>365</onleft>
-                <onright>367</onright>
-                <onup>354</onup>
-                <ondown>354</ondown>
-            </control>
-            <control type="button" id="367">
-                <left>1470</left>
-                <top>0</top>
-                <width>190</width>
-                <height>44</height>
-                <label>$ADDON[plugin.audio.soundcloud 30376]</label>
-                <font>font12</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <textcolor>FFA8A8A8</textcolor>
-                <focusedcolor>FFFF5500</focusedcolor>
-                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
-                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
-                <onleft>366</onleft>
-                <onright>367</onright>
-                <onup>354</onup>
-                <ondown>354</ondown>
-            </control>
-
-            <!-- Orange underline marking the selected genre chip. -->
-            <control type="image">
-                <left>0</left>
-                <top>44</top>
-                <width>190</width>
-                <height>3</height>
-                <texture colordiffuse="FFFF5500">white.png</texture>
-                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:all-music)</visible>
-            </control>
-            <control type="image">
-                <left>210</left>
-                <top>44</top>
-                <width>190</width>
-                <height>3</height>
-                <texture colordiffuse="FFFF5500">white.png</texture>
-                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:techno)</visible>
-            </control>
-            <control type="image">
-                <left>420</left>
-                <top>44</top>
-                <width>190</width>
-                <height>3</height>
-                <texture colordiffuse="FFFF5500">white.png</texture>
-                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:house)</visible>
-            </control>
-            <control type="image">
-                <left>630</left>
-                <top>44</top>
-                <width>190</width>
-                <height>3</height>
-                <texture colordiffuse="FFFF5500">white.png</texture>
-                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:deephouse)</visible>
-            </control>
-            <control type="image">
-                <left>840</left>
-                <top>44</top>
-                <width>190</width>
-                <height>3</height>
-                <texture colordiffuse="FFFF5500">white.png</texture>
-                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:electronic)</visible>
-            </control>
-            <control type="image">
-                <left>1050</left>
-                <top>44</top>
-                <width>190</width>
-                <height>3</height>
-                <texture colordiffuse="FFFF5500">white.png</texture>
-                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:hiphop)</visible>
-            </control>
-            <control type="image">
-                <left>1260</left>
-                <top>44</top>
-                <width>190</width>
-                <height>3</height>
-                <texture colordiffuse="FFFF5500">white.png</texture>
-                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:ambient)</visible>
-            </control>
-            <control type="image">
-                <left>1470</left>
-                <top>44</top>
-                <width>190</width>
-                <height>3</height>
-                <texture colordiffuse="FFFF5500">white.png</texture>
-                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:jazz)</visible>
-            </control>
-
             <control type="list" id="354">
                 <left>0</left>
                 <top>70</top>
@@ -964,7 +998,7 @@
                 <onleft>110</onleft>
                 <onright>354</onright>
                 <onup>360</onup>
-                <ondown>354</ondown>
+                <ondown>521</ondown>
                 <scrolltime tween="sine" easing="out">300</scrolltime>
                 <!-- Row style follows the design demo: a dark card per
                      track (#252525), cover 84x84, white title, grey
@@ -1017,6 +1051,35 @@
                             <font>font13</font>
                             <textcolor>FFA8A8A8</textcolor>
                             <visible>!String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                        </control>
+                        <!-- Playing equalizer: pulsing orange bars on
+                             the row of the track currently playing. -->
+                        <control type="image">
+                            <left>1232</left>
+                            <top>70</top>
+                            <width>6</width>
+                            <height>16</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="fade" start="100" end="30" time="450" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                        </control>
+                        <control type="image">
+                            <left>1242</left>
+                            <top>60</top>
+                            <width>6</width>
+                            <height>26</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="fade" start="100" end="30" time="450" delay="150" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                        </control>
+                        <control type="image">
+                            <left>1252</left>
+                            <top>76</top>
+                            <width>6</width>
+                            <height>10</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="fade" start="100" end="30" time="450" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
                         </control>
                         <control type="label">
                             <left>1296</left>
@@ -1086,6 +1149,35 @@
                             <font>font13</font>
                             <textcolor>FFFAFAFA</textcolor>
                             <visible>!String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                        </control>
+                        <!-- Playing equalizer: pulsing orange bars on
+                             the row of the track currently playing. -->
+                        <control type="image">
+                            <left>1232</left>
+                            <top>70</top>
+                            <width>6</width>
+                            <height>16</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="fade" start="100" end="30" time="450" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                        </control>
+                        <control type="image">
+                            <left>1242</left>
+                            <top>60</top>
+                            <width>6</width>
+                            <height>26</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="fade" start="100" end="30" time="450" delay="150" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                        </control>
+                        <control type="image">
+                            <left>1252</left>
+                            <top>76</top>
+                            <width>6</width>
+                            <height>10</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="fade" start="100" end="30" time="450" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
                         </control>
                         <control type="label">
                             <left>1296</left>
@@ -1153,7 +1245,7 @@
                 <onleft>110</onleft>
                 <onright>401</onright>
                 <onup>401</onup>
-                <ondown>401</ondown>
+                <ondown>521</ondown>
                 <scrolltime tween="sine" easing="out">300</scrolltime>
                 <itemlayout width="1660" height="110">
                     <control type="group">
@@ -1194,6 +1286,35 @@
                             <label>$INFO[ListItem.Artist]</label>
                             <font>font13</font>
                             <textcolor>FFA8A8A8</textcolor>
+                        </control>
+                        <!-- Playing equalizer: pulsing orange bars on
+                             the row of the track currently playing. -->
+                        <control type="image">
+                            <left>1232</left>
+                            <top>70</top>
+                            <width>6</width>
+                            <height>16</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying</visible>
+                            <animation effect="fade" start="100" end="30" time="450" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                        </control>
+                        <control type="image">
+                            <left>1242</left>
+                            <top>60</top>
+                            <width>6</width>
+                            <height>26</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying</visible>
+                            <animation effect="fade" start="100" end="30" time="450" delay="150" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                        </control>
+                        <control type="image">
+                            <left>1252</left>
+                            <top>76</top>
+                            <width>6</width>
+                            <height>10</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying</visible>
+                            <animation effect="fade" start="100" end="30" time="450" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
                         </control>
                         <control type="label">
                             <left>1296</left>
@@ -1248,6 +1369,35 @@
                             <font>font13</font>
                             <textcolor>FFFAFAFA</textcolor>
                         </control>
+                        <!-- Playing equalizer: pulsing orange bars on
+                             the row of the track currently playing. -->
+                        <control type="image">
+                            <left>1232</left>
+                            <top>70</top>
+                            <width>6</width>
+                            <height>16</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying</visible>
+                            <animation effect="fade" start="100" end="30" time="450" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                        </control>
+                        <control type="image">
+                            <left>1242</left>
+                            <top>60</top>
+                            <width>6</width>
+                            <height>26</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying</visible>
+                            <animation effect="fade" start="100" end="30" time="450" delay="150" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                        </control>
+                        <control type="image">
+                            <left>1252</left>
+                            <top>76</top>
+                            <width>6</width>
+                            <height>10</height>
+                            <texture colordiffuse="FFFF5500">white.png</texture>
+                            <visible>ListItem.IsPlaying</visible>
+                            <animation effect="fade" start="100" end="30" time="450" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                        </control>
                         <control type="label">
                             <left>1296</left>
                             <top>0</top>
@@ -1273,7 +1423,7 @@
                 <onleft>110</onleft>
                 <onright>400</onright>
                 <onup>400</onup>
-                <ondown>400</ondown>
+                <ondown>521</ondown>
                 <itemlayout width="240" height="320">
                 <control type="group">
                     <left>20</left>
@@ -1461,7 +1611,10 @@
                         <texturenofocus>-</texturenofocus>
                         <onleft>521</onleft>
                         <onright>521</onright>
-                        <onup>110</onup>
+                        <onup condition="String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(layout),list)">354</onup>
+                        <onup condition="String.IsEqual(Window.Property(page),home)">350</onup>
+                        <onup condition="String.IsEqual(Window.Property(layout),list)">401</onup>
+                        <onup>400</onup>
                     </control>
 
                     <control type="button" id="521">
@@ -1469,7 +1622,7 @@
                         <top>20</top>
                         <width>60</width>
                         <height>60</height>
-                        <label>[B]$INFO[Player.Paused,&gt;,II][/B]</label>
+                        <label>[B]II[/B]</label>
                         <font>font14</font>
                         <textcolor>FFFAFAFA</textcolor>
                         <focusedcolor>FFFF5500</focusedcolor>
@@ -1478,7 +1631,10 @@
                         <texturenofocus colordiffuse="22FFFFFF">white.png</texturenofocus>
                         <onleft>520</onleft>
                         <onright>522</onright>
-                        <onup>110</onup>
+                        <onup condition="String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(layout),list)">354</onup>
+                        <onup condition="String.IsEqual(Window.Property(page),home)">350</onup>
+                        <onup condition="String.IsEqual(Window.Property(layout),list)">401</onup>
+                        <onup>400</onup>
                     </control>
 
                     <control type="button" id="522">
@@ -1495,7 +1651,10 @@
                         <texturenofocus>-</texturenofocus>
                         <onleft>521</onleft>
                         <onright>521</onright>
-                        <onup>110</onup>
+                        <onup condition="String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(layout),list)">354</onup>
+                        <onup condition="String.IsEqual(Window.Property(page),home)">350</onup>
+                        <onup condition="String.IsEqual(Window.Property(layout),list)">401</onup>
+                        <onup>400</onup>
                     </control>
                 </control>
 

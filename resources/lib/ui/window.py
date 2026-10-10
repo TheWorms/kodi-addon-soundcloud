@@ -89,12 +89,18 @@ class _ProgressUpdater(threading.Thread):
     ID_FILL_CONTROLS = 530
     ID_FILL_COMPACT = 531
 
+    # Control id of the mini-player play/pause button (set in the
+    # XML). Its label is synced from Python because Kodi's $INFO has
+    # no conditional form to show '>' when paused and 'II' otherwise.
+    ID_PLAY_PAUSE = 521
+
     def __init__(self, window):
         super().__init__(daemon=True)
         self._player = xbmc.Player()
         self._stop_event = threading.Event()
         self._window = window  # needed for getControl()
         self._tick_count = 0  # for logging cadence
+        self._last_pp_label = None  # cached play/pause icon
 
     def stop(self):
         self._stop_event.set()
@@ -135,8 +141,31 @@ class _ProgressUpdater(threading.Thread):
                 )
             return False
 
+    def _sync_play_pause(self):
+        """
+        Keep the mini-player play/pause button (521) in sync: '>' (play)
+        while paused, 'II' (pause) while playing. The XML label can't
+        express the two states, so the icon is set from Python every
+        tick; the value is cached to avoid spamming setLabel().
+        """
+        try:
+            try:
+                paused = self._player.isPaused()
+            except Exception:
+                paused = False
+            label = "[B]>[/B]" if paused else "[B]II[/B]"
+            if label != self._last_pp_label:
+                self._window.getControl(self.ID_PLAY_PAUSE).setLabel(label)
+                self._last_pp_label = label
+        except Exception:
+            # Control absent (mini-player "off" or window closing) - noop.
+            pass
+
     def _tick(self):
         self._tick_count += 1
+
+        # Sync the play/pause icon first, whatever the player state.
+        self._sync_play_pause()
 
         if not self._player.isPlayingAudio():
             self._set_width(self.ID_FILL_CONTROLS, 1)
@@ -1358,22 +1387,11 @@ ROW_TYPES = {
     "following": {"title_strid": 30154, "loader": "_load_following"},
 }
 
-# Localized labels of the trending genre options (urn -> string ID),
-# used for the subtitle of the home page in the "list" layout.
-GENRE_LABELS = {
-    "soundcloud:genres:all-music": 30365,
-    "soundcloud:genres:techno": 30370,
-    "soundcloud:genres:house": 30371,
-    "soundcloud:genres:deephouse": 30372,
-    "soundcloud:genres:electronic": 30373,
-    "soundcloud:genres:hiphop": 30374,
-    "soundcloud:genres:ambient": 30375,
-    "soundcloud:genres:jazz": 30376,
-}
+# Localized labels of the trending genres live in the .po files
+# (string ids 30365..30376) and are shown by the genre chips of the
+# home page in BOTH layouts.
 
-# Order of the genre chips shown on the home page in the "list"
-# layout. MUST match the button ids 360..367 in the skin XML
-# (chip 360 = first entry, chip 367 = last).
+# Order of the genre chips shown on the home page. MUST match the
 GENRE_URNS = (
     "soundcloud:genres:all-music",
     "soundcloud:genres:techno",
@@ -1483,15 +1501,14 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         # Default page = home.
         self._show_home()
 
-        # Focus the home button in cards mode, or the trending list in
-        # list mode. Wrapped in try/except because setFocusId on a
-        # non-existent or invisible control logs a "can't focus" error
-        # and (in some Kodi versions) can trigger a window reload loop.
+        # Always focus the Home button of the side menu on open (in
+        # both layouts): moving into the content is the user's
+        # choice (right / down), never automatic. Wrapped in
+        # try/except because setFocusId on a non-existent or
+        # invisible control logs a "can't focus" error and (in some
+        # Kodi versions) can trigger a window reload loop.
         try:
-            if layout == "list":
-                target = ID_HOME_LIST
-            else:
-                target = ID_NAV_HOME
+            target = ID_NAV_HOME
             # Small delay to let the controls fully initialize before
             # we try to focus them. Without this, focus can race against
             # the layout pass and silently fail.
@@ -1559,26 +1576,35 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             if page == "home":
                 self._show_home()
             try:
-                # On the home page the focus follows the layout's own
-                # controls (chips list / side menu); on any other page
-                # both page-list containers already hold the same
-                # content, so we just re-focus the visible one.
-                if layout == "list":
-                    self.setFocusId(
-                        ID_HOME_LIST if page == "home" else ID_PAGE_LIST_L)
-                else:
-                    self.setFocusId(
-                        ID_NAV_HOME if page == "home" else ID_PAGE_LIST)
+                # Only move the focus when it currently sits on a
+                # content container that the layout switch just hid
+                # (card panel becoming the vertical list, or the
+                # reverse). If the user is on the side menu — visible
+                # in both layouts — the focus stays exactly where it
+                # is.
+                focused = self.getFocusId()
             except Exception:
-                pass
+                focused = None
+            if (focused in ID_ROW_LISTS
+                    or focused in (ID_PAGE_LIST, ID_PAGE_LIST_L, ID_HOME_LIST)):
+                try:
+                    if layout == "list":
+                        self.setFocusId(
+                            ID_HOME_LIST if page == "home" else ID_PAGE_LIST_L)
+                    else:
+                        self.setFocusId(
+                            ID_ROW1_LIST if page == "home" else ID_PAGE_LIST)
+                except Exception:
+                    pass
 
         # Trending genre changed in the settings (the chips and the
         # list subtitle follow it live, like the layout).
         genre = self._trending_genre()
         if genre != (self.getProperty("trending_genre") or ""):
             self.setProperty("trending_genre", genre)
-            if (self.getProperty("layout") == "list"
-                    and (self.getProperty("page") or "home") == "home"):
+            # Reload the home page in BOTH layouts: the genre chips
+            # and the trending row exist in tiles mode too now.
+            if (self.getProperty("page") or "home") == "home":
                 self._show_home()
 
         mp_setting = self.settings.get("ui.miniplayer") or "2"
@@ -1962,16 +1988,11 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         if self.getProperty("layout") == "list":
             for idx in range(1, 5):
                 self.setProperty("row%d_visible" % idx, "false")
-            self.setProperty("subtitle", self._trending_genre_label())
             row_configs = self._row_configs()
             if all(t == "off" for t in row_configs):
                 row_configs = ["trending"]
             if not self._fill_home_sections(row_configs):
                 self.setProperty("page_empty", "true")
-            try:
-                self.setFocusId(ID_HOME_LIST)
-            except Exception:
-                pass
             return
 
         # Read row config from settings (see _row_configs). Each of
@@ -2036,17 +2057,6 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         """
         genre = (self.settings.get("trending.genre") or "").strip()
         return genre or "soundcloud:genres:all-music"
-
-    def _trending_genre_label(self):
-        """
-        Localized label of the configured trending genre (shown as the
-        subtitle of the home page in list layout). Returns an empty
-        string for an unknown genre value.
-        """
-        strid = GENRE_LABELS.get(self._trending_genre())
-        if strid:
-            return self.addon.getLocalizedString(strid)
-        return ""
 
     # ---------- Row content loaders (each fills one fixedlist) ----------
 
@@ -2383,15 +2393,11 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
 
         is_empty = collection is None or not collection.items
         self.setProperty("page_empty", "true" if is_empty else "false")
-        # Focus the container that is visible in the current layout:
-        # the vertical list in "list", the card panel otherwise.
-        focus_id = (ID_PAGE_LIST_L
-                    if (self.getProperty("layout") or "sidebar") == "list"
-                    else ID_PAGE_LIST)
-        try:
-            self.setFocusId(focus_id)
-        except Exception:
-            pass
+        # NOTE: the focus is deliberately NOT moved here. Selecting a
+        # menu entry keeps the focus on the side menu — the user
+        # navigates into the content with right/down when they want
+        # to (both page-list containers are always filled, so no
+        # re-fetch is ever needed).
 
     # =====================================================================
     # Playback

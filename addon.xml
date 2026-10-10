@@ -60,6 +60,10 @@ INTERFACE: the vertical list mode now applies to EVERY page - likes, playlists, 
 INTERFACE: the home list rows now follow the design demo - one compact card per track (dark #252525 background, focused row #2E2E2E) with a 56x56 cover, white title, grey artist and right-aligned grey duration; the focused track title turns accent orange.
 INTERFACE: the "List" home page now shows one section per configured home row (Likes / Trending / Playlists / Subscriptions, same row settings as the tiles layout; rows set to "off" are skipped) under orange localized headers - previously it only listed trending tracks and the row settings had no effect in list mode.
 INTERFACE: list rows on every page are taller and less compact - 110px rows with an 84x84 cover and larger fonts (title, artist, duration), same demo styling (dark card, focused row highlighted in #2E2E2E, orange focused title).
+INTERFACE: the home genre chips are now shown in BOTH layouts - the tiles home previously had no way to pick the trending genre from the home page. The chips sit above the content; the tiles rows moved down to make room.
+INTERFACE: selecting a side-menu entry no longer auto-jumps the focus into the content - it stays on the menu and you move to the content yourself (right / down). A fresh open focuses the Home button of the side menu.
+INTERFACE: the track currently playing shows a pulsing orange equalizer on its row in the list layouts.
+INTERFACE FIX: the mini-player is now reachable with the remote - down from the last item of any content list / the last home row reaches the play/pause button, up from the buttons returns to the content - and its play/pause button showed an empty block instead of an icon: the icon is now kept in sync by the addon (play when paused, pause bars when playing).
 SETTINGS: the layout options are renamed to "Tiles" and "List" (a stale stored value still falls back to tiles).
 
 EXPERT: cache duration (7/30/90 days, old entries purged once per session) and network timeout (5/10/15/30 s) are now settings instead of hardcoded values.
