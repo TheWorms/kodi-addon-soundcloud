@@ -348,6 +348,14 @@ class _PlayerObserver(xbmc.Player):
         # Scheduled, never inline: Player callbacks run on Kodi's
         # application thread (see onPlayBackEnded below).
         try:
+            self._window._sync_playing_marker_property()
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::PlayerObserver onAVStarted "
+                "marker sync: %s" % str(e),
+                xbmc.LOGWARNING,
+            )
+        try:
             self._window._schedule_playing_markers_refresh()
         except Exception as e:
             xbmc.log(
@@ -376,6 +384,14 @@ class _PlayerObserver(xbmc.Player):
         # Fired when the queue moves to another item - same refresh
         # as onAVStarted (the two events are debounced together).
         try:
+            self._window._sync_playing_marker_property()
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::PlayerObserver onAVChange "
+                "marker sync: %s" % str(e),
+                xbmc.LOGWARNING,
+            )
+        try:
             self._window._schedule_playing_markers_refresh()
         except Exception as e:
             xbmc.log(
@@ -396,6 +412,14 @@ class _PlayerObserver(xbmc.Player):
         self._close_now_playing()
         # Nothing plays anymore - re-render the lists so the playing
         # markers clear instead of staying frozen on the last track.
+        try:
+            self._window._sync_playing_marker_property()
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::PlayerObserver "
+                "onPlayBackStopped marker sync: %s" % str(e),
+                xbmc.LOGWARNING,
+            )
         try:
             self._window._schedule_playing_markers_refresh()
         except Exception as e:
@@ -421,6 +445,14 @@ class _PlayerObserver(xbmc.Player):
         # Re-render the lists: either the queue continues (the fresh
         # onAVStarted re-schedules a refresh that shows the new track)
         # or nothing plays anymore and the markers clear.
+        try:
+            self._window._sync_playing_marker_property()
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::PlayerObserver "
+                "onPlayBackEnded marker sync: %s" % str(e),
+                xbmc.LOGWARNING,
+            )
         try:
             self._window._schedule_playing_markers_refresh()
         except Exception as e:
@@ -1481,6 +1513,9 @@ ID_NAV_PLAYLISTS = 113
 ID_NAV_FOLLOWING = 114
 ID_NAV_SETTINGS = 115
 ID_NAV_STATIONS = 116
+# Side-menu entry that renews the OAuth token from inside the UI
+# (see _show_token) - sits right above the Settings button.
+ID_NAV_TOKEN = 117
 # (ID 116 was the legacy interface button — removed in 5.2.4; it is now
 # the "Stations" entry of the side menu.)
 
@@ -1505,6 +1540,63 @@ HOME_SECTION_LIMIT = 10
 # burst of PlayerControl(Next) presses fires several more - one
 # coalesced re-fill avoids a visible flicker of the lists per event.
 MARKER_REFRESH_DELAY = 0.2
+# Backstop polling loop for the playing markers: Kodi's Player
+# callbacks are the primary trigger, but the container re-render
+# they schedule can silently fail; the watchdog re-syncs the marker
+# property whenever the (playing, playlist position) pair actually
+# changes (see _MarkerWatchdog below).
+MARKER_WATCHDOG_POLL = 0.5
+
+
+class _MarkerWatchdog(threading.Thread):
+    """
+    Daemon thread that keeps the playing-marker property in sync
+    even when the Player callbacks are lost (observed on CoreELEC:
+    callbacks fire but the container re-render never happens, and
+    the markers stay frozen on the previous track). Instead of
+    refreshing unconditionally, it remembers the last (playing,
+    playlist position) pair and only triggers a sync when that key
+    changes - a remote Next press, an autoplay queue advance or a
+    stop all move the playlist position, so every real transition
+    is caught within one poll interval.
+    """
+
+    POLL_SECONDS = MARKER_WATCHDOG_POLL
+
+    def __init__(self, window):
+        super().__init__(daemon=True)
+        self._window = window
+        self._last_key = None
+
+    def run(self):
+        monitor = xbmc.Monitor()
+        player = xbmc.Player()
+        while not monitor.waitForAbort(self.POLL_SECONDS):
+            try:
+                if getattr(self._window, "_closed", False):
+                    return
+                if player.isPlayingAudio():
+                    try:
+                        position = xbmc.PlayList(
+                            xbmc.PLAYLIST_MUSIC).getposition()
+                    except Exception:
+                        position = -1
+                    key = ("play", position)
+                else:
+                    key = ("stop",)
+                if key == self._last_key:
+                    continue
+                self._last_key = key
+                self._window._sync_playing_marker_property()
+                self._window._refresh_playing_markers()
+            except Exception as e:
+                xbmc.log(
+                    "plugin.audio.soundcloud::MarkerWatchdog "
+                    "failed: %s" % str(e),
+                    xbmc.LOGWARNING,
+                )
+
+
 # Available row types — used to map a setting value to a content loader.
 # Localized titles use the corresponding string ID.
 ROW_TYPES = {
@@ -1632,6 +1724,13 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         self.setProperty("miniplayer", mp_mode)
         self._apply_content_geometry(mp_mode == "off")
 
+        # Publish the playing-marker state before the first fill:
+        # a window opened while something plays must show the
+        # markers right away, and the initial fill renders each
+        # item exactly once.
+        self._marker_hint = None
+        self._sync_playing_marker_property()
+
         # Default page = home.
         self._show_home()
 
@@ -1667,6 +1766,24 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             xbmc.log(
                 "plugin.audio.soundcloud::HomeWindow progress updater failed to start: %s" %
                 str(e),
+                xbmc.LOGWARNING,
+            )
+
+        # Start the marker watchdog backstop (see _MarkerWatchdog):
+        # same pattern as the progress updater - getControl needs
+        # onInit to have run, so this can only start here.
+        try:
+            self._marker_watchdog = _MarkerWatchdog(self)
+            self._marker_watchdog.start()
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow marker watchdog "
+                "started",
+                xbmc.LOGINFO,
+            )
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow marker watchdog "
+                "failed to start: %s" % str(e),
                 xbmc.LOGWARNING,
             )
 
@@ -2094,6 +2211,9 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             return
         if control_id == ID_NAV_SETTINGS:
             self.addon.openSettings()
+            return
+        if control_id == ID_NAV_TOKEN:
+            self._show_token()
             return
 
         # ----- Mini-player controls -----
@@ -3121,6 +3241,11 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 xbmc.LOGINFO,
             )
             xbmc.Player().play(playlist, startpos=new_start)
+            # The Kodi playlist is the source of truth again - drop
+            # any single-track hint and publish the fresh marker
+            # state.
+            self._marker_hint = None
+            self._sync_playing_marker_property()
 
             # Arm the sleep timer for this fresh playback.
             self._arm_sleep_timer()
@@ -3154,6 +3279,12 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 return
             list_item.setPath(resolved)
             xbmc.Player().play(resolved, list_item)
+            # Single-track playback bypasses the Kodi playlist, so
+            # its position cannot identify the track: publish the
+            # track id directly as the marker hint.
+            hint = list_item.getProperty("soundcloud.track_id")
+            self._marker_hint = hint or None
+            self.setProperty("playing_marker", hint or "none")
             # Arm the sleep timer for this fresh playback.
             self._arm_sleep_timer()
         except Exception as e:
@@ -3267,6 +3398,67 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         self._fill_page_list(None)
         return False
 
+    def _show_token(self):
+        """
+        "OAuth token" side-menu button: guided token renewal without
+        leaving the interface. Shows the helper-page instructions,
+        lets the user paste the fresh token, saves it, clears the
+        invalid-token latch and the cached profile, verifies it
+        against /me and reloads the home content. A dead token
+        makes every personal row silently fall back to trending,
+        which is exactly what this button fixes.
+        """
+        dialog = xbmcgui.Dialog()
+        addon_name = self.addon.getAddonInfo("name")
+        # 1) How to get a token (helper page with the copy-paste
+        #    snippet) - also the context for the keyboard paste.
+        dialog.ok(addon_name, self.addon.getLocalizedString(30026))
+        # 2) Paste the token (empty input = cancel, no change).
+        token = dialog.input(self.addon.getLocalizedString(30021))
+        if not token or not token.strip():
+            return
+        # 3) Save it.
+        self.addon.setSetting("auth.oauth_token", token.strip())
+        # 4) Clear the invalid-token latch so get_me() retries, and
+        #    drop the /me profile cached for the previous token.
+        try:
+            self.api._token_invalid = False
+            self.api._last_invalid_token = None
+        except Exception:
+            pass
+        try:
+            self.api.cache.vfs.delete("api-me-profile")
+        except Exception:
+            pass
+        # 5) Verify against /me (network errors surface as None
+        #    or an exception - both are handled below).
+        try:
+            me = self.api.get_me()
+        except Exception as e:
+            dialog.ok(
+                addon_name,
+                self.addon.getLocalizedString(30245).format(str(e)),
+            )
+            return
+        if me and me.get("username"):
+            dialog.ok(
+                addon_name,
+                self.addon.getLocalizedString(30242).format(
+                    me["username"]
+                ),
+            )
+        else:
+            dialog.ok(
+                addon_name,
+                self.addon.getLocalizedString(30243).format("401"),
+            )
+        # 6) Reload the home content with the (possibly new) token.
+        self._show_home()
+        try:
+            self.setFocusId(ID_NAV_HOME)
+        except Exception:
+            pass
+
     def _notify(self, message):
         try:
             xbmcgui.Dialog().notification(
@@ -3336,7 +3528,53 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             xbmc.log(
                 "plugin.audio.soundcloud::HomeWindow marker refresh "
                 "scheduling failed: %s" % str(e),
-                xbmc.LOGDEBUG,
+                xbmc.LOGWARNING,
+            )
+
+    def _sync_playing_marker_property(self):
+        """
+        Publish the id of the track that is actually playing as the
+        window property "playing_marker". The skin flags the
+        playing item by comparing this property against the
+        per-item "playing_marker" property set in models/track.py
+        - unlike ListItem.IsPlaying this works for every playback
+        source (queue, endless autoplay, remote Next/Previous,
+        single-track play).
+
+        Priority order:
+        1. _marker_hint - set by _play_track: single-track playback
+           plays a resolved URL outside the Kodi playlist, so the
+           playlist position cannot identify the track.
+        2. The Kodi music playlist - the queue we built (plus the
+           endless-playback appends), so its current position is
+           the truth for queue playback.
+        When nothing plays, the property becomes "none" - a plain
+        empty property would match the items that carry no marker
+        (section headers, see-more buttons).
+        """
+        try:
+            hint = getattr(self, "_marker_hint", None)
+            if hint:
+                self.setProperty("playing_marker", str(hint))
+                return
+            if self._player_observer.isPlayingAudio():
+                playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
+                position = playlist.getposition()
+                if 0 <= position < playlist.size():
+                    track_id = playlist[position].getProperty(
+                        "soundcloud.track_id"
+                    )
+                    if track_id:
+                        self.setProperty("playing_marker", track_id)
+                        return
+            # Nothing identifiable is playing - clear the markers.
+            self._marker_hint = None
+            self.setProperty("playing_marker", "none")
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow playing marker "
+                "sync failed: %s" % str(e),
+                xbmc.LOGWARNING,
             )
 
     def _refresh_playing_markers(self):
@@ -3360,6 +3598,13 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         """
         with self._marker_refresh_lock:
             self._marker_refresh_timer = None
+        # Bump the pass counter: a property that changes on every
+        # pass makes each re-added ListItem differ from its previous
+        # copy, so Kodi cannot optimise the re-render away and the
+        # marker conditions are re-evaluated with fresh values.
+        marker_pass = getattr(self, "_marker_pass", 0) + 1
+        self._marker_pass = marker_pass
+        refreshed = 0
         for control_id, items in list(self._lists.items()):
             if not items:
                 continue
@@ -3375,6 +3620,7 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                         position = -1
                     control.reset()
                     for _, list_item in items:
+                        list_item.setProperty("sc_rr", str(marker_pass))
                         control.addItem(list_item)
                     if position >= 0:
                         try:
@@ -3385,8 +3631,15 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 xbmc.log(
                     "plugin.audio.soundcloud::HomeWindow marker refresh "
                     "on control %d failed: %s" % (control_id, str(e)),
-                    xbmc.LOGDEBUG,
+                    xbmc.LOGWARNING,
                 )
+            else:
+                refreshed += 1
+        xbmc.log(
+            "plugin.audio.soundcloud::HomeWindow markers refresh "
+            "pass %d: %d containers" % (marker_pass, refreshed),
+            xbmc.LOGINFO,
+        )
 
 
 def open_home(api, addon, settings, startup_track_id=None,
@@ -3440,4 +3693,6 @@ def open_home(api, addon, settings, startup_track_id=None,
     watchdog.start()
 
     window.doModal()
+    # Stop the marker watchdog poll loop.
+    window._closed = True
     del window

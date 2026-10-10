@@ -106,6 +106,13 @@ class Track(ListItem):
         # Kodi keeps these properties on the playing item.
         if self.id is not None:
             list_item.setProperty("soundcloud.track_id", str(self.id))
+            # Flat marker property the skin matches against the
+            # window's playing_marker property - ListItem.IsPlaying
+            # never fires for plugin-resolved playback, so the
+            # playing track is flagged by comparing track ids
+            # instead (see _sync_playing_marker_property in
+            # ui/window.py).
+            list_item.setProperty("playing_marker", str(self.id))
         if self.info.get("waveform_url"):
             list_item.setProperty(
                 "soundcloud.waveform_url", self.info["waveform_url"]

@@ -201,7 +201,7 @@
                 <textoffsetx>16</textoffsetx>
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>113</onup>
-                <ondown>115</ondown>
+                <ondown>117</ondown>
 
                 <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEmpty(Window.Property(page)) | String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list) + !String.IsEmpty(Window.Property(page)) + !String.IsEqual(Window.Property(page),home)">401</onright>
@@ -213,6 +213,30 @@
             </control>
 
             <!-- Bottom buttons -->
+            <control type="button" id="117">
+                <left>10</left>
+                <top>954</top>
+                <width>220</width>
+                <height>50</height>
+                <label>$ADDON[plugin.audio.soundcloud 30021]</label>
+                <font>font13</font>
+                <textcolor>FFA8A8A8</textcolor>
+                <focusedcolor>FFFFFFFF</focusedcolor>
+                <align>left</align>
+                <aligny>center</aligny>
+                <textoffsetx>16</textoffsetx>
+                <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
+                <onup>114</onup>
+                <ondown>115</ondown>
+
+                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEmpty(Window.Property(page)) | String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list) + !String.IsEmpty(Window.Property(page)) + !String.IsEqual(Window.Property(page),home)">401</onright>
+                <onright condition="String.IsEmpty(Window.Property(page)) + String.IsEqual(Window.Property(row1_visible),true) | String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(row1_visible),true)">350</onright>
+                <onright condition="String.IsEmpty(Window.Property(page)) + String.IsEqual(Window.Property(row2_visible),true) | String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(row2_visible),true)">351</onright>
+                <onright condition="String.IsEmpty(Window.Property(page)) + String.IsEqual(Window.Property(row3_visible),true) | String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(row3_visible),true)">352</onright>
+                <onright condition="String.IsEmpty(Window.Property(page)) + String.IsEqual(Window.Property(row4_visible),true) | String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(row4_visible),true)">353</onright>
+                <onright>400</onright>
+            </control>
             <control type="button" id="115">
                 <left>10</left>
                 <top>1010</top>
@@ -226,7 +250,7 @@
                 <aligny>center</aligny>
                 <textoffsetx>16</textoffsetx>
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
-                <onup>114</onup>
+                <onup>117</onup>
                 <ondown>110</ondown>
 
                 <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEmpty(Window.Property(page)) | String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
@@ -321,7 +345,7 @@
     <width>96</width>
     <height>34</height>
     <texture colordiffuse="B4000000">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
 </control>
 <control type="image">
     <left>63</left>
@@ -329,8 +353,8 @@
     <width>10</width>
     <height>18</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>79</left>
@@ -338,8 +362,8 @@
     <width>10</width>
     <height>26</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>95</left>
@@ -347,8 +371,8 @@
     <width>10</width>
     <height>14</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>111</left>
@@ -356,8 +380,8 @@
     <width>10</width>
     <height>22</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>127</left>
@@ -365,8 +389,8 @@
     <width>10</width>
     <height>10</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
                     <control type="label">
                         <left>0</left>
@@ -414,7 +438,7 @@
     <width>96</width>
     <height>34</height>
     <texture colordiffuse="B4000000">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
 </control>
 <control type="image">
     <left>63</left>
@@ -422,8 +446,8 @@
     <width>10</width>
     <height>18</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>79</left>
@@ -431,8 +455,8 @@
     <width>10</width>
     <height>26</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>95</left>
@@ -440,8 +464,8 @@
     <width>10</width>
     <height>14</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>111</left>
@@ -449,8 +473,8 @@
     <width>10</width>
     <height>22</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>127</left>
@@ -458,8 +482,8 @@
     <width>10</width>
     <height>10</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
                     <control type="image">
                         <left>-3</left>
@@ -556,7 +580,7 @@
     <width>96</width>
     <height>34</height>
     <texture colordiffuse="B4000000">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
 </control>
 <control type="image">
     <left>63</left>
@@ -564,8 +588,8 @@
     <width>10</width>
     <height>18</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>79</left>
@@ -573,8 +597,8 @@
     <width>10</width>
     <height>26</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>95</left>
@@ -582,8 +606,8 @@
     <width>10</width>
     <height>14</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>111</left>
@@ -591,8 +615,8 @@
     <width>10</width>
     <height>22</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>127</left>
@@ -600,8 +624,8 @@
     <width>10</width>
     <height>10</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
                     <control type="label">
                         <left>0</left>
@@ -649,7 +673,7 @@
     <width>96</width>
     <height>34</height>
     <texture colordiffuse="B4000000">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
 </control>
 <control type="image">
     <left>63</left>
@@ -657,8 +681,8 @@
     <width>10</width>
     <height>18</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>79</left>
@@ -666,8 +690,8 @@
     <width>10</width>
     <height>26</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>95</left>
@@ -675,8 +699,8 @@
     <width>10</width>
     <height>14</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>111</left>
@@ -684,8 +708,8 @@
     <width>10</width>
     <height>22</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>127</left>
@@ -693,8 +717,8 @@
     <width>10</width>
     <height>10</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
                     <control type="image">
                         <left>-3</left>
@@ -791,7 +815,7 @@
     <width>96</width>
     <height>34</height>
     <texture colordiffuse="B4000000">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
 </control>
 <control type="image">
     <left>63</left>
@@ -799,8 +823,8 @@
     <width>10</width>
     <height>18</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>79</left>
@@ -808,8 +832,8 @@
     <width>10</width>
     <height>26</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>95</left>
@@ -817,8 +841,8 @@
     <width>10</width>
     <height>14</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>111</left>
@@ -826,8 +850,8 @@
     <width>10</width>
     <height>22</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>127</left>
@@ -835,8 +859,8 @@
     <width>10</width>
     <height>10</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
                     <control type="label">
                         <left>0</left>
@@ -884,7 +908,7 @@
     <width>96</width>
     <height>34</height>
     <texture colordiffuse="B4000000">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
 </control>
 <control type="image">
     <left>63</left>
@@ -892,8 +916,8 @@
     <width>10</width>
     <height>18</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>79</left>
@@ -901,8 +925,8 @@
     <width>10</width>
     <height>26</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>95</left>
@@ -910,8 +934,8 @@
     <width>10</width>
     <height>14</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>111</left>
@@ -919,8 +943,8 @@
     <width>10</width>
     <height>22</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>127</left>
@@ -928,8 +952,8 @@
     <width>10</width>
     <height>10</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
                     <control type="image">
                         <left>-3</left>
@@ -1026,7 +1050,7 @@
     <width>96</width>
     <height>34</height>
     <texture colordiffuse="B4000000">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
 </control>
 <control type="image">
     <left>63</left>
@@ -1034,8 +1058,8 @@
     <width>10</width>
     <height>18</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>79</left>
@@ -1043,8 +1067,8 @@
     <width>10</width>
     <height>26</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>95</left>
@@ -1052,8 +1076,8 @@
     <width>10</width>
     <height>14</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>111</left>
@@ -1061,8 +1085,8 @@
     <width>10</width>
     <height>22</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>127</left>
@@ -1070,8 +1094,8 @@
     <width>10</width>
     <height>10</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
                     <control type="label">
                         <left>0</left>
@@ -1119,7 +1143,7 @@
     <width>96</width>
     <height>34</height>
     <texture colordiffuse="B4000000">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
 </control>
 <control type="image">
     <left>63</left>
@@ -1127,8 +1151,8 @@
     <width>10</width>
     <height>18</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>79</left>
@@ -1136,8 +1160,8 @@
     <width>10</width>
     <height>26</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>95</left>
@@ -1145,8 +1169,8 @@
     <width>10</width>
     <height>14</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>111</left>
@@ -1154,8 +1178,8 @@
     <width>10</width>
     <height>22</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>127</left>
@@ -1163,8 +1187,8 @@
     <width>10</width>
     <height>10</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
                     <control type="image">
                         <left>-3</left>
@@ -1273,7 +1297,7 @@
     <width>52</width>
     <height>30</height>
     <texture colordiffuse="B4000000">white.png</texture>
-    <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
 </control>
 <control type="image">
     <left>44</left>
@@ -1281,8 +1305,8 @@
     <width>10</width>
     <height>16</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>54</left>
@@ -1290,8 +1314,8 @@
     <width>10</width>
     <height>10</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="90" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="90" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>64</left>
@@ -1299,8 +1323,8 @@
     <width>10</width>
     <height>20</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>74</left>
@@ -1308,8 +1332,8 @@
     <width>10</width>
     <height>12</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="270" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="270" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
                         <control type="label">
                             <left>124</left>
@@ -1321,7 +1345,7 @@
                             <textcolor>FFFAFAFA</textcolor>
                             <selectedcolor>FFFF5500</selectedcolor>
                             <aligny>center</aligny>
-                            <visible>!ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <visible>!String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>                        <control type="label">
                             <left>124</left>
                             <top>14</top>
@@ -1332,7 +1356,7 @@
                             <textcolor>FFFF5500</textcolor>
                             <selectedcolor>FFFF5500</selectedcolor>
                             <aligny>center</aligny>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
                         <control type="label">
                             <left>124</left>
@@ -1358,8 +1382,8 @@
                             <width>16</width>
                             <height>18</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1256</left>
@@ -1367,8 +1391,8 @@
                             <width>16</width>
                             <height>30</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="60" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="60" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1280</left>
@@ -1376,8 +1400,8 @@
                             <width>16</width>
                             <height>12</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="120" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="120" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1304</left>
@@ -1385,8 +1409,8 @@
                             <width>16</width>
                             <height>24</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1328</left>
@@ -1394,8 +1418,8 @@
                             <width>16</width>
                             <height>16</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="240" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="240" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1352</left>
@@ -1403,8 +1427,8 @@
                             <width>16</width>
                             <height>28</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1376</left>
@@ -1412,8 +1436,8 @@
                             <width>16</width>
                             <height>18</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="360" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="360" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1400</left>
@@ -1421,8 +1445,8 @@
                             <width>16</width>
                             <height>30</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="420" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="420" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1424</left>
@@ -1430,8 +1454,8 @@
                             <width>16</width>
                             <height>12</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="480" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="480" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1448</left>
@@ -1439,8 +1463,8 @@
                             <width>16</width>
                             <height>24</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="540" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="540" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1472</left>
@@ -1448,8 +1472,8 @@
                             <width>16</width>
                             <height>16</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="600" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="600" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="label">
                             <left>1296</left>
@@ -1462,7 +1486,7 @@
                             <selectedcolor>FFFF5500</selectedcolor>
                             <align>right</align>
                             <aligny>center</aligny>
-                            <visible>!ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <visible>!String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>                        <control type="label">
                             <left>1296</left>
                             <top>0</top>
@@ -1474,7 +1498,7 @@
                             <selectedcolor>FFFF5500</selectedcolor>
                             <align>right</align>
                             <aligny>center</aligny>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
                         <control type="label">
                             <left>20</left>
@@ -1521,7 +1545,7 @@
     <width>52</width>
     <height>30</height>
     <texture colordiffuse="B4000000">white.png</texture>
-    <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
 </control>
 <control type="image">
     <left>44</left>
@@ -1529,8 +1553,8 @@
     <width>10</width>
     <height>16</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>54</left>
@@ -1538,8 +1562,8 @@
     <width>10</width>
     <height>10</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="90" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="90" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>64</left>
@@ -1547,8 +1571,8 @@
     <width>10</width>
     <height>20</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>74</left>
@@ -1556,8 +1580,8 @@
     <width>10</width>
     <height>12</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="270" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="270" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
                         <control type="label">
                             <left>124</left>
@@ -1595,8 +1619,8 @@
                             <width>16</width>
                             <height>18</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1256</left>
@@ -1604,8 +1628,8 @@
                             <width>16</width>
                             <height>30</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="60" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="60" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1280</left>
@@ -1613,8 +1637,8 @@
                             <width>16</width>
                             <height>12</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="120" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="120" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1304</left>
@@ -1622,8 +1646,8 @@
                             <width>16</width>
                             <height>24</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1328</left>
@@ -1631,8 +1655,8 @@
                             <width>16</width>
                             <height>16</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="240" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="240" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1352</left>
@@ -1640,8 +1664,8 @@
                             <width>16</width>
                             <height>28</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1376</left>
@@ -1649,8 +1673,8 @@
                             <width>16</width>
                             <height>18</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="360" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="360" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1400</left>
@@ -1658,8 +1682,8 @@
                             <width>16</width>
                             <height>30</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="420" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="420" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1424</left>
@@ -1667,8 +1691,8 @@
                             <width>16</width>
                             <height>12</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="480" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="480" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1448</left>
@@ -1676,8 +1700,8 @@
                             <width>16</width>
                             <height>24</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="540" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="540" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1472</left>
@@ -1685,8 +1709,8 @@
                             <width>16</width>
                             <height>16</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="600" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="600" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="label">
                             <left>1296</left>
@@ -1699,7 +1723,7 @@
                             <selectedcolor>FFFF5500</selectedcolor>
                             <align>right</align>
                             <aligny>center</aligny>
-                            <visible>!ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <visible>!String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>                        <control type="label">
                             <left>1296</left>
                             <top>0</top>
@@ -1711,7 +1735,7 @@
                             <selectedcolor>FFFF5500</selectedcolor>
                             <align>right</align>
                             <aligny>center</aligny>
-                            <visible>ListItem.IsPlaying + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
                         <control type="label">
                             <left>20</left>
@@ -1799,7 +1823,7 @@
     <width>52</width>
     <height>30</height>
     <texture colordiffuse="B4000000">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
 </control>
 <control type="image">
     <left>44</left>
@@ -1807,8 +1831,8 @@
     <width>10</width>
     <height>16</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>54</left>
@@ -1816,8 +1840,8 @@
     <width>10</width>
     <height>10</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="90" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="90" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>64</left>
@@ -1825,8 +1849,8 @@
     <width>10</width>
     <height>20</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>74</left>
@@ -1834,8 +1858,8 @@
     <width>10</width>
     <height>12</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="270" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="270" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
                         <control type="label">
                             <left>124</left>
@@ -1847,7 +1871,7 @@
                             <textcolor>FFFAFAFA</textcolor>
                             <selectedcolor>FFFF5500</selectedcolor>
                             <aligny>center</aligny>
-                            <visible>!ListItem.IsPlaying</visible>
+                            <visible>!String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
                         </control>                        <control type="label">
                             <left>124</left>
                             <top>14</top>
@@ -1858,7 +1882,7 @@
                             <textcolor>FFFF5500</textcolor>
                             <selectedcolor>FFFF5500</selectedcolor>
                             <aligny>center</aligny>
-                            <visible>ListItem.IsPlaying</visible>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
                         </control>
                         <control type="label">
                             <left>124</left>
@@ -1883,8 +1907,8 @@
                             <width>16</width>
                             <height>18</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1256</left>
@@ -1892,8 +1916,8 @@
                             <width>16</width>
                             <height>30</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="60" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="60" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1280</left>
@@ -1901,8 +1925,8 @@
                             <width>16</width>
                             <height>12</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="120" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="120" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1304</left>
@@ -1910,8 +1934,8 @@
                             <width>16</width>
                             <height>24</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1328</left>
@@ -1919,8 +1943,8 @@
                             <width>16</width>
                             <height>16</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="240" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="240" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1352</left>
@@ -1928,8 +1952,8 @@
                             <width>16</width>
                             <height>28</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1376</left>
@@ -1937,8 +1961,8 @@
                             <width>16</width>
                             <height>18</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="360" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="360" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1400</left>
@@ -1946,8 +1970,8 @@
                             <width>16</width>
                             <height>30</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="420" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="420" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1424</left>
@@ -1955,8 +1979,8 @@
                             <width>16</width>
                             <height>12</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="480" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="480" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1448</left>
@@ -1964,8 +1988,8 @@
                             <width>16</width>
                             <height>24</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="540" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="540" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1472</left>
@@ -1973,8 +1997,8 @@
                             <width>16</width>
                             <height>16</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="600" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="600" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="label">
                             <left>1296</left>
@@ -1987,7 +2011,7 @@
                             <selectedcolor>FFFF5500</selectedcolor>
                             <align>right</align>
                             <aligny>center</aligny>
-                            <visible>!ListItem.IsPlaying</visible>
+                            <visible>!String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
                         </control>                        <control type="label">
                             <left>1296</left>
                             <top>0</top>
@@ -1999,7 +2023,7 @@
                             <selectedcolor>FFFF5500</selectedcolor>
                             <align>right</align>
                             <aligny>center</aligny>
-                            <visible>ListItem.IsPlaying</visible>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
                         </control>
                     </control>
                 </itemlayout>
@@ -2032,7 +2056,7 @@
     <width>52</width>
     <height>30</height>
     <texture colordiffuse="B4000000">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
 </control>
 <control type="image">
     <left>44</left>
@@ -2040,8 +2064,8 @@
     <width>10</width>
     <height>16</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>54</left>
@@ -2049,8 +2073,8 @@
     <width>10</width>
     <height>10</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="90" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="90" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>64</left>
@@ -2058,8 +2082,8 @@
     <width>10</width>
     <height>20</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>74</left>
@@ -2067,8 +2091,8 @@
     <width>10</width>
     <height>12</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="270" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="270" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
                         <control type="label">
                             <left>124</left>
@@ -2104,8 +2128,8 @@
                             <width>16</width>
                             <height>18</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1256</left>
@@ -2113,8 +2137,8 @@
                             <width>16</width>
                             <height>30</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="60" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="60" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1280</left>
@@ -2122,8 +2146,8 @@
                             <width>16</width>
                             <height>12</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="120" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="120" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1304</left>
@@ -2131,8 +2155,8 @@
                             <width>16</width>
                             <height>24</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1328</left>
@@ -2140,8 +2164,8 @@
                             <width>16</width>
                             <height>16</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="240" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="240" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1352</left>
@@ -2149,8 +2173,8 @@
                             <width>16</width>
                             <height>28</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1376</left>
@@ -2158,8 +2182,8 @@
                             <width>16</width>
                             <height>18</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="360" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="360" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1400</left>
@@ -2167,8 +2191,8 @@
                             <width>16</width>
                             <height>30</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="420" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="420" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1424</left>
@@ -2176,8 +2200,8 @@
                             <width>16</width>
                             <height>12</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="480" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="480" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1448</left>
@@ -2185,8 +2209,8 @@
                             <width>16</width>
                             <height>24</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="540" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="540" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1472</left>
@@ -2194,8 +2218,8 @@
                             <width>16</width>
                             <height>16</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>ListItem.IsPlaying</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="600" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="600" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
                         </control>
                         <control type="label">
                             <left>1296</left>
@@ -2208,7 +2232,7 @@
                             <selectedcolor>FFFF5500</selectedcolor>
                             <align>right</align>
                             <aligny>center</aligny>
-                            <visible>!ListItem.IsPlaying</visible>
+                            <visible>!String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
                         </control>                        <control type="label">
                             <left>1296</left>
                             <top>0</top>
@@ -2220,7 +2244,7 @@
                             <selectedcolor>FFFF5500</selectedcolor>
                             <align>right</align>
                             <aligny>center</aligny>
-                            <visible>ListItem.IsPlaying</visible>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
                         </control>
                     </control>
                 </focusedlayout>
@@ -2259,7 +2283,7 @@
     <width>96</width>
     <height>34</height>
     <texture colordiffuse="B4000000">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
 </control>
 <control type="image">
     <left>63</left>
@@ -2267,8 +2291,8 @@
     <width>10</width>
     <height>18</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>79</left>
@@ -2276,8 +2300,8 @@
     <width>10</width>
     <height>26</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>95</left>
@@ -2285,8 +2309,8 @@
     <width>10</width>
     <height>14</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>111</left>
@@ -2294,8 +2318,8 @@
     <width>10</width>
     <height>22</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>127</left>
@@ -2303,8 +2327,8 @@
     <width>10</width>
     <height>10</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
                     <control type="label">
                         <left>0</left>
@@ -2352,7 +2376,7 @@
     <width>96</width>
     <height>34</height>
     <texture colordiffuse="B4000000">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
 </control>
 <control type="image">
     <left>63</left>
@@ -2360,8 +2384,8 @@
     <width>10</width>
     <height>18</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>79</left>
@@ -2369,8 +2393,8 @@
     <width>10</width>
     <height>26</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>95</left>
@@ -2378,8 +2402,8 @@
     <width>10</width>
     <height>14</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>111</left>
@@ -2387,8 +2411,8 @@
     <width>10</width>
     <height>22</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>127</left>
@@ -2396,8 +2420,8 @@
     <width>10</width>
     <height>10</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>ListItem.IsPlaying</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="ListItem.IsPlaying">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
 </control>
                     <control type="image">
                         <left>-3</left>
