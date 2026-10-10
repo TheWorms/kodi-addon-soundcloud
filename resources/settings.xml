@@ -30,12 +30,11 @@
                 </setting>
                 <setting id="ui.miniplayer" type="integer" label="30137" help="30138">
                     <level>0</level>
-                    <default>2</default>
+                    <default>1</default>
                     <constraints>
                         <options>
                             <option label="30139">0</option>
                             <option label="30181">1</option>
-                            <option label="30141">2</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -214,10 +213,18 @@
                 </setting>
             </group>
 
-            <!-- Fullscreen playback overlay: opens a custom WindowXMLDialog
-                 on top of the new UI when audio playback starts. The user
-                 picks one of 4 visual styles or "off" to disable. -->
+            <!-- Fullscreen playback overlay ("screensaver"): opens a
+                 custom WindowXMLDialog on top of the new UI during
+                 playback. The playback.screensaver toggle enables it and
+                 gates the visibility of the style and delay settings;
+                 playback.screensaver_delay postpones the overlay after
+                 playback starts (0 = immediately). -->
             <group id="2" label="32100">
+                <setting id="playback.screensaver" type="boolean" label="30387" help="30388">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
                 <setting id="playback.fullscreen_style" type="string" label="32101" help="32114">
                     <level>0</level>
                     <default>off</default>
@@ -230,6 +237,27 @@
                             <option label="32110">vinyl</option>
                         </options>
                     </constraints>
+                    <dependencies>
+                        <dependency type="visible" setting="playback.screensaver" operator="is">true</dependency>
+                    </dependencies>
+                    <control type="spinner" format="string"/>
+                </setting>
+                <setting id="playback.screensaver_delay" type="string" label="30389" help="30390">
+                    <level>0</level>
+                    <default>30</default>
+                    <constraints>
+                        <options>
+                            <option label="30391">0</option>
+                            <option label="30392">5</option>
+                            <option label="30393">10</option>
+                            <option label="30394">30</option>
+                            <option label="30395">60</option>
+                            <option label="30396">120</option>
+                        </options>
+                    </constraints>
+                    <dependencies>
+                        <dependency type="visible" setting="playback.screensaver" operator="is">true</dependency>
+                    </dependencies>
                     <control type="spinner" format="string"/>
                 </setting>
                 <setting id="playback.seek_interval" type="string" label="30354" help="30355">

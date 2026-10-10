@@ -265,8 +265,8 @@ msgid "Mini-player"
 msgstr "Mini-player"
 
 msgctxt "#30138"
-msgid "Choose how the mini-player is shown at the bottom of the new interface."
-msgstr "Choose how the mini-player is shown at the bottom of the new interface."
+msgid "Choose how the mini-player is shown at the bottom of the interface: the compact bar shows the cover and a progress bar, and Hidden gives the content the full screen height."
+msgstr "Choose how the mini-player is shown at the bottom of the interface: the compact bar shows the cover and a progress bar, and Hidden gives the content the full screen height."
 
 msgctxt "#30139"
 msgid "Hidden"
@@ -753,4 +753,44 @@ msgstr "Created by SoundCloud"
 msgctxt "#30386"
 msgid "Buzzing artists"
 msgstr "Buzzing artists"
+
+msgctxt "#30387"
+msgid "Automatic fullscreen overlay"
+msgstr "Automatic fullscreen overlay"
+
+msgctxt "#30388"
+msgid "When enabled, the fullscreen Now Playing overlay (Cinema, Waveform, Editorial or Vinyl) opens during playback. The style and delay settings below are only shown while this is on."
+msgstr "When enabled, the fullscreen Now Playing overlay (Cinema, Waveform, Editorial or Vinyl) opens during playback. The style and delay settings below are only shown while this is on."
+
+msgctxt "#30389"
+msgid "Delay before opening"
+msgstr "Delay before opening"
+
+msgctxt "#30390"
+msgid "Time to wait after playback starts before the fullscreen overlay opens."
+msgstr "Time to wait after playback starts before the fullscreen overlay opens."
+
+msgctxt "#30391"
+msgid "Immediately"
+msgstr "Immediately"
+
+msgctxt "#30392"
+msgid "5 seconds"
+msgstr "5 seconds"
+
+msgctxt "#30393"
+msgid "10 seconds"
+msgstr "10 seconds"
+
+msgctxt "#30394"
+msgid "30 seconds"
+msgstr "30 seconds"
+
+msgctxt "#30395"
+msgid "1 minute"
+msgstr "1 minute"
+
+msgctxt "#30396"
+msgid "2 minutes"
+msgstr "2 minutes"
 

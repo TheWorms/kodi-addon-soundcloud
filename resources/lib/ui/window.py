@@ -334,6 +334,11 @@ class _PlayerObserver(xbmc.Player):
         # Stored on the observer (not the home window) so it survives
         # a re-init of the window if that happens.
         self._np_dialog = None
+        # Pending screensaver delay timer (threading.Timer): the
+        # fullscreen overlay opens only after playback.screensaver_delay
+        # seconds, instead of hijacking the screen the moment a track
+        # starts.
+        self._ss_timer = None
 
     def onAVStarted(self):
         try:
@@ -363,6 +368,7 @@ class _PlayerObserver(xbmc.Player):
             )
 
     def onPlayBackStopped(self):
+        self._cancel_screensaver_timer()
         self._close_now_playing()
 
     def onPlayBackEnded(self):
@@ -597,15 +603,66 @@ class _PlayerObserver(xbmc.Player):
 
     def _maybe_open_now_playing(self):
         """Open the configured fullscreen overlay, if any, and only if
-        not already open."""
+        not already open. Honours the playback.screensaver on/off
+        toggle and the playback.screensaver_delay setting."""
+        enabled = (self._window.settings.get("playback.screensaver")
+                   or "true").strip().lower() == "true"
         style = (self._window.settings.get("playback.fullscreen_style")
                  or "off").strip()
         xbmc.log(
             "plugin.audio.soundcloud::PlayerObserver _maybe_open_now_"
-            "playing setting=%r np_dialog_is_set=%s" %
-            (style, self._np_dialog is not None),
+            "playing setting=%r enabled=%s np_dialog_is_set=%s" %
+            (style, enabled, self._np_dialog is not None),
             xbmc.LOGINFO,
         )
+        if not enabled or style in ("", "off"):
+            return
+        if self._np_dialog is not None:
+            # Already open — just leave it; infolabels will refresh.
+            return
+
+        delay = 30
+        try:
+            delay = int(float((self._window.settings.get(
+                "playback.screensaver_delay") or "30").strip() or "30"))
+        except Exception:
+            delay = 30
+        if delay <= 0:
+            self._open_now_playing()
+            return
+        self._cancel_screensaver_timer()
+        self._ss_timer = threading.Timer(delay, self._open_now_playing_safely)
+        self._ss_timer.daemon = True
+        self._ss_timer.start()
+
+    def _cancel_screensaver_timer(self):
+        """Cancel a pending screensaver delay timer, if any."""
+        timer, self._ss_timer = self._ss_timer, None
+        if timer is not None:
+            try:
+                timer.cancel()
+            except Exception:
+                pass
+
+    def _open_now_playing_safely(self):
+        """Timer callback: open the overlay if playback is still up."""
+        self._ss_timer = None
+        try:
+            if xbmc.Player().isPlayingAudio():
+                self._open_now_playing()
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::PlayerObserver screensaver "
+                "open failed: %s" % str(e),
+                xbmc.LOGWARNING,
+            )
+
+    def _open_now_playing(self):
+        """Open the configured fullscreen overlay right now (defensive
+        re-checks: the settings may have changed while a delay timer
+        was pending, and the dialog may already be open)."""
+        style = (self._window.settings.get("playback.fullscreen_style")
+                 or "off").strip()
         if style in ("", "off"):
             return
         if self._np_dialog is not None:
@@ -1501,10 +1558,14 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         self.setProperty("trending_genre", self._trending_genre())
 
         # Apply miniplayer mode from settings.
-        # 0 = off, 1 = compact (no controls), 2 = controls (full)
-        mp_setting = self.settings.get("ui.miniplayer") or "2"
-        mp_mode = {"0": "off", "1": "compact", "2": "controls"}.get(mp_setting, "controls")
+        # 0 = off (hidden - the content takes the full screen height),
+        # 1 = compact (cover + title + progress bar). A stale stored
+        # "2" (the old removed "display + controls" mode) falls back
+        # to compact.
+        mp_setting = self.settings.get("ui.miniplayer") or "1"
+        mp_mode = {"0": "off", "1": "compact"}.get(mp_setting, "compact")
         self.setProperty("miniplayer", mp_mode)
+        self._apply_content_geometry(mp_mode == "off")
 
         # Default page = home.
         self._show_home()
@@ -1559,6 +1620,38 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             track_id, self._startup_track_id = self._startup_track_id, None
             source, self._startup_track_source = self._startup_track_source, None
             self._play_startup_track(track_id, source)
+
+    # Content heights: (control id, height when the mini-player bar
+    # is visible, full height when the bar is hidden). These
+    # containers (list / panel / group) are all reachable from Python.
+    # The home rows grouplist (290) is NOT reachable (Kodi exposes no
+    # Python control for grouplists) - its full height is baked into
+    # the skin XML instead, and the bar simply covers the bottom of
+    # the rows when it is shown.
+    _CONTENT_GEOMETRY = (
+        (354, 750, 870),  # home list (list layout on home)
+        (295, 720, 880),  # generic page group (cards + list)
+        (401, 720, 880),  # page vertical list (list layout)
+        (400, 720, 880),  # page card panel (tiles layout)
+    )
+
+    def _apply_content_geometry(self, miniplayer_off):
+        """Stretch the content containers down to the bottom of the
+        screen when the mini-player bar is hidden, and restore their
+        original heights when the bar is shown again. Called from
+        onInit and whenever the setting changes live. Any failure is
+        logged at LOGWARNING (not LOGDEBUG) so a Kodi limitation
+        shows up in kodi.log without debug mode."""
+        for control_id, height_bar, height_full in self._CONTENT_GEOMETRY:
+            height = height_full if miniplayer_off else height_bar
+            try:
+                self.getControl(control_id).setHeight(height)
+            except Exception as e:
+                xbmc.log(
+                    "plugin.audio.soundcloud::HomeWindow could not "
+                    "resize control %d: %s" % (control_id, str(e)),
+                    xbmc.LOGWARNING,
+                )
 
     def _check_live_settings(self):
         """
@@ -1626,12 +1719,13 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             if (self.getProperty("page") or "home") == "home":
                 self._show_home()
 
-        mp_setting = self.settings.get("ui.miniplayer") or "2"
-        mp_mode = {"0": "off", "1": "compact", "2": "controls"}.get(
-            mp_setting, "controls"
+        mp_setting = self.settings.get("ui.miniplayer") or "1"
+        mp_mode = {"0": "off", "1": "compact"}.get(
+            mp_setting, "compact"
         )
-        if mp_mode != (self.getProperty("miniplayer") or "controls"):
+        if mp_mode != (self.getProperty("miniplayer") or "compact"):
             self.setProperty("miniplayer", mp_mode)
+            self._apply_content_geometry(mp_mode == "off")
 
     def _play_startup_track(self, track_id, source=None):
         """

@@ -5,7 +5,7 @@
     Modes (set via Window.Property before doModal):
       - layout=sidebar  -> side menu + horizontal rows (cards)
       - layout=list     -> side menu + vertical trending list + genre chips
-      - miniplayer=off / display / controls  (visibility of bottom bar)
+      - miniplayer=off / compact  (visibility of bottom bar)
 -->
 <window id="14000">
     <defaultcontrol always="true">110</defaultcontrol>
@@ -509,7 +509,13 @@
         <!-- The rows grouplist (290) sits inside a plain group (291).   -->
         <!-- The side menu is always visible now, so nothing gets        -->
         <!-- repositioned from Python anymore — the group is purely      -->
-        <!-- structural.                                                 -->
+        <!-- structural. The grouplist itself is full height (down to    -->
+        <!-- y=1060): Kodi exposes no Python control for grouplists, so  -->
+        <!-- the height cannot be switched at runtime like the other     -->
+        <!-- containers (see _apply_content_geometry in window.py).      -->
+        <!-- When the mini-player bar is shown it simply covers the      -->
+        <!-- bottom of the rows, and when the bar is hidden the rows     -->
+        <!-- get the full screen height.                                 -->
         <!-- ============================================================ -->
         <control type="group" id="291">
             <left>260</left>
@@ -521,7 +527,7 @@
             <left>0</left>
             <top>0</top>
             <width>1660</width>
-            <height>770</height>
+            <height>870</height>
             <itemgap>16</itemgap>
             <orientation>vertical</orientation>
             <scrolltime tween="sine" easing="out">300</scrolltime>
