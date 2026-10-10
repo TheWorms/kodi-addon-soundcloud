@@ -155,6 +155,77 @@ class ApiV2(ApiInterface):
             res = {"collection": []}
         return self._map_json_to_collection(res)
 
+    def play_history(self, limit=50):
+        """
+        Returns the authenticated user's recently played tracks
+        (/me/play-history). The entries wrap the track in a "track"
+        key WITHOUT a "kind" field of their own, so they are unwrapped
+        here before the generic mapper sees them. Returns None when
+        the request fails (not logged in, expired token, ...).
+        """
+        res = self._do_request("/me/play-history", {"limit": limit})
+        if not isinstance(res, dict) or "collection" not in res:
+            return None
+        tracks = [
+            entry.get("track") for entry in res["collection"]
+            if isinstance(entry, dict)
+        ]
+        tracks = [t for t in tracks if isinstance(t, dict)]
+        if not tracks:
+            return None
+        return self._map_json_to_collection({
+            "collection": tracks,
+            "next_href": res.get("next_href"),
+        })
+
+    def system_playlist(self, urn):
+        """
+        Returns the tracks of a system playlist (a "station"): genre
+        stations (soundcloud:system-playlists:trending-by-genre:{slug}),
+        artist stations, track stations, personalized playlists such as
+        "Mixed for you", ... The response hydrates the tracks under a
+        "tracks" key, which the generic mapper handles; unhydrated
+        tracks are resolved through the mapper's /tracks?ids= path.
+        Returns None when the request fails.
+        """
+        res = self._do_request(
+            "/system-playlists/" + urllib.parse.quote(urn, safe=""), {}
+        )
+        if not isinstance(res, dict) or "tracks" not in res:
+            return None
+        return self._map_json_to_collection(res)
+
+    def discover_section(self, keywords):
+        """
+        Returns the items of the first /mixed-selections category whose
+        urn, id, tracking feature name or title contains one of the
+        given keywords (case-insensitive). This is how the personalized
+        home sections ("Mixed for you", "Recently played", "More of what
+        you like", ...) are reached: their section ids are user-specific
+        and can NOT be hardcoded - they must be matched at runtime.
+        Returns None when nothing matches (e.g. not logged in, or the
+        sections were renamed).
+        """
+        res = self._do_request(
+            "/mixed-selections", {}, self.api_cache["discover"]
+        )
+        for category in (res or {}).get("collection", []):
+            if not isinstance(category, dict):
+                continue
+            hay = " ".join([
+                str(category.get(key) or "")
+                for key in ("urn", "id", "tracking_feature_name", "title")
+            ]).lower()
+            if any(kw in hay for kw in keywords):
+                items = category.get("items")
+                if isinstance(items, dict) and items.get("collection"):
+                    return self._map_json_to_collection(items)
+                if category.get("tracks"):
+                    return self._map_json_to_collection({
+                        "collection": category["tracks"]
+                    })
+        return None
+
     def like_track(self, track_id):
         """PUT /me/favorites/{id} — True on HTTP 2xx."""
         return self._modify_favorite(track_id, method="PUT")
@@ -580,6 +651,9 @@ class ApiV2(ApiInterface):
                     elif isinstance(item.get("playlist"), dict):
                         item = item["playlist"]
                         kind = item.get("kind", "playlist")
+                    elif isinstance(item.get("system_playlist"), dict):
+                        item = item["system_playlist"]
+                        kind = item.get("kind", "system-playlist")
                     else:
                         continue
                 elif kind in ("track-repost", "repost"):
@@ -598,6 +672,12 @@ class ApiV2(ApiInterface):
                     if isinstance(item.get("playlist"), dict):
                         item = item["playlist"]
                         kind = item.get("kind", "playlist")
+                    else:
+                        continue
+                elif kind == "system-playlist-like":
+                    if isinstance(item.get("system_playlist"), dict):
+                        item = item["system_playlist"]
+                        kind = item.get("kind", "system-playlist")
                     else:
                         continue
 
@@ -636,8 +716,13 @@ class ApiV2(ApiInterface):
                     collection.items.append(playlist)
 
                 elif kind == "system-playlist":
-                    # System playlists only appear inside selections
-                    playlist = Selection(id=item["id"], label=item.get("title"))
+                    # System playlists appear inside selections and in
+                    # /me/likes/system-playlists; the liked entries
+                    # carry a "urn" but no "id".
+                    playlist = Selection(
+                        id=item.get("id") or item.get("urn"),
+                        label=item.get("title"),
+                    )
                     playlist.thumb = self._get_thumbnail(item, self.thumbnail_size)
                     collection.items.append(playlist)
 

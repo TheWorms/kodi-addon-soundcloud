@@ -48,7 +48,15 @@
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
         <credits>jaylinski (original add-on), bromix, SLiX</credits>
-        <news>6.0.0 (2026-10-10) - quick settings, endless playback, sleep timer, likes from the addon, list layout
+        <news>6.0.0 (2026-10-10) - quick settings, endless playback, sleep timer, likes from the addon, list layout, stations and personalized home rows
+
+STATIONS: new "Stations" entry in the side menu, under "Following" - lists the genre stations served by SoundCloud's discover feed (All genres, Techno, House, Hip-hop, Pop, Electronic, R&amp;B, Ambient, ...) and, with an OAuth token, the stations you liked. Selecting a station opens its track list.
+
+HOME ROWS: five new configurable home rows - "Recently played" (your SoundCloud play history, OAuth), "Mixed for you", "Based on what you like", "Created by SoundCloud" (curated selections) and "Buzzing artists" (playlists from the artists-to-watch selection). The personal selections are looked up at runtime in the discover feed and gracefully fall back to trending when SoundCloud does not serve them (e.g. anonymous use).
+
+INTERFACE: activating a selection or station card/row now opens it - stations resolve through /system-playlists/&lt;urn&gt; and other selections through the discover endpoint; selection items previously did nothing when clicked.
+
+INTERFACE: the playing-track equalizer is wider - eleven accent-orange bars spanning the row up to the duration column, bouncing in sequence.
 
 SETTINGS: new Playback options - configurable seek interval (5/10/15/30 s) for the arrow keys in the fullscreen player, option to skip 30-second Go+ excerpts, endless playback, and a sleep timer (15/30/60/120 min) that counts EFFECTIVE listening time (pause suspends the countdown).
 

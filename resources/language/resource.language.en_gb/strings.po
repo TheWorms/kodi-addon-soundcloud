@@ -730,3 +730,27 @@ msgctxt "#30380"
 msgid "Tiles"
 msgstr "Tiles"
 
+msgctxt "#30381"
+msgid "Stations"
+msgstr "Stations"
+
+msgctxt "#30382"
+msgid "Recently played"
+msgstr "Recently played"
+
+msgctxt "#30383"
+msgid "Mixed for you"
+msgstr "Mixed for you"
+
+msgctxt "#30384"
+msgid "Based on what you like"
+msgstr "Based on what you like"
+
+msgctxt "#30385"
+msgid "Created by SoundCloud"
+msgstr "Created by SoundCloud"
+
+msgctxt "#30386"
+msgid "Buzzing artists"
+msgstr "Buzzing artists"
+

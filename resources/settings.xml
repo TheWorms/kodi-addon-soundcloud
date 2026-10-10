@@ -52,6 +52,11 @@
                             <option label="30155">trending</option>
                             <option label="30153">playlists</option>
                             <option label="30154">following</option>
+                            <option label="30382">history</option>
+                            <option label="30383">foryou</option>
+                            <option label="30384">based</option>
+                            <option label="30385">curated</option>
+                            <option label="30386">buzzing</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -66,6 +71,11 @@
                             <option label="30155">trending</option>
                             <option label="30153">playlists</option>
                             <option label="30154">following</option>
+                            <option label="30382">history</option>
+                            <option label="30383">foryou</option>
+                            <option label="30384">based</option>
+                            <option label="30385">curated</option>
+                            <option label="30386">buzzing</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -80,6 +90,11 @@
                             <option label="30155">trending</option>
                             <option label="30153">playlists</option>
                             <option label="30154">following</option>
+                            <option label="30382">history</option>
+                            <option label="30383">foryou</option>
+                            <option label="30384">based</option>
+                            <option label="30385">curated</option>
+                            <option label="30386">buzzing</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -94,6 +109,11 @@
                             <option label="30155">trending</option>
                             <option label="30153">playlists</option>
                             <option label="30154">following</option>
+                            <option label="30382">history</option>
+                            <option label="30383">foryou</option>
+                            <option label="30384">based</option>
+                            <option label="30385">curated</option>
+                            <option label="30386">buzzing</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>

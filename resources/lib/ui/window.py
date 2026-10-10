@@ -28,6 +28,8 @@ import threading
 import xbmc
 import xbmcgui
 
+from resources.lib.soundcloud.api_collection import ApiCollection
+
 
 # Kodi action IDs (used by both NowPlayingDialog and SoundCloudHomeWindow,
 # defined here at module top so both classes can reference them).
@@ -1355,8 +1357,9 @@ ID_NAV_LIKES = 112
 ID_NAV_PLAYLISTS = 113
 ID_NAV_FOLLOWING = 114
 ID_NAV_SETTINGS = 115
-# (ID 116 was the legacy interface button — removed in 5.2.4, the option
-# to switch to the classic UI now lives in the addon settings)
+ID_NAV_STATIONS = 116
+# (ID 116 was the legacy interface button — removed in 5.2.4; it is now
+# the "Stations" entry of the side menu.)
 
 # Page lists / row lists
 ID_ROW1_LIST = 350
@@ -1385,6 +1388,11 @@ ROW_TYPES = {
     "trending":  {"title_strid": 30155, "loader": "_load_trending"},
     "playlists": {"title_strid": 30153, "loader": "_load_playlists"},
     "following": {"title_strid": 30154, "loader": "_load_following"},
+    "history":   {"title_strid": 30382, "loader": "_load_history"},
+    "foryou":    {"title_strid": 30383, "loader": "_load_foryou"},
+    "based":     {"title_strid": 30384, "loader": "_load_based"},
+    "curated":   {"title_strid": 30385, "loader": "_load_curated"},
+    "buzzing":   {"title_strid": 30386, "loader": "_load_buzzing"},
 }
 
 # Localized labels of the trending genres live in the .po files
@@ -1888,6 +1896,9 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         if control_id == ID_NAV_FOLLOWING:
             self._show_following()
             return
+        if control_id == ID_NAV_STATIONS:
+            self._show_stations()
+            return
         if control_id == ID_NAV_SETTINGS:
             self.addon.openSettings()
             return
@@ -1960,6 +1971,8 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             self._nav_stack.append(self._show_likes)
         elif current_page == "following":
             self._nav_stack.append(self._show_following)
+        elif current_page == "stations":
+            self._nav_stack.append(self._show_stations)
         elif current_page == "search":
             self._nav_stack.append(self._show_search)
         elif current_page == "home":
@@ -2158,6 +2171,98 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 xbmc.LOGERROR,
             )
 
+    def _load_history(self, list_id, limit=20):
+        # Recently played (/me/play-history) - requires an OAuth
+        # token; falls back to trending like the other personal rows.
+        if not self.api.settings.get_oauth_token():
+            self._load_trending(list_id, limit=limit)
+            return
+        try:
+            collection = self.api.play_history(limit)
+            if collection is None or not collection.items:
+                self._load_trending(list_id, limit=limit)
+                return
+            self._fill_list(list_id, collection)
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow load_history "
+                "failed: %s" % str(e),
+                xbmc.LOGERROR,
+            )
+
+    def _load_foryou(self, list_id, limit=20):
+        # "Mixed for you" - personalized section matched at runtime
+        # from /mixed-selections; trending fallback when not served.
+        try:
+            collection = self.api.discover_section(
+                ("mixed for you", "mixed-for-you")
+            )
+            if collection is None or not collection.items:
+                self._load_trending(list_id, limit=limit)
+                return
+            self._fill_list(list_id, collection)
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow load_foryou "
+                "failed: %s" % str(e),
+                xbmc.LOGERROR,
+            )
+
+    def _load_based(self, list_id, limit=20):
+        # "More of what you like" / "Based on what you like" -
+        # personalized section matched at runtime from
+        # /mixed-selections; trending fallback when not served.
+        try:
+            collection = self.api.discover_section(
+                ("more of what you like", "more-of-what-you-like",
+                 "based on what you like", "based-on-what-you-like")
+            )
+            if collection is None or not collection.items:
+                self._load_trending(list_id, limit=limit)
+                return
+            self._fill_list(list_id, collection)
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow load_based "
+                "failed: %s" % str(e),
+                xbmc.LOGERROR,
+            )
+
+    def _load_curated(self, list_id, limit=20):
+        # "Curated by SoundCloud" selection - available anonymously.
+        try:
+            collection = self.api.discover(
+                "soundcloud:selections:personalised-curated-global"
+            )
+            if collection is None or not collection.items:
+                self._load_trending(list_id, limit=limit)
+                return
+            self._fill_list(list_id, collection)
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow load_curated "
+                "failed: %s" % str(e),
+                xbmc.LOGERROR,
+            )
+
+    def _load_buzzing(self, list_id, limit=20):
+        # "Artists to watch out for" (Buzzing) selection - available
+        # anonymously.
+        try:
+            collection = self.api.discover(
+                "soundcloud:selections:buzzing"
+            )
+            if collection is None or not collection.items:
+                self._load_trending(list_id, limit=limit)
+                return
+            self._fill_list(list_id, collection)
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow load_buzzing "
+                "failed: %s" % str(e),
+                xbmc.LOGERROR,
+            )
+
     def _fetch_home_section(self, row_type, limit):
         """
         Fetch the content of one configured home row for the sectioned
@@ -2166,6 +2271,43 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         Returns None when the fetch failed.
         """
         try:
+            if row_type == "history":
+                # Recently played requires an OAuth token; falls
+                # through to the trending fallback when logged out.
+                if self.api.settings.get_oauth_token():
+                    history = self.api.play_history(limit)
+                    if history is not None and history.items:
+                        return history
+            elif row_type == "foryou":
+                # "Mixed for you" - personalized section matched at
+                # runtime from /mixed-selections (user-specific ids).
+                collection = self.api.discover_section(
+                    ("mixed for you", "mixed-for-you")
+                )
+                if collection is not None and collection.items:
+                    return collection
+            elif row_type == "based":
+                # "More of what you like" / "Based on what you like".
+                collection = self.api.discover_section(
+                    ("more of what you like", "more-of-what-you-like",
+                     "based on what you like", "based-on-what-you-like")
+                )
+                if collection is not None and collection.items:
+                    return collection
+            elif row_type == "curated":
+                # "Curated by SoundCloud" selection - anonymous OK.
+                collection = self.api.discover(
+                    "soundcloud:selections:personalised-curated-global"
+                )
+                if collection is not None and collection.items:
+                    return collection
+            elif row_type == "buzzing":
+                # "Artists to watch out for" (Buzzing) - anonymous OK.
+                collection = self.api.discover(
+                    "soundcloud:selections:buzzing"
+                )
+                if collection is not None and collection.items:
+                    return collection
             if (row_type in ("likes", "playlists", "following")
                     and self.api.settings.get_oauth_token()):
                 user_id = self.api.get_my_user_id()
@@ -2333,6 +2475,50 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             )
             self._fill_page_list(None)
 
+    def _show_stations(self):
+        """
+        Stations page: the user's liked stations (when logged in) are
+        listed first, followed by SoundCloud's genre stations - the
+        "trending by genre" system playlists served by /mixed-selections
+        (Trap, Hip Hop, Pop, Electronic, House, ...). Clicking a
+        station opens its tracks (see the "selection" parameter
+        handling in _play_from_list).
+        """
+        self.setProperty("page", "stations")
+        self.setProperty("title", self.addon.getLocalizedString(30381))
+        self.setProperty("subtitle", "")
+
+        merged = ApiCollection()
+        merged.items = []
+        merged.load = []
+        merged.next_href = None
+
+        if self.api.settings.get_oauth_token():
+            try:
+                liked = self.api.call("/me/likes/system-playlists?limit=50")
+                if liked is not None:
+                    merged.items.extend(liked.items)
+            except Exception as e:
+                xbmc.log(
+                    "plugin.audio.soundcloud::HomeWindow liked stations "
+                    "failed: %s" % str(e),
+                    xbmc.LOGWARNING,
+                )
+        try:
+            genres = self.api.discover(
+                "soundcloud:selections:trending-by-genre-playlists"
+            )
+            if genres is not None:
+                merged.items.extend(genres.items)
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow genre stations "
+                "failed: %s" % str(e),
+                xbmc.LOGERROR,
+            )
+
+        self._fill_page_list(merged)
+
     # =====================================================================
     # Data loading helpers
     # =====================================================================
@@ -2472,6 +2658,7 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 parsed = urlparse(play_url)
                 qs = parse_qs(parsed.query)
                 call_path = unquote(qs.get("call", [""])[0])
+                selection_id = unquote(qs.get("selection", [""])[0])
                 if call_path:
                     # Push the current page onto the nav stack so Back
                     # can return here instead of closing the window.
@@ -2480,6 +2667,26 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                     self.setProperty("title", list_item.getLabel())
                     self.setProperty("subtitle", "")
                     collection = self.api.call(call_path)
+                    self._fill_page_list(collection)
+                elif selection_id:
+                    # Selection / station items (Discover selections and
+                    # system playlists - genre stations, artist stations,
+                    # "Mixed for you", ...) carry a "selection" parameter
+                    # instead of "call": they previously did nothing when
+                    # clicked. System playlists have their own endpoint;
+                    # other selections are resolved from /mixed-selections.
+                    self._push_nav_state()
+                    self.setProperty("page", "browse")
+                    self.setProperty("title", list_item.getLabel())
+                    self.setProperty("subtitle", "")
+                    try:
+                        if selection_id.startswith(
+                                "soundcloud:system-playlists:"):
+                            collection = self.api.system_playlist(selection_id)
+                        else:
+                            collection = self.api.discover(selection_id)
+                    except Exception:
+                        collection = None
                     self._fill_page_list(collection)
             except Exception as e:
                 xbmc.log(
