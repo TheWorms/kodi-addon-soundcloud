@@ -44,6 +44,8 @@ ACTION_PLAYER_PLAY = 68
 ACTION_STEP_FORWARD = 87
 ACTION_STEP_BACK = 88
 ACTION_NAV_BACK = 92
+# Long-press / menu key on most remotes (opens the context menu).
+ACTION_CONTEXT_MENU = 117
 
 # How many seconds the left/right arrow keys seek when an audio
 # track is playing. 10s feels right on a TV remote — small enough
@@ -221,6 +223,68 @@ class _AbortWatcher(threading.Thread):
             pass
 
 
+class _SleepTimer(threading.Thread):
+    """
+    Sleep timer: counts EFFECTIVE listening time and stops playback
+    once the configured number of minutes has elapsed ("effective" =
+    the countdown only advances while audio is actually playing;
+    pausing suspends it). One instance is (re)armed on every playback
+    start; arming a new one cancels the previous. A parallel
+    implementation lives in service.py so the timer also works with
+    the full-screen UI closed (first timer to elapse wins).
+    """
+    POLL_SECONDS = 1.0
+
+    def __init__(self, window):
+        super().__init__(daemon=True)
+        self._window = window
+        self._elapsed = 0.0
+        self._cancelled = False
+
+    def cancel(self):
+        self._cancelled = True
+
+    def _target_seconds(self):
+        try:
+            minutes = int(
+                self._window.settings.get("playback.sleep_timer") or 0
+            )
+        except Exception:
+            return 0
+        return max(0, minutes) * 60
+
+    def run(self):
+        import time
+
+        while not self._cancelled:
+            target = self._target_seconds()
+            if target <= 0:
+                # Setting off (or turned off mid-playback): exit.
+                return
+            try:
+                if xbmc.Player().isPlayingAudio():
+                    self._elapsed += self.POLL_SECONDS
+                    if self._elapsed >= target:
+                        xbmc.Player().stop()
+                        try:
+                            xbmcgui.Dialog().notification(
+                                self._window.addon.getAddonInfo("name"),
+                                self._window.addon.getLocalizedString(30358),
+                                xbmcgui.NOTIFICATION_INFO,
+                                4000,
+                            )
+                        except Exception:
+                            pass
+                        return
+            except Exception as e:
+                xbmc.log(
+                    "plugin.audio.soundcloud::SleepTimer error: %s" % str(e),
+                    xbmc.LOGWARNING,
+                )
+                return
+            time.sleep(self.POLL_SECONDS)
+
+
 class _PlayerObserver(xbmc.Player):
     """
     Subclass of xbmc.Player that gets notified when playback changes.
@@ -291,6 +355,18 @@ class _PlayerObserver(xbmc.Player):
             xbmc.log(
                 "plugin.audio.soundcloud::PlayerObserver resume check "
                 "failed: %s" % str(e),
+                xbmc.LOGWARNING,
+            )
+
+        # Endless playback: if the ended track was the LAST of the
+        # queue, fetch related tracks and extend the playlist so the
+        # music keeps going.
+        try:
+            self._maybe_extend_queue()
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::PlayerObserver endless queue "
+                "extension failed: %s" % str(e),
                 xbmc.LOGWARNING,
             )
 
@@ -380,6 +456,113 @@ class _PlayerObserver(xbmc.Player):
             "out (stream never became seekable)",
             xbmc.LOGWARNING,
         )
+
+    def _maybe_extend_queue(self):
+        """
+        Endless playback: when the option is enabled and the track
+        that just ended was the LAST of the Kodi queue, fetch
+        SoundCloud's related tracks, append them, and continue playback
+        at the first appended position (same playlist-restart pattern as
+        the interrupted-stream auto-resume). Defensive by design: the
+        /tracks/{id}/related endpoint is not part of the stable surface
+        we use elsewhere — on any error this is a silent no-op.
+        """
+        w = self._window
+        try:
+            enabled = (w.settings.get("playback.endless") or "false") == "true"
+        except Exception:
+            enabled = False
+        if not enabled:
+            return
+
+        playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
+        try:
+            size = int(playlist.size() or 0)
+            position = int(playlist.getposition() or -1)
+        except Exception:
+            return
+        if size <= 0 or position != size - 1:
+            # Not the last track of the queue — normal autoplay
+            # continues; nothing to do.
+            return
+
+        try:
+            last_item = playlist[position]
+            track_id = (
+                last_item.getProperty("soundcloud.track_id") or ""
+            ).strip()
+        except Exception:
+            track_id = ""
+        if not track_id:
+            return
+
+        # Anti-loop guards: never extend twice from the same track,
+        # never append a track that was already appended (or used as
+        # an extension source) earlier in the session.
+        extended = getattr(w, "_endless_extended", None)
+        added = getattr(w, "_endless_added", None)
+        if extended is None:
+            extended = w._endless_extended = set()
+        if added is None:
+            added = w._endless_added = set()
+        if track_id in extended:
+            return
+        extended.add(track_id)
+
+        try:
+            skip_previews = (
+                (w.settings.get("playback.skip_excerpts") or "false")
+                == "true"
+            )
+        except Exception:
+            skip_previews = False
+
+        try:
+            related = w.api.related_tracks(track_id, limit=10)
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::PlayerObserver endless queue "
+                "fetch failed: %s" % str(e),
+                xbmc.LOGWARNING,
+            )
+            return
+        items = getattr(related, "items", None) or []
+
+        addon_base = "plugin://" + w.addon.getAddonInfo("id")
+        new_items = []
+        for item in items:
+            if not getattr(item, "media", ""):
+                continue
+            # Honour the "Skip Go+ excerpts" option.
+            if skip_previews and getattr(item, "preview", False):
+                continue
+            url, li, _ = item.to_list_item(addon_base)
+            if not li.getProperty("mediaUrl"):
+                continue
+            item_id = (li.getProperty("soundcloud.track_id") or "").strip()
+            if item_id and (item_id in added or item_id in extended):
+                continue
+            if item_id:
+                added.add(item_id)
+            new_items.append((url, li))
+
+        if not new_items:
+            return
+
+        for url, li in new_items:
+            playlist.add(url=url, listitem=li)
+
+        xbmc.log(
+            "plugin.audio.soundcloud::PlayerObserver endless queue: "
+            "appending %d related tracks after track %s" %
+            (len(new_items), track_id),
+            xbmc.LOGINFO,
+        )
+        # Continue at the first appended track: the ended position was
+        # the last of the old queue, so index 'size' (the old length)
+        # lands exactly on the first new item. Older tracks are kept
+        # so "previous" navigation still works.
+        xbmc.Player().play(playlist, startpos=size)
 
     def _maybe_open_now_playing(self):
         """Open the configured fullscreen overlay, if any, and only if
@@ -775,12 +958,26 @@ class NowPlayingDialog(xbmcgui.WindowXMLDialog):
             if not player.isPlayingAudio():
                 return
 
-            # Left/Right: seek backward/forward by SEEK_STEP_SECONDS.
+            # Left/Right: seek backward/forward. The step comes from
+            # Settings > Playback > Seek interval (10 s historically).
+            # Fall back to the module default if the setting can't be
+            # read (defensive: observer/window may be unavailable).
+            try:
+                seek_step = int(
+                    self._observer._window.settings.get(
+                        "playback.seek_interval"
+                    ) or SEEK_STEP_SECONDS
+                )
+            except Exception:
+                seek_step = SEEK_STEP_SECONDS
+            if seek_step < 1:
+                seek_step = SEEK_STEP_SECONDS
+
             # Clamp to [0, totalTime] so we don't crash on edge cases.
             if action_id == ACTION_MOVE_LEFT or action_id == ACTION_STEP_BACK:
                 try:
                     current = player.getTime()
-                    target = max(0.0, current - SEEK_STEP_SECONDS)
+                    target = max(0.0, current - seek_step)
                     player.seekTime(target)
                 except Exception as e:
                     xbmc.log(
@@ -794,7 +991,7 @@ class NowPlayingDialog(xbmcgui.WindowXMLDialog):
                 try:
                     current = player.getTime()
                     total = player.getTotalTime()
-                    target = min(total - 0.5, current + SEEK_STEP_SECONDS)
+                    target = min(total - 0.5, current + seek_step)
                     if target > current:
                         player.seekTime(target)
                 except Exception as e:
@@ -1139,6 +1336,11 @@ ID_ROW3_LIST = 352
 ID_ROW4_LIST = 353
 ID_ROW_LISTS = (ID_ROW1_LIST, ID_ROW2_LIST, ID_ROW3_LIST, ID_ROW4_LIST)
 ID_PAGE_LIST = 400
+# Vertical list shown on the home page in the "list" layout.
+ID_HOME_LIST = 354
+# Genre chips shown on the home page above the list in the "list"
+# layout. Ids 360..367, one per GENRE_URNS entry, in the same order.
+ID_GENRE_CHIPS = (360, 361, 362, 363, 364, 365, 366, 367)
 
 # Available row types — used to map a setting value to a content loader.
 # Localized titles use the corresponding string ID.
@@ -1148,6 +1350,33 @@ ROW_TYPES = {
     "playlists": {"title_strid": 30153, "loader": "_load_playlists"},
     "following": {"title_strid": 30154, "loader": "_load_following"},
 }
+
+# Localized labels of the trending genre options (urn -> string ID),
+# used for the subtitle of the home page in the "list" layout.
+GENRE_LABELS = {
+    "soundcloud:genres:all-music": 30365,
+    "soundcloud:genres:techno": 30370,
+    "soundcloud:genres:house": 30371,
+    "soundcloud:genres:deephouse": 30372,
+    "soundcloud:genres:electronic": 30373,
+    "soundcloud:genres:hiphop": 30374,
+    "soundcloud:genres:ambient": 30375,
+    "soundcloud:genres:jazz": 30376,
+}
+
+# Order of the genre chips shown on the home page in the "list"
+# layout. MUST match the button ids 360..367 in the skin XML
+# (chip 360 = first entry, chip 367 = last).
+GENRE_URNS = (
+    "soundcloud:genres:all-music",
+    "soundcloud:genres:techno",
+    "soundcloud:genres:house",
+    "soundcloud:genres:deephouse",
+    "soundcloud:genres:electronic",
+    "soundcloud:genres:hiphop",
+    "soundcloud:genres:ambient",
+    "soundcloud:genres:jazz",
+)
 
 # Mini-player buttons
 ID_MP_PREV = 520
@@ -1194,6 +1423,13 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         self._last_duration = 0.0
         self._last_playlist_pos = -1
         self._resume_attempts = {}
+        # Endless-playback bookkeeping: track ids used as extension
+        # source, and ids appended by endless mode (anti-loop /
+        # anti-duplicate guards).
+        self._endless_extended = set()
+        self._endless_added = set()
+        # Sleep-timer thread — (re)armed on every playback start.
+        self._sleep_timer_thread = None
 
         # Closes this window on Kodi shutdown so the script exits
         # cleanly instead of being force-killed after 5 seconds.
@@ -1217,9 +1453,19 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         )
 
         # Apply layout from settings.
-        layout_setting = self.settings.get("ui.layout") or "1"
-        layout = "sidebar" if layout_setting == "1" else "rows"
+        # 1 = side menu + rows ("cards"), 2 = side menu + trending
+        # list. The old "rows only" layout (which hid the side menu
+        # and left no way back to the addon settings from the
+        # interface) was removed - the side menu is now ALWAYS visible.
+        # A stale persisted value of 0 (or the empty string a freshly
+        # installed setting can return) falls back to the cards layout.
+        layout_setting = (self.settings.get("ui.layout") or "1").strip()
+        layout = {"1": "sidebar", "2": "list"}.get(
+            layout_setting, "sidebar"
+        )
         self.setProperty("layout", layout)
+        # Genre of the trending list (highlights the matching chip).
+        self.setProperty("trending_genre", self._trending_genre())
 
         # Apply miniplayer mode from settings.
         # 0 = off, 1 = compact (no controls), 2 = controls (full)
@@ -1230,15 +1476,15 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         # Default page = home.
         self._show_home()
 
-        # Focus the home button in sidebar mode, or the first row in
-        # rows-only mode. Wrapped in try/except because setFocusId on a
+        # Focus the home button in cards mode, or the trending list in
+        # list mode. Wrapped in try/except because setFocusId on a
         # non-existent or invisible control logs a "can't focus" error
         # and (in some Kodi versions) can trigger a window reload loop.
         try:
-            if layout == "sidebar":
-                target = ID_NAV_HOME
+            if layout == "list":
+                target = ID_HOME_LIST
             else:
-                target = ID_ROW1_LIST
+                target = ID_NAV_HOME
             # Small delay to let the controls fully initialize before
             # we try to focus them. Without this, focus can race against
             # the layout pass and silently fail.
@@ -1281,6 +1527,52 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             track_id, self._startup_track_id = self._startup_track_id, None
             source, self._startup_track_source = self._startup_track_source, None
             self._play_startup_track(track_id, source)
+
+    def _check_live_settings(self):
+        """
+        Live reload of the interface settings, called from onAction
+        (so it fires on the first key press after the settings screen
+        opened from the sidebar closes, and also covers settings
+        changed any other way while the window is up). Layout and
+        mini-player changes are applied immediately; anything else
+        still needs a window reopen.
+        """
+        layout_setting = (self.settings.get("ui.layout") or "1").strip()
+        layout = {"1": "sidebar", "2": "list"}.get(
+            layout_setting, "sidebar"
+        )
+        if layout != (self.getProperty("layout") or "sidebar"):
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow layout changed to "
+                "'%s', applying live" % layout,
+                xbmc.LOGINFO,
+            )
+            self.setProperty("layout", layout)
+            if (self.getProperty("page") or "home") == "home":
+                self._show_home()
+            try:
+                if layout == "list":
+                    self.setFocusId(ID_HOME_LIST)
+                else:
+                    self.setFocusId(ID_NAV_HOME)
+            except Exception:
+                pass
+
+        # Trending genre changed in the settings (the chips and the
+        # list subtitle follow it live, like the layout).
+        genre = self._trending_genre()
+        if genre != (self.getProperty("trending_genre") or ""):
+            self.setProperty("trending_genre", genre)
+            if (self.getProperty("layout") == "list"
+                    and (self.getProperty("page") or "home") == "home"):
+                self._show_home()
+
+        mp_setting = self.settings.get("ui.miniplayer") or "2"
+        mp_mode = {"0": "off", "1": "compact", "2": "controls"}.get(
+            mp_setting, "controls"
+        )
+        if mp_mode != (self.getProperty("miniplayer") or "controls"):
+            self.setProperty("miniplayer", mp_mode)
 
     def _play_startup_track(self, track_id, source=None):
         """
@@ -1396,7 +1688,7 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             elif source == "trending":
                 collection = self.api.charts({
                     "kind": "trending",
-                    "genre": "soundcloud:genres:all-music",
+                    "genre": self._trending_genre(),
                     "limit": limit,
                 })
             elif source == "discover":
@@ -1413,11 +1705,19 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             return [], 0
 
         addon_base = "plugin://" + self.addon.getAddonInfo("id")
+        # Skip Go+ excerpts (30-second snippets) when the user
+        # enabled the option.
+        skip_previews = (
+            (self.settings.get("playback.skip_excerpts") or "false") == "true"
+        )
         track_items = []
         start = None
         for item in getattr(collection, "items", None) or []:
             # Tracks have a media URL; selections/playlists/users don't.
             if not getattr(item, "media", ""):
+                continue
+            # Skip Go+ excerpts when the user enabled the option.
+            if skip_previews and getattr(item, "preview", False):
                 continue
             url, li, _ = item.to_list_item(addon_base)
             if not li.getProperty("mediaUrl"):
@@ -1452,6 +1752,35 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
 
     def onAction(self, action):
         action_id = action.getId()
+
+        # The settings screen is opened FROM this window (sidebar
+        # button); when it closes, the home window resumes without a
+        # new onInit - and the layout used to be read only at window
+        # open, so changing it had no visible effect until the addon
+        # was fully closed and reopened. Re-read the interface
+        # settings on every action (a cheap settings read) and apply
+        # any change live.
+        try:
+            self._check_live_settings()
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow live settings "
+                "reload failed: %s" % str(e),
+                xbmc.LOGDEBUG,
+            )
+
+        if action_id == ACTION_CONTEXT_MENU:
+            # Long-press menu: add/remove the focused track from the
+            # user's SoundCloud likes.
+            try:
+                self._handle_context_menu()
+            except Exception as e:
+                xbmc.log(
+                    "plugin.audio.soundcloud::HomeWindow context menu "
+                    "failed: %s" % str(e),
+                    xbmc.LOGWARNING,
+                )
+            return
         if action_id in (ACTION_PREVIOUS_MENU, ACTION_NAV_BACK, ACTION_PARENT_DIR):
             # Back behaviour:
             # - If we have navigation history (user is deep in a folder),
@@ -1512,6 +1841,31 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             self.addon.openSettings()
             return
 
+        # ----- Genre chip clicked (home page of the "list" layout) -----
+        if control_id in ID_GENRE_CHIPS:
+            urn = GENRE_URNS[control_id - ID_GENRE_CHIPS[0]]
+            if urn != self._trending_genre():
+                try:
+                    self.addon.setSetting("trending.genre", urn)
+                except Exception as e:
+                    xbmc.log(
+                        "plugin.audio.soundcloud::HomeWindow genre chip "
+                        "persist failed: %s" % str(e),
+                        xbmc.LOGWARNING,
+                    )
+                self.setProperty("trending_genre", urn)
+                xbmc.log(
+                    "plugin.audio.soundcloud::HomeWindow trending genre "
+                    "switched to '%s'" % urn,
+                    xbmc.LOGINFO,
+                )
+                # Reload the trending list with the new genre. The
+                # chips are only reachable on the home page, and
+                # _show_home re-reads the (already persisted) genre.
+                if (self.getProperty("page") or "home") == "home":
+                    self._show_home()
+            return
+
         # ----- Mini-player controls -----
         if control_id == ID_MP_PREV:
             xbmc.executebuiltin("PlayerControl(Previous)")
@@ -1523,8 +1877,11 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             xbmc.executebuiltin("PlayerControl(Next)")
             return
 
-        # ----- A track was clicked in one of the rows or the page list -----
-        if control_id in ID_ROW_LISTS or control_id == ID_PAGE_LIST:
+        # ----- A track was clicked in one of the rows, the home list
+        # or the page list -----
+        if (control_id in ID_ROW_LISTS
+                or control_id == ID_PAGE_LIST
+                or control_id == ID_HOME_LIST):
             self._play_from_list(control_id)
             return
 
@@ -1581,6 +1938,30 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         self.setProperty("subtitle", "")
         self.setProperty("page_empty", "false")
 
+        # In "list" layout the home page is a single vertical list of
+        # trending tracks (genre from the trending.genre setting)
+        # under a "Trending" header - the four home rows stay hidden.
+        # Clicking a track plays the whole list from that track.
+        if self.getProperty("layout") == "list":
+            for idx in range(1, 5):
+                self.setProperty("row%d_visible" % idx, "false")
+            self.setProperty(
+                "title",
+                self.addon.getLocalizedString(ROW_TYPES["trending"]["title_strid"])
+            )
+            self.setProperty("subtitle", self._trending_genre_label())
+            try:
+                self._load_trending(ID_HOME_LIST, limit=50)
+            except Exception as e:
+                xbmc.log(
+                    "plugin.audio.soundcloud::HomeWindow load_trending "
+                    "(list layout) failed: %s" % str(e),
+                    xbmc.LOGERROR,
+                )
+            if not self._lists.get(ID_HOME_LIST):
+                self.setProperty("page_empty", "true")
+            return
+
         # Read row config from settings. Each of the 4 rows has:
         #   - row1.type, row2.type, row3.type, row4.type
         # Defaults: likes / trending / playlists / following.
@@ -1629,6 +2010,25 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         except (TypeError, ValueError):
             return 20
 
+    def _trending_genre(self):
+        """
+        Trending genre from settings (URN form expected by the /charts
+        endpoint), defaulting to all-music.
+        """
+        genre = (self.settings.get("trending.genre") or "").strip()
+        return genre or "soundcloud:genres:all-music"
+
+    def _trending_genre_label(self):
+        """
+        Localized label of the configured trending genre (shown as the
+        subtitle of the home page in list layout). Returns an empty
+        string for an unknown genre value.
+        """
+        strid = GENRE_LABELS.get(self._trending_genre())
+        if strid:
+            return self.addon.getLocalizedString(strid)
+        return ""
+
     # ---------- Row content loaders (each fills one fixedlist) ----------
 
     def _load_likes(self, list_id, limit=20):
@@ -1654,7 +2054,7 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         try:
             collection = self.api.charts({
                 "kind": "trending",
-                "genre": "soundcloud:genres:all-music",
+                "genre": self._trending_genre(),
                 "limit": limit,
             })
             self._fill_list(list_id, collection)
@@ -1953,9 +2353,15 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         # Filter to tracks only (skip non-playable items in case the
         # list mixes types — shouldn't happen on the home rows but
         # belts and suspenders).
+        # Skip Go+ excerpts (30-second snippets) when the user
+        # enabled the option.
+        skip_previews = (
+            (self.settings.get("playback.skip_excerpts") or "false") == "true"
+        )
         track_items = [
             (url, li) for (url, li) in items
             if li.getProperty("mediaUrl")
+            and not (skip_previews and li.getProperty("soundcloud.preview") == "true")
         ]
         if not track_items:
             return
@@ -2038,6 +2444,9 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             )
             xbmc.Player().play(playlist, startpos=new_start)
 
+            # Arm the sleep timer for this fresh playback.
+            self._arm_sleep_timer()
+
             # Also flip Kodi's own random toggle for visual consistency
             # in the player controls. If we shuffled the list above, the
             # actual order is already random; this builtin just makes
@@ -2067,12 +2476,107 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 return
             list_item.setPath(resolved)
             xbmc.Player().play(resolved, list_item)
+            # Arm the sleep timer for this fresh playback.
+            self._arm_sleep_timer()
         except Exception as e:
             xbmc.log(
                 "plugin.audio.soundcloud::HomeWindow play failed: %s" % str(e),
                 xbmc.LOGERROR,
             )
             self._notify(self.addon.getLocalizedString(30126))
+
+    def _arm_sleep_timer(self):
+        """
+        (Re)start the sleep timer for a fresh playback. The previous
+        timer (if any) is cancelled; no new thread is started when
+        the setting is 0/disabled.
+        """
+        try:
+            old = getattr(self, "_sleep_timer_thread", None)
+            if old is not None:
+                old.cancel()
+        except Exception:
+            pass
+        try:
+            try:
+                minutes = int(
+                    self.settings.get("playback.sleep_timer") or 0
+                )
+            except (TypeError, ValueError):
+                minutes = 0
+            if minutes > 0:
+                timer = _SleepTimer(self)
+                self._sleep_timer_thread = timer
+                timer.start()
+            else:
+                self._sleep_timer_thread = None
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow sleep timer arm "
+                "failed: %s" % str(e),
+                xbmc.LOGWARNING,
+            )
+
+    def _handle_context_menu(self):
+        """
+        Long-press context menu on the focused list: add or remove
+        the selected track from the user's SoundCloud likes
+        (PUT/DELETE /me/favorites/{id}). Requires an OAuth token.
+        """
+        try:
+            control_id = self.getFocusId()
+        except Exception:
+            control_id = None
+        items = self._lists.get(control_id, [])
+        if not items:
+            return
+
+        try:
+            position = self.getControl(control_id).getSelectedPosition()
+        except Exception:
+            position = -1
+        if position < 0 or position >= len(items):
+            return
+
+        _, list_item = items[position]
+        track_id = (
+            list_item.getProperty("soundcloud.track_id") or ""
+        ).strip()
+        if not track_id:
+            return
+
+        if not self.api.settings.get_oauth_token():
+            self._notify(self.addon.getLocalizedString(30024))
+            return
+
+        choice = xbmcgui.Dialog().select(
+            self.addon.getLocalizedString(30364),
+            [
+                self.addon.getLocalizedString(30359),
+                self.addon.getLocalizedString(30360),
+            ],
+        )
+        if choice < 0:
+            return
+
+        try:
+            if choice == 0:
+                ok = self.api.like_track(track_id)
+            else:
+                ok = self.api.unlike_track(track_id)
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow like/unlike "
+                "failed: %s" % str(e),
+                xbmc.LOGWARNING,
+            )
+            ok = False
+
+        if ok:
+            self._notify(self.addon.getLocalizedString(
+                30361 if choice == 0 else 30362))
+        else:
+            self._notify(self.addon.getLocalizedString(30363))
 
     # =====================================================================
     # Helpers

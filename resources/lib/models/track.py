@@ -97,6 +97,10 @@ class Track(ListItem):
 
         list_item.setProperty("isPlayable", "true")
         list_item.setProperty("mediaUrl", self.media)
+        # Mark Go+ excerpts so the playback paths can skip them when the
+        # "Skip Go+ excerpts" option is enabled.
+        if self.preview:
+            list_item.setProperty("soundcloud.preview", "true")
         # Stash the track id and waveform url so the fullscreen overlay
         # can identify the playing track and display its waveform.
         # Kodi keeps these properties on the playing item.

@@ -27,6 +27,39 @@ search_history = SearchHistory(settings, vfs)
 listItems = Items(addon, addon_base, search_history, api=api)
 
 
+_cache_purge_done = False
+
+
+def _purge_cache_once():
+    """
+    Purge cache entries older than the "cache.ttl" setting, once per
+    plugin process. Kodi never cleans special://profile/cache between
+    sessions (notably on CoreELEC/LibreELEC), so without this the
+    folder grows forever. Cheap: one listdir + mtime scan.
+    """
+    global _cache_purge_done
+    if _cache_purge_done:
+        return
+    _cache_purge_done = True
+    try:
+        days = int(settings.get("cache.ttl") or 30)
+    except (TypeError, ValueError):
+        days = 30
+    try:
+        removed = cache.purge_older_than(days)
+        if removed:
+            xbmc.log(
+                "%s: purged %d cache entries older than %d days"
+                % (addon_id, removed, days),
+                xbmc.LOGDEBUG,
+            )
+    except Exception as e:
+        xbmc.log(
+            "%s: cache purge failed: %s" % (addon_id, str(e)),
+            xbmc.LOGWARNING,
+        )
+
+
 def run():
     import time as _t
     _t0 = _t.time()
@@ -39,6 +72,9 @@ def run():
     path = url.path
     handle = int(sys.argv[1])
     args = urllib.parse.parse_qs(sys.argv[2][1:])
+
+    # One-shot cache purge — keeps the cache folder bounded.
+    _purge_cache_once()
 
     # Widget track click → open the full-screen UI playing that track.
     # Widget track items point at /?play_track=<id> (not /play/) since
@@ -67,6 +103,17 @@ def run():
         xbmc.executebuiltin("ReplaceWindow(home)")
         return
 
+    # Kodi caches plugin directory listings per requested URL for the
+    # whole session (in-memory, cleared only on Kodi restart). A listing
+    # served under the ROOT url must therefore never be cached:
+    # widget.mode can be changed in the addon settings at any time,
+    # and until a Kodi restart Kodi would keep serving the old
+    # (redirected) root listing without ever re-invoking the plugin —
+    # exactly the "I disabled the widget but still land on the
+    # following page until I restart Kodi" symptom.
+    requested_path = path
+    cacheable_request = requested_path != PATH_ROOT
+
     # Widget mode redirection (must happen BEFORE the main dispatch).
     # When the user has set widget.mode to something other than "off",
     # any call to the plugin root returns directly the items for that
@@ -89,7 +136,8 @@ def run():
             }.get(widget_mode)
             if redirect_to:
                 xbmc.log(
-                    addon_id + ": widget.mode='%s' — redirecting / to %s" %
+                    addon_id + ": widget.mode='%s' — redirecting / to %s "
+                    "(root listing uncached)" %
                     (widget_mode, redirect_to),
                     xbmc.LOGINFO,
                 )
@@ -223,9 +271,10 @@ def run():
 
             # Widget call: return the flat directory of widget shortcuts
             # so the skin has something playable to render.
+            # Root listing → never cached (see requested_path above).
             items = listItems.widgets(include_ui_launcher=True)
             xbmcplugin.addDirectoryItems(handle, items, len(items))
-            xbmcplugin.endOfDirectory(handle)
+            xbmcplugin.endOfDirectory(handle, cacheToDisc=False)
         elif "call" in action:
             # Generic "call" action — used by the full-screen UI to
             # navigate inside the plugin's data tree. We don't know what
@@ -474,7 +523,7 @@ def run():
                         xbmc.LOGDEBUG,
                     )
                     r = requests.get(test_url, headers=common_headers,
-                                     timeout=10)
+                                     timeout=int(settings.get("network.timeout") or 15))
                     bp = (r.text or "")[:300]
                     xbmc.log(
                         "plugin.audio.soundcloud::AuthTest %s -> HTTP %d, "
@@ -594,7 +643,8 @@ def run():
                 xbmcplugin.addDirectoryItems(handle, collection, len(collection))
         except Exception as e:
             xbmc.log(addon_id + ": widget/likes failed: %s" % str(e), xbmc.LOGERROR)
-        xbmcplugin.endOfDirectory(handle)
+        # Root redirect (widget.mode) → never cache the root listing.
+        xbmcplugin.endOfDirectory(handle, cacheToDisc=cacheable_request)
 
     elif path == PATH_WIDGET_PLAYLISTS:
         # User's own playlists. Requires OAuth.
@@ -610,7 +660,8 @@ def run():
                 xbmcplugin.addDirectoryItems(handle, collection, len(collection))
         except Exception as e:
             xbmc.log(addon_id + ": widget/playlists failed: %s" % str(e), xbmc.LOGERROR)
-        xbmcplugin.endOfDirectory(handle)
+        # Root redirect (widget.mode) → never cache the root listing.
+        xbmcplugin.endOfDirectory(handle, cacheToDisc=cacheable_request)
 
     elif path == PATH_WIDGET_FOLLOWING:
         # Artists the user follows. Requires OAuth.
@@ -626,16 +677,18 @@ def run():
                 xbmcplugin.addDirectoryItems(handle, collection, len(collection))
         except Exception as e:
             xbmc.log(addon_id + ": widget/following failed: %s" % str(e), xbmc.LOGERROR)
-        xbmcplugin.endOfDirectory(handle)
+        # Root redirect (widget.mode) → never cache the root listing.
+        xbmcplugin.endOfDirectory(handle, cacheToDisc=cacheable_request)
 
     elif path == PATH_WIDGET_TRENDING:
         # Worldwide trending tracks (no OAuth required).
         xbmcplugin.setContent(handle, "songs")
         try:
             limit = int(settings.get("search.items.size") or 20)
+            trending_genre = (settings.get("trending.genre") or "").strip() or "soundcloud:genres:all-music"
             api_result = api.charts({
                 "kind": "trending",
-                "genre": "soundcloud:genres:all-music",
+                "genre": trending_genre,
                 "limit": limit,
             })
             collection = _widgetify_tracks(
@@ -645,7 +698,8 @@ def run():
             xbmcplugin.addDirectoryItems(handle, collection, len(collection))
         except Exception as e:
             xbmc.log(addon_id + ": widget/trending failed: %s" % str(e), xbmc.LOGERROR)
-        xbmcplugin.endOfDirectory(handle)
+        # Root redirect (widget.mode) → never cache the root listing.
+        xbmcplugin.endOfDirectory(handle, cacheToDisc=cacheable_request)
 
     elif path == PATH_WIDGET_DISCOVER:
         # SoundCloud's "Discover" / mixed-selections endpoint.
@@ -659,7 +713,8 @@ def run():
             xbmcplugin.addDirectoryItems(handle, collection, len(collection))
         except Exception as e:
             xbmc.log(addon_id + ": widget/discover failed: %s" % str(e), xbmc.LOGERROR)
-        xbmcplugin.endOfDirectory(handle)
+        # Root redirect (widget.mode) → never cache the root listing.
+        xbmcplugin.endOfDirectory(handle, cacheToDisc=cacheable_request)
 
     elif path == PATH_SETTINGS_CACHE_CLEAR:
         vfs_cache.destroy()

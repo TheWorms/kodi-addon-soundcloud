@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.audio.soundcloud" name="SoundCloud" version="5.9.6027" provider-name="TheWorms">
+<addon id="plugin.audio.soundcloud" name="SoundCloud" version="7.0.0" provider-name="TheWorms">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.29.0"/>
@@ -48,7 +48,24 @@
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
         <credits>jaylinski (original add-on), bromix, SLiX</credits>
-        <news>5.9.6027 (2026-10-08) - robustness fixes (audit)
+        <news>7.0.0 (2026-10-09) - quick settings, endless playback, sleep timer, likes from the addon, list layout
+
+SETTINGS: new Playback options - configurable seek interval (5/10/15/30 s) for the arrow keys in the fullscreen player, option to skip 30-second Go+ excerpts, endless playback, and a sleep timer (15/30/60/120 min) that counts EFFECTIVE listening time (pause suspends the countdown).
+
+DISPLAY: the Trending row and the trending widget now follow a configurable genre (All genres, Techno, House, Deep House, Electronic, Hip-hop, Ambient, Jazz).
+
+INTERFACE: new home layout option "List" (side menu + a vertical list of trending tracks, one track per line with cover, artist and duration, and clickable genre chips above the list). The old "Rows only" layout was REMOVED - it hid the side menu, which also hid the only in-addon access to the settings, trapping the user; the side menu is now always visible and a stale "rows" setting value falls back to the cards layout. Layout and mini-player changes apply immediately when leaving the addon settings, without closing and reopening the interface.
+INTERFACE FIX (6.1): the "List" home layout did not show its genre chips and trending list when the addon was OPENED directly in list mode (fresh open). The group's skin visibility condition used parentheses, which Kodi's boolean expression parser rejects (two "unmatched parentheses" errors at every window load, leaving the whole group unrendered). Rewrote the condition flat ("A + B | A + C", AND binds tighter than OR - no parentheses). Opening the addon directly in list mode now shows the chips and the list.
+
+EXPERT: cache duration (7/30/90 days, old entries purged once per session) and network timeout (5/10/15/30 s) are now settings instead of hardcoded values.
+
+LIKES: long-press (context menu) on any track now offers "Add to likes" / "Remove from likes" - no need to open soundcloud.com anymore. Requires an OAuth token.
+
+ENDLESS PLAYBACK: when the queue reaches its last track, related tracks are fetched from SoundCloud and appended automatically, so the music never stops. The extension is defensive: if the related-tracks endpoint ever changes, the option silently becomes a no-op (watch kodi.log).
+
+WIDGET MODE: changing the "Home screen widget" mode in the settings now applies immediately - no Kodi restart needed. The plugin root listing is no longer cached by Kodi (previously the old widget page kept showing until the next restart).
+
+5.9.6027 (2026-10-08) - robustness fixes (audit)
 CHARTS: /charts returns an empty listing on an unexpected API response (error page, rate limit) instead of crashing with KeyError.
 
 API PUBLIC: ApiPublic requests are wrapped in try/except (network error, non-JSON response) - no more crashes on transport failures, consistent with ApiV2.

@@ -249,8 +249,8 @@ msgid "Layout"
 msgstr "Mise en page"
 
 msgctxt "#30134"
-msgid "Choose between a simple home with horizontal rows, or a sidebar + home view."
-msgstr "Choisissez entre un accueil simple avec rangées horizontales, ou une vue avec barre latérale + accueil."
+msgid "Choose the home screen layout: cards with the side menu, or a vertical list of trending tracks."
+msgstr "Choisissez la mise en page de l’accueil : cartes avec le menu latéral, ou liste verticale des tendances."
 
 msgctxt "#30135"
 msgid "Rows only"
@@ -605,3 +605,124 @@ msgstr "Quand un morceau lancé depuis un widget d'accueil se termine, continue 
 msgctxt "#30295"
 msgid "Stream interrupted — resuming…"
 msgstr "Flux interrompu — reprise…"
+
+msgctxt "#30350"
+msgid "Skip Go+ excerpts"
+msgstr "Ignorer les extraits Go+"
+
+msgctxt "#30351"
+msgid "When playback reaches a Go+ track that can only be previewed, skip it instead of playing the 30-second snippet."
+msgstr "Quand la lecture atteint un morceau Go+ écoutable seulement en extrait, passez-le au lieu de jouer l'extrait de 30 secondes."
+
+msgctxt "#30352"
+msgid "Endless playback (related tracks)"
+msgstr "Lecture sans fin (morceaux similaires)"
+
+msgctxt "#30353"
+msgid "When the queue reaches its last track, keep playing forever by appending SoundCloud's related tracks automatically."
+msgstr "Quand la file atteint son dernier morceau, continuez indéfiniment en ajoutant automatiquement les morceaux similaires de SoundCloud."
+
+msgctxt "#30354"
+msgid "Seek interval (seconds)"
+msgstr "Intervalle de déplacement (secondes)"
+
+msgctxt "#30355"
+msgid "How many seconds the left/right keys seek in the fullscreen player."
+msgstr "Nombre de secondes dont les touches gauche/droite déplacent la lecture dans le lecteur plein écran."
+
+msgctxt "#30356"
+msgid "Sleep timer (minutes)"
+msgstr "Minuterie d'arrêt (minutes)"
+
+msgctxt "#30357"
+msgid "Stop playback after this much effective listening time (pause suspends the countdown). 0 disables the timer."
+msgstr "Arrête la lecture après ce temps d'écoute effectif (la pause suspend le décompte). 0 désactive la minuterie."
+
+msgctxt "#30358"
+msgid "Playback stopped (sleep timer)"
+msgstr "Lecture arrêtée (minuterie)"
+
+msgctxt "#30359"
+msgid "Add to likes"
+msgstr "Ajouter à vos likes"
+
+msgctxt "#30360"
+msgid "Remove from likes"
+msgstr "Retirer de vos likes"
+
+msgctxt "#30361"
+msgid "Added to your likes"
+msgstr "Ajouté à vos likes"
+
+msgctxt "#30362"
+msgid "Removed from your likes"
+msgstr "Retiré de vos likes"
+
+msgctxt "#30363"
+msgid "Could not update likes (no OAuth token, or SoundCloud refused the request)"
+msgstr "Impossible de mettre à jour les likes (pas de jeton OAuth, ou requête refusée par SoundCloud)"
+
+msgctxt "#30364"
+msgid "SoundCloud likes"
+msgstr "Likes SoundCloud"
+
+msgctxt "#30365"
+msgid "All genres"
+msgstr "Tous les genres"
+
+msgctxt "#30366"
+msgid "Trending genre"
+msgstr "Genre des Tendances"
+
+msgctxt "#30367"
+msgid "Genre used for the Trending charts (home row and trending widget)."
+msgstr "Genre utilisé pour les classements Tendances (rangée d'accueil et widget Tendances)."
+
+msgctxt "#30368"
+msgid "Network timeout (seconds)"
+msgstr "Timeout réseau (secondes)"
+
+msgctxt "#30369"
+msgid "Maximum seconds to wait for a SoundCloud API response. Lower is snappier, higher tolerates slower connections."
+msgstr "Nombre maximal de secondes d’attente d’une réponse de l’API SoundCloud. Plus bas = plus réactif, plus haut tolère les connexions lentes."
+
+msgctxt "#30370"
+msgid "Techno"
+msgstr "Techno"
+
+msgctxt "#30371"
+msgid "House"
+msgstr "House"
+
+msgctxt "#30372"
+msgid "Deep House"
+msgstr "Deep House"
+
+msgctxt "#30373"
+msgid "Electronic"
+msgstr "Électronique"
+
+msgctxt "#30374"
+msgid "Hip-hop"
+msgstr "Hip-hop"
+
+msgctxt "#30375"
+msgid "Ambient"
+msgstr "Ambient"
+
+msgctxt "#30376"
+msgid "Jazz"
+msgstr "Jazz"
+
+msgctxt "#30377"
+msgid "Cache duration (days)"
+msgstr "Durée du cache (jours)"
+
+msgctxt "#30378"
+msgid "Delete cached API responses older than this. Shorter means fresher content but more network calls."
+msgstr "Supprime les réponses d’API en cache plus anciennes que ce délai. Plus court = contenu plus frais, mais plus d’appels réseau."
+
+msgctxt "#30379"
+msgid "List"
+msgstr "Liste"
+

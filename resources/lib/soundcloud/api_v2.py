@@ -32,6 +32,14 @@ class ApiV2(ApiInterface):
         self.cache = cache
         self.settings = settings
         self.api_limit = int(self.settings.get("search.items.size"))
+        # Response timeout (Settings > Expert > Network timeout).
+        # Minimum 5 s; defaults to 15 s when the setting is missing.
+        try:
+            self.api_timeout = max(
+                5, int(self.settings.get("network.timeout") or 15)
+            )
+        except (TypeError, ValueError):
+            self.api_timeout = 15
 
         if self.settings.get("apiv2.locale") == self.settings.APIV2_LOCALE["auto"]:
             self.api_lang = lang
@@ -129,6 +137,73 @@ class ApiV2(ApiInterface):
         if me:
             return me.get("id")
         return None
+
+    def related_tracks(self, track_id, limit=10):
+        """
+        Tracks related to the given one (endless playback). The
+        /tracks/{id}/related endpoint is not part of the officially
+        stable surface we use elsewhere — callers must tolerate an
+        empty result or an exception on any error (404, rate limit).
+        """
+        res = self._do_request(
+            "/tracks/%s/related" % urllib.parse.quote(str(track_id)),
+            {"limit": limit},
+        )
+        if not isinstance(res, dict):
+            res = {}
+        if "collection" not in res:
+            res = {"collection": []}
+        return self._map_json_to_collection(res)
+
+    def like_track(self, track_id):
+        """PUT /me/favorites/{id} — True on HTTP 2xx."""
+        return self._modify_favorite(track_id, method="PUT")
+
+    def unlike_track(self, track_id):
+        """DELETE /me/favorites/{id} — True on HTTP 2xx."""
+        return self._modify_favorite(track_id, method="DELETE")
+
+    def _modify_favorite(self, track_id, method):
+        """
+        PUT/DELETE a favorite. Direct requests call on purpose (not
+        _do_request): that helper is GET-oriented (client_id fallback,
+        anonymous retry after 401), none of which makes sense for a
+        user-scoped write. Success = any 2xx status.
+        """
+        current_token = self.settings.get_oauth_token()
+        if not current_token:
+            return False
+        url = self.api_host + "/me/favorites/%s" % urllib.parse.quote(
+            str(track_id)
+        )
+        headers = {
+            "Accept-Encoding": "gzip",
+            "User-Agent": self.api_user_agent,
+            "Authorization": "OAuth " + current_token,
+            "Origin": "https://soundcloud.com",
+            "Referer": "https://soundcloud.com/",
+        }
+        try:
+            r = requests.request(
+                method,
+                url,
+                headers=headers,
+                timeout=(5, getattr(self, "api_timeout", 15)),
+            )
+            ok = 200 <= r.status_code < 300
+            xbmc.log(
+                "plugin.audio.soundcloud::ApiV2() %s %s -> HTTP %d"
+                % (method, url, r.status_code),
+                xbmc.LOGDEBUG,
+            )
+            return ok
+        except requests.exceptions.RequestException as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::ApiV2() %s %s failed: %s"
+                % (method, url, str(e)),
+                xbmc.LOGWARNING,
+            )
+            return False
 
     def resolve_id(self, id):
         res = self._do_request("/tracks", {"ids": id})
@@ -248,7 +323,8 @@ class ApiV2(ApiInterface):
         # l'OS — potentiellement plusieurs minutes sans aucun retour.
         try:
             raw = requests.get(
-                path, headers=headers, params=payload, timeout=(5, 15)
+                path, headers=headers, params=payload,
+                timeout=(5, getattr(self, "api_timeout", 15))
             )
         except requests.exceptions.RequestException as e:
             xbmc.log(

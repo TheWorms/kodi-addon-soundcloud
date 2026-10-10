@@ -46,6 +46,7 @@ negligible (an idle ARM Cortex-A73 spends <0.1% on this loop).
 """
 import os
 import sys
+import threading
 
 import xbmc
 import xbmcaddon
@@ -118,6 +119,52 @@ def _warm_module_files(addon_path):
     )
 
 
+def _sleep_timer_loop():
+    """
+    Sleep timer that also works with the SoundCloud UI closed (this
+    service runs from Kodi login to shutdown). Counts EFFECTIVE
+    listening time: the countdown only advances while audio is
+    actually playing (pause suspends it). Re-reads the setting every
+    second so mid-playback changes are honoured. 0 = disabled.
+    """
+    addon = xbmcaddon.Addon()
+    monitor = xbmc.Monitor()
+    elapsed = 0
+    target_minutes = 0
+    while not monitor.waitForAbort(1.0):
+        try:
+            try:
+                minutes = int(addon.getSetting("playback.sleep_timer") or 0)
+            except (TypeError, ValueError):
+                minutes = 0
+            if minutes != target_minutes:
+                # Setting changed (or first read) — restart the countdown.
+                target_minutes = minutes
+                elapsed = 0
+            if target_minutes <= 0:
+                continue
+            if xbmc.Player().isPlayingAudio():
+                elapsed += 1
+                if elapsed >= target_minutes * 60:
+                    elapsed = 0
+                    try:
+                        xbmc.Player().stop()
+                    except Exception:
+                        pass
+                    xbmcgui.Dialog().notification(
+                        addon.getAddonInfo("name"),
+                        addon.getLocalizedString(30358),
+                        xbmcgui.NOTIFICATION_INFO,
+                        4000,
+                    )
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::service.py sleep timer error: %s"
+                % str(e),
+                xbmc.LOGWARNING,
+            )
+
+
 def _run_service():
     addon = xbmcaddon.Addon()
     addon_path = addon.getAddonInfo("path")
@@ -139,6 +186,22 @@ def _run_service():
     # Announce that we're alive — plugin.py reads this to detect when
     # the user enabled the service but hasn't restarted Kodi yet.
     home.setProperty("soundcloud.service.alive", "1")
+
+    # Sleep-timer thread (works with the UI closed). Harmlessly
+    # coexists with the UI's own timer when both run — the first one
+    # to reach its countdown stops playback.
+    try:
+        threading.Thread(
+            target=_sleep_timer_loop,
+            daemon=True,
+            name="soundcloud-sleep-timer",
+        ).start()
+    except Exception as e:
+        xbmc.log(
+            "plugin.audio.soundcloud::service.py sleep timer start "
+            "failed: %s" % str(e),
+            xbmc.LOGWARNING,
+        )
 
     splash = None
     xbmc.log(

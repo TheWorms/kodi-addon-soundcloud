@@ -22,8 +22,8 @@
                     <default>1</default>
                     <constraints>
                         <options>
-                            <option label="30135">0</option>
                             <option label="30136">1</option>
+                            <option label="30379">2</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -121,6 +121,28 @@
                     <control type="spinner" format="string"/>
                 </setting>
             </group>
+
+            <!-- Trending genre: applied to the home Trending row and the
+                 trending skin widget (parameter of the /charts endpoint). -->
+            <group id="4" label="30155">
+                <setting id="trending.genre" type="string" label="30366" help="30367">
+                    <level>0</level>
+                    <default>soundcloud:genres:all-music</default>
+                    <constraints>
+                        <options>
+                            <option label="30365">soundcloud:genres:all-music</option>
+                            <option label="30370">soundcloud:genres:techno</option>
+                            <option label="30371">soundcloud:genres:house</option>
+                            <option label="30372">soundcloud:genres:deephouse</option>
+                            <option label="30373">soundcloud:genres:electronic</option>
+                            <option label="30374">soundcloud:genres:hiphop</option>
+                            <option label="30375">soundcloud:genres:ambient</option>
+                            <option label="30376">soundcloud:genres:jazz</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                </setting>
+            </group>
         </category>
 
         <!-- ============================================================ -->
@@ -149,6 +171,30 @@
                     <level>0</level>
                     <default>false</default>
                     <control type="toggle"/>
+                </setting>
+                <setting id="playback.skip_excerpts" type="boolean" label="30350" help="30351">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="playback.endless" type="boolean" label="30352" help="30353">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="playback.sleep_timer" type="string" label="30356" help="30357">
+                    <level>0</level>
+                    <default>0</default>
+                    <constraints>
+                        <options>
+                            <option>0</option>
+                            <option>15</option>
+                            <option>30</option>
+                            <option>60</option>
+                            <option>120</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
                 </setting>
                 <setting id="widget.autoplay" type="boolean" label="30293" help="30294">
                     <level>0</level>
@@ -184,6 +230,19 @@
                             <option label="32111">waveform</option>
                             <option label="32113">editorial</option>
                             <option label="32110">vinyl</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                </setting>
+                <setting id="playback.seek_interval" type="string" label="30354" help="30355">
+                    <level>0</level>
+                    <default>10</default>
+                    <constraints>
+                        <options>
+                            <option>5</option>
+                            <option>10</option>
+                            <option>15</option>
+                            <option>30</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -246,6 +305,18 @@
                     <default>false</default>
                     <control type="toggle" format="boolean"/>
                 </setting>
+                <setting id="cache.ttl" type="string" label="30377" help="30378">
+                    <level>2</level>
+                    <default>30</default>
+                    <constraints>
+                        <options>
+                            <option>7</option>
+                            <option>30</option>
+                            <option>90</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                </setting>
             </group>
             <group id="3" label="30221">
                 <setting id="search.history.size" type="string" label="30013" help="">
@@ -280,6 +351,19 @@
                         <options>
                             <option label="30063">0</option>
                             <option label="30064">1</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                </setting>
+                <setting id="network.timeout" type="string" label="30368" help="30369">
+                    <level>2</level>
+                    <default>15</default>
+                    <constraints>
+                        <options>
+                            <option>5</option>
+                            <option>10</option>
+                            <option>15</option>
+                            <option>30</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>

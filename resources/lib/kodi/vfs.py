@@ -66,3 +66,14 @@ class VFS:
     def save_obj_to_json(self, filename, obj):
         string = json.dumps(obj)
         return self.write(filename, string)
+
+    def listdir(self, filename=None):
+        """
+        Return the file names contained in the VFS folder, optionally
+        restricted to those starting with the given prefix. Used by
+        the cache purge to enumerate old entries.
+        """
+        _, file_list = xbmcvfs.listdir(self.path)
+        if not filename:
+            return file_list or []
+        return [f for f in (file_list or []) if f.startswith(filename)]

@@ -3,8 +3,8 @@
     SoundCloud V2 home window — full-screen "app" interface.
 
     Modes (set via Window.Property before doModal):
-      - layout=rows     -> sidebar hidden, page takes full width
-      - layout=sidebar  -> 180px sidebar on the left
+      - layout=sidebar  -> side menu + horizontal rows (cards)
+      - layout=list     -> side menu + vertical trending list + genre chips
       - miniplayer=off / display / controls  (visibility of bottom bar)
 -->
 <window id="14000">
@@ -32,14 +32,14 @@
         </control>
 
         <!-- ============================================================ -->
-        <!-- SIDEBAR (visible only when layout=sidebar)                  -->
+        <!-- SIDEBAR (always visible — the old "rows" layout that hid
+             it was removed)                                            -->
         <!-- ============================================================ -->
         <control type="group" id="100">
             <left>0</left>
             <top>0</top>
             <width>240</width>
             <height>1080</height>
-            <visible>String.IsEqual(Window.Property(layout),sidebar)</visible>
 
             <control type="image" id="101">
                 <left>0</left>
@@ -82,7 +82,8 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>115</onup>
                 <ondown>111</ondown>
-                <onright>SetFocus(350)</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list)">360</onright>
+                <onright>350</onright>
             </control>
             <control type="button" id="111">
                 <left>10</left>
@@ -99,7 +100,8 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>110</onup>
                 <ondown>112</ondown>
-                <onright>SetFocus(350)</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list)">360</onright>
+                <onright>350</onright>
             </control>
             <control type="button" id="112">
                 <left>10</left>
@@ -116,7 +118,8 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>111</onup>
                 <ondown>113</ondown>
-                <onright>SetFocus(350)</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list)">360</onright>
+                <onright>350</onright>
             </control>
             <control type="button" id="113">
                 <left>10</left>
@@ -133,7 +136,8 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>112</onup>
                 <ondown>114</ondown>
-                <onright>SetFocus(350)</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list)">360</onright>
+                <onright>350</onright>
             </control>
             <control type="button" id="114">
                 <left>10</left>
@@ -150,7 +154,8 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>113</onup>
                 <ondown>115</ondown>
-                <onright>SetFocus(350)</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list)">360</onright>
+                <onright>350</onright>
             </control>
 
             <!-- Bottom buttons -->
@@ -169,22 +174,19 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>114</onup>
                 <ondown>110</ondown>
-                <onright>SetFocus(350)</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list)">360</onright>
+                <onright>350</onright>
             </control>
         </control>
 
         <!-- ============================================================ -->
         <!-- PAGE HEADER                                                  -->
         <!-- ============================================================ -->
-        <control type="group">
+        <control type="group" id="205">
             <left>260</left>
             <top>40</top>
             <width>1660</width>
             <height>120</height>
-            <include condition="String.IsEqual(Window.Property(layout),rows)">
-                <left>40</left>
-                <width>1840</width>
-            </include>
 
             <!-- Orange accent line -->
             <control type="image">
@@ -219,10 +221,20 @@
 
         <!-- ============================================================ -->
         <!-- HOME ROWS (only visible when page=home)                     -->
+        <!-- The rows grouplist (290) sits inside a plain group (291).   -->
+        <!-- The side menu is always visible now, so nothing gets        -->
+        <!-- repositioned from Python anymore — the group is purely      -->
+        <!-- structural.                                                 -->
         <!-- ============================================================ -->
-        <control type="grouplist" id="290">
+        <control type="group" id="291">
             <left>260</left>
             <top>180</top>
+            <width>1660</width>
+            <height>780</height>
+
+            <control type="grouplist" id="290">
+            <left>0</left>
+            <top>0</top>
             <width>1660</width>
             <height>780</height>
             <itemgap>16</itemgap>
@@ -710,12 +722,357 @@
                     <content/>
                 </control>
             </control>
+            </control>
+        </control>
+
+        <!-- ============================================================ -->
+        <!-- HOME LIST MODE (layout=list: vertical trending list)         -->
+        <!-- ============================================================ -->
+        <control type="group">
+            <left>260</left>
+            <top>180</top>
+            <width>1660</width>
+            <height>780</height>
+            <visible>String.IsEqual(Window.Property(layout),list) + String.IsEmpty(Window.Property(page)) | String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)</visible>
+
+            <!-- Genre chips (ids 360-367, one per trending genre, same
+                 order as GENRE_URNS in window.py). The chip matching the
+                 current genre (Window.Property(trending_genre)) carries
+                 an orange underline; clicks are handled by window.py. -->
+            <control type="button" id="360">
+                <left>0</left>
+                <top>0</top>
+                <width>190</width>
+                <height>44</height>
+                <label>$ADDON[plugin.audio.soundcloud 30365]</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <textcolor>FFA8A8A8</textcolor>
+                <focusedcolor>FFFF5500</focusedcolor>
+                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
+                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
+                <onleft>110</onleft>
+                <onright>361</onright>
+                <onup>354</onup>
+                <ondown>354</ondown>
+            </control>
+            <control type="button" id="361">
+                <left>210</left>
+                <top>0</top>
+                <width>190</width>
+                <height>44</height>
+                <label>$ADDON[plugin.audio.soundcloud 30370]</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <textcolor>FFA8A8A8</textcolor>
+                <focusedcolor>FFFF5500</focusedcolor>
+                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
+                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
+                <onleft>360</onleft>
+                <onright>362</onright>
+                <onup>354</onup>
+                <ondown>354</ondown>
+            </control>
+            <control type="button" id="362">
+                <left>420</left>
+                <top>0</top>
+                <width>190</width>
+                <height>44</height>
+                <label>$ADDON[plugin.audio.soundcloud 30371]</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <textcolor>FFA8A8A8</textcolor>
+                <focusedcolor>FFFF5500</focusedcolor>
+                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
+                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
+                <onleft>361</onleft>
+                <onright>363</onright>
+                <onup>354</onup>
+                <ondown>354</ondown>
+            </control>
+            <control type="button" id="363">
+                <left>630</left>
+                <top>0</top>
+                <width>190</width>
+                <height>44</height>
+                <label>$ADDON[plugin.audio.soundcloud 30372]</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <textcolor>FFA8A8A8</textcolor>
+                <focusedcolor>FFFF5500</focusedcolor>
+                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
+                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
+                <onleft>362</onleft>
+                <onright>364</onright>
+                <onup>354</onup>
+                <ondown>354</ondown>
+            </control>
+            <control type="button" id="364">
+                <left>840</left>
+                <top>0</top>
+                <width>190</width>
+                <height>44</height>
+                <label>$ADDON[plugin.audio.soundcloud 30373]</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <textcolor>FFA8A8A8</textcolor>
+                <focusedcolor>FFFF5500</focusedcolor>
+                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
+                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
+                <onleft>363</onleft>
+                <onright>365</onright>
+                <onup>354</onup>
+                <ondown>354</ondown>
+            </control>
+            <control type="button" id="365">
+                <left>1050</left>
+                <top>0</top>
+                <width>190</width>
+                <height>44</height>
+                <label>$ADDON[plugin.audio.soundcloud 30374]</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <textcolor>FFA8A8A8</textcolor>
+                <focusedcolor>FFFF5500</focusedcolor>
+                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
+                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
+                <onleft>364</onleft>
+                <onright>366</onright>
+                <onup>354</onup>
+                <ondown>354</ondown>
+            </control>
+            <control type="button" id="366">
+                <left>1260</left>
+                <top>0</top>
+                <width>190</width>
+                <height>44</height>
+                <label>$ADDON[plugin.audio.soundcloud 30375]</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <textcolor>FFA8A8A8</textcolor>
+                <focusedcolor>FFFF5500</focusedcolor>
+                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
+                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
+                <onleft>365</onleft>
+                <onright>367</onright>
+                <onup>354</onup>
+                <ondown>354</ondown>
+            </control>
+            <control type="button" id="367">
+                <left>1470</left>
+                <top>0</top>
+                <width>190</width>
+                <height>44</height>
+                <label>$ADDON[plugin.audio.soundcloud 30376]</label>
+                <font>font12</font>
+                <align>center</align>
+                <aligny>center</aligny>
+                <textcolor>FFA8A8A8</textcolor>
+                <focusedcolor>FFFF5500</focusedcolor>
+                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
+                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
+                <onleft>366</onleft>
+                <onright>367</onright>
+                <onup>354</onup>
+                <ondown>354</ondown>
+            </control>
+
+            <!-- Orange underline marking the selected genre chip. -->
+            <control type="image">
+                <left>0</left>
+                <top>44</top>
+                <width>190</width>
+                <height>3</height>
+                <texture colordiffuse="FFFF5500">white.png</texture>
+                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:all-music)</visible>
+            </control>
+            <control type="image">
+                <left>210</left>
+                <top>44</top>
+                <width>190</width>
+                <height>3</height>
+                <texture colordiffuse="FFFF5500">white.png</texture>
+                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:techno)</visible>
+            </control>
+            <control type="image">
+                <left>420</left>
+                <top>44</top>
+                <width>190</width>
+                <height>3</height>
+                <texture colordiffuse="FFFF5500">white.png</texture>
+                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:house)</visible>
+            </control>
+            <control type="image">
+                <left>630</left>
+                <top>44</top>
+                <width>190</width>
+                <height>3</height>
+                <texture colordiffuse="FFFF5500">white.png</texture>
+                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:deephouse)</visible>
+            </control>
+            <control type="image">
+                <left>840</left>
+                <top>44</top>
+                <width>190</width>
+                <height>3</height>
+                <texture colordiffuse="FFFF5500">white.png</texture>
+                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:electronic)</visible>
+            </control>
+            <control type="image">
+                <left>1050</left>
+                <top>44</top>
+                <width>190</width>
+                <height>3</height>
+                <texture colordiffuse="FFFF5500">white.png</texture>
+                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:hiphop)</visible>
+            </control>
+            <control type="image">
+                <left>1260</left>
+                <top>44</top>
+                <width>190</width>
+                <height>3</height>
+                <texture colordiffuse="FFFF5500">white.png</texture>
+                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:ambient)</visible>
+            </control>
+            <control type="image">
+                <left>1470</left>
+                <top>44</top>
+                <width>190</width>
+                <height>3</height>
+                <texture colordiffuse="FFFF5500">white.png</texture>
+                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:jazz)</visible>
+            </control>
+
+            <control type="list" id="354">
+                <left>0</left>
+                <top>70</top>
+                <width>1660</width>
+                <height>710</height>
+                <onleft>110</onleft>
+                <onright>354</onright>
+                <onup>360</onup>
+                <ondown>354</ondown>
+                <scrolltime tween="sine" easing="out">300</scrolltime>
+                <itemlayout width="1660" height="70">
+                    <control type="group">
+                        <left>0</left>
+                        <top>0</top>
+                        <width>1660</width>
+                        <height>70</height>
+                        <control type="image">
+                            <left>0</left>
+                            <top>11</top>
+                            <width>48</width>
+                            <height>48</height>
+                            <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
+                            <aspectratio>scale</aspectratio>
+                        </control>
+                        <control type="label">
+                            <left>64</left>
+                            <top>0</top>
+                            <width>1000</width>
+                            <height>40</height>
+                            <label>$INFO[ListItem.Label]</label>
+                            <font>font13</font>
+                            <textcolor>FFFAFAFA</textcolor>
+                            <aligny>center</aligny>
+                        </control>
+                        <control type="label">
+                            <left>64</left>
+                            <top>38</top>
+                            <width>1000</width>
+                            <height>32</height>
+                            <label>$INFO[ListItem.Artist]</label>
+                            <font>font12</font>
+                            <textcolor>FFA8A8A8</textcolor>
+                        </control>
+                        <control type="label">
+                            <left>1300</left>
+                            <top>0</top>
+                            <width>360</width>
+                            <height>70</height>
+                            <label>$INFO[ListItem.Duration]</label>
+                            <font>font13</font>
+                            <textcolor>FFA8A8A8</textcolor>
+                            <align>right</align>
+                            <aligny>center</aligny>
+                        </control>
+                    </control>
+                </itemlayout>
+                <focusedlayout width="1660" height="70">
+                    <control type="group">
+                        <left>0</left>
+                        <top>0</top>
+                        <width>1660</width>
+                        <height>70</height>
+                        <control type="image">
+                            <left>0</left>
+                            <top>11</top>
+                            <width>48</width>
+                            <height>48</height>
+                            <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
+                            <aspectratio>scale</aspectratio>
+                        </control>
+                        <control type="label">
+                            <left>64</left>
+                            <top>0</top>
+                            <width>1000</width>
+                            <height>40</height>
+                            <label>$INFO[ListItem.Label]</label>
+                            <font>font13</font>
+                            <textcolor>FFFF5500</textcolor>
+                            <aligny>center</aligny>
+                        </control>
+                        <control type="label">
+                            <left>64</left>
+                            <top>38</top>
+                            <width>1000</width>
+                            <height>32</height>
+                            <label>$INFO[ListItem.Artist]</label>
+                            <font>font12</font>
+                            <textcolor>FFFAFAFA</textcolor>
+                        </control>
+                        <control type="label">
+                            <left>1300</left>
+                            <top>0</top>
+                            <width>360</width>
+                            <height>70</height>
+                            <label>$INFO[ListItem.Duration]</label>
+                            <font>font13</font>
+                            <textcolor>FFFF5500</textcolor>
+                            <align>right</align>
+                            <aligny>center</aligny>
+                        </control>
+                    </control>
+                </focusedlayout>
+                <content/>
+            </control>
+
+            <!-- Empty state -->
+            <control type="label">
+                <left>0</left>
+                <top>200</top>
+                <width>1660</width>
+                <height>60</height>
+                <align>center</align>
+                <label>$ADDON[plugin.audio.soundcloud 30157]</label>
+                <font>font14</font>
+                <textcolor>FF6A6A6A</textcolor>
+                <visible>String.IsEqual(Window.Property(page_empty),true)</visible>
+            </control>
         </control>
 
         <!-- ============================================================ -->
         <!-- GENERIC PAGE LIST (visible on non-home pages)                -->
         <!-- ============================================================ -->
-        <control type="group">
+        <control type="group" id="295">
             <left>260</left>
             <top>180</top>
             <width>1660</width>
