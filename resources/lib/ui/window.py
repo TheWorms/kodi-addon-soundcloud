@@ -1336,6 +1336,11 @@ ID_ROW3_LIST = 352
 ID_ROW4_LIST = 353
 ID_ROW_LISTS = (ID_ROW1_LIST, ID_ROW2_LIST, ID_ROW3_LIST, ID_ROW4_LIST)
 ID_PAGE_LIST = 400
+# Vertical mirror of the page list shown in the "list" layout on
+# non-home pages (the card panel 400 covers the "sidebar" layout).
+# Both containers are always filled with the same content, so
+# switching layouts live never needs a re-fetch.
+ID_PAGE_LIST_L = 401
 # Vertical list shown on the home page in the "list" layout.
 ID_HOME_LIST = 354
 # Genre chips shown on the home page above the list in the "list"
@@ -1548,13 +1553,20 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 xbmc.LOGINFO,
             )
             self.setProperty("layout", layout)
-            if (self.getProperty("page") or "home") == "home":
+            page = (self.getProperty("page") or "home")
+            if page == "home":
                 self._show_home()
             try:
+                # On the home page the focus follows the layout's own
+                # controls (chips list / side menu); on any other page
+                # both page-list containers already hold the same
+                # content, so we just re-focus the visible one.
                 if layout == "list":
-                    self.setFocusId(ID_HOME_LIST)
+                    self.setFocusId(
+                        ID_HOME_LIST if page == "home" else ID_PAGE_LIST_L)
                 else:
-                    self.setFocusId(ID_NAV_HOME)
+                    self.setFocusId(
+                        ID_NAV_HOME if page == "home" else ID_PAGE_LIST)
             except Exception:
                 pass
 
@@ -1881,6 +1893,7 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         # or the page list -----
         if (control_id in ID_ROW_LISTS
                 or control_id == ID_PAGE_LIST
+                or control_id == ID_PAGE_LIST_L
                 or control_id == ID_HOME_LIST):
             self._play_from_list(control_id)
             return
@@ -2229,37 +2242,50 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         Fills the generic page list with collection items, plus a
         synthetic "Next page" item at the end if the collection has
         more results (next_href).
+
+        Both containers are filled with the same content: the card
+        panel (400, "sidebar" layout) and the vertical list (401,
+        "list" layout), so switching layouts live from the settings
+        just moves the focus, without re-fetching anything.
         """
         # Remember the next-page link so we can load it when the user
         # selects the "Next page" item.
         self._next_href = (collection.next_href if collection else None)
 
         self._fill_list(ID_PAGE_LIST, collection)
+        self._fill_list(ID_PAGE_LIST_L, collection)
 
         # Append "Next page" pseudo-item if there's more.
         if self._next_href:
-            try:
-                control = self.getControl(ID_PAGE_LIST)
-                next_item = xbmcgui.ListItem(
-                    label=self.addon.getLocalizedString(30901)  # "Next page"
-                )
-                next_item.setArt({
-                    "thumb": "DefaultFolderForward.png",
-                    "icon": "DefaultFolderForward.png",
-                })
-                next_item.setProperty("isNextPage", "true")
-                control.addItem(next_item)
-                self._lists[ID_PAGE_LIST].append((None, next_item))
-            except Exception as e:
-                xbmc.log(
-                    "plugin.audio.soundcloud::HomeWindow add_next_page failed: %s" % str(e),
-                    xbmc.LOGWARNING,
-                )
+            for list_id in (ID_PAGE_LIST, ID_PAGE_LIST_L):
+                try:
+                    control = self.getControl(list_id)
+                    next_item = xbmcgui.ListItem(
+                        label=self.addon.getLocalizedString(30901)  # "Next page"
+                    )
+                    next_item.setArt({
+                        "thumb": "DefaultFolderForward.png",
+                        "icon": "DefaultFolderForward.png",
+                    })
+                    next_item.setProperty("isNextPage", "true")
+                    control.addItem(next_item)
+                    self._lists[list_id].append((None, next_item))
+                except Exception as e:
+                    xbmc.log(
+                        "plugin.audio.soundcloud::HomeWindow add_next_page "
+                        "failed: %s" % str(e),
+                        xbmc.LOGWARNING,
+                    )
 
         is_empty = collection is None or not collection.items
         self.setProperty("page_empty", "true" if is_empty else "false")
+        # Focus the container that is visible in the current layout:
+        # the vertical list in "list", the card panel otherwise.
+        focus_id = (ID_PAGE_LIST_L
+                    if (self.getProperty("layout") or "sidebar") == "list"
+                    else ID_PAGE_LIST)
         try:
-            self.setFocusId(ID_PAGE_LIST)
+            self.setFocusId(focus_id)
         except Exception:
             pass
 

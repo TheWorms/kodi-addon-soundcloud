@@ -249,8 +249,8 @@ msgid "Layout"
 msgstr "Mise en page"
 
 msgctxt "#30134"
-msgid "Choose the home screen layout: cards with the side menu, or a vertical list of trending tracks."
-msgstr "Choisissez la mise en page de l’accueil : cartes avec le menu latéral, ou liste verticale des tendances."
+msgid "Choose the interface layout: tiles with the side menu, or vertical lists on every page including the home screen."
+msgstr "Choisissez la mise en page de l’interface : vignettes avec le menu latéral, ou listes verticales sur toutes les pages, y compris l’accueil."
 
 msgctxt "#30135"
 msgid "Rows only"
@@ -725,4 +725,8 @@ msgstr "Supprime les réponses d’API en cache plus anciennes que ce délai. Pl
 msgctxt "#30379"
 msgid "List"
 msgstr "Liste"
+
+msgctxt "#30380"
+msgid "Tiles"
+msgstr "Vignettes"
 

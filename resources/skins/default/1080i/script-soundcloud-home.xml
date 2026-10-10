@@ -82,7 +82,8 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>115</onup>
                 <ondown>111</ondown>
-                <onright condition="String.IsEqual(Window.Property(layout),list)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list)">401</onright>
                 <onright>350</onright>
             </control>
             <control type="button" id="111">
@@ -100,7 +101,8 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>110</onup>
                 <ondown>112</ondown>
-                <onright condition="String.IsEqual(Window.Property(layout),list)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list)">401</onright>
                 <onright>350</onright>
             </control>
             <control type="button" id="112">
@@ -118,7 +120,8 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>111</onup>
                 <ondown>113</ondown>
-                <onright condition="String.IsEqual(Window.Property(layout),list)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list)">401</onright>
                 <onright>350</onright>
             </control>
             <control type="button" id="113">
@@ -136,7 +139,8 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>112</onup>
                 <ondown>114</ondown>
-                <onright condition="String.IsEqual(Window.Property(layout),list)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list)">401</onright>
                 <onright>350</onright>
             </control>
             <control type="button" id="114">
@@ -154,7 +158,8 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>113</onup>
                 <ondown>115</ondown>
-                <onright condition="String.IsEqual(Window.Property(layout),list)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list)">401</onright>
                 <onright>350</onright>
             </control>
 
@@ -174,7 +179,8 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>114</onup>
                 <ondown>110</ondown>
-                <onright condition="String.IsEqual(Window.Property(layout),list)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">360</onright>
+                <onright condition="String.IsEqual(Window.Property(layout),list)">401</onright>
                 <onright>350</onright>
             </control>
         </control>
@@ -960,93 +966,112 @@
                 <onup>360</onup>
                 <ondown>354</ondown>
                 <scrolltime tween="sine" easing="out">300</scrolltime>
-                <itemlayout width="1660" height="70">
+                <!-- Row style follows the design demo: a dark card per
+                     track (#252525), cover 56x56, white title, grey
+                     artist, grey duration right-aligned; the focused
+                     row switches the card to #2E2E2E and the title to
+                     the accent orange. -->
+                <itemlayout width="1660" height="80">
                     <control type="group">
                         <left>0</left>
                         <top>0</top>
                         <width>1660</width>
-                        <height>70</height>
+                        <height>80</height>
                         <control type="image">
                             <left>0</left>
-                            <top>11</top>
-                            <width>48</width>
-                            <height>48</height>
+                            <top>4</top>
+                            <width>1660</width>
+                            <height>72</height>
+                            <texture colordiffuse="FF252525">white.png</texture>
+                        </control>
+                        <control type="image">
+                            <left>16</left>
+                            <top>12</top>
+                            <width>56</width>
+                            <height>56</height>
                             <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                             <aspectratio>scale</aspectratio>
                         </control>
                         <control type="label">
-                            <left>64</left>
-                            <top>0</top>
-                            <width>1000</width>
-                            <height>40</height>
+                            <left>88</left>
+                            <top>10</top>
+                            <width>1190</width>
+                            <height>36</height>
                             <label>$INFO[ListItem.Label]</label>
                             <font>font13</font>
                             <textcolor>FFFAFAFA</textcolor>
                             <aligny>center</aligny>
                         </control>
                         <control type="label">
-                            <left>64</left>
-                            <top>38</top>
-                            <width>1000</width>
-                            <height>32</height>
+                            <left>88</left>
+                            <top>44</top>
+                            <width>1190</width>
+                            <height>30</height>
                             <label>$INFO[ListItem.Artist]</label>
                             <font>font12</font>
                             <textcolor>FFA8A8A8</textcolor>
                         </control>
                         <control type="label">
-                            <left>1300</left>
+                            <left>1296</left>
                             <top>0</top>
-                            <width>360</width>
-                            <height>70</height>
+                            <width>344</width>
+                            <height>80</height>
                             <label>$INFO[ListItem.Duration]</label>
-                            <font>font13</font>
+                            <font>font12</font>
                             <textcolor>FFA8A8A8</textcolor>
                             <align>right</align>
                             <aligny>center</aligny>
                         </control>
                     </control>
                 </itemlayout>
-                <focusedlayout width="1660" height="70">
+                <focusedlayout width="1660" height="80">
                     <control type="group">
                         <left>0</left>
                         <top>0</top>
                         <width>1660</width>
-                        <height>70</height>
+                        <height>80</height>
                         <control type="image">
                             <left>0</left>
-                            <top>11</top>
-                            <width>48</width>
-                            <height>48</height>
+                            <top>4</top>
+                            <width>1660</width>
+                            <height>72</height>
+                            <texture colordiffuse="FF2E2E2E">white.png</texture>
+                        </control>
+                        <control type="image">
+                            <left>16</left>
+                            <top>12</top>
+                            <width>56</width>
+                            <height>56</height>
                             <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                             <aspectratio>scale</aspectratio>
                         </control>
                         <control type="label">
-                            <left>64</left>
-                            <top>0</top>
-                            <width>1000</width>
-                            <height>40</height>
+                            <left>88</left>
+                            <top>10</top>
+                            <width>1190</width>
+                            <height>36</height>
                             <label>$INFO[ListItem.Label]</label>
                             <font>font13</font>
                             <textcolor>FFFF5500</textcolor>
                             <aligny>center</aligny>
                         </control>
                         <control type="label">
-                            <left>64</left>
-                            <top>38</top>
-                            <width>1000</width>
-                            <height>32</height>
+                            <left>88</left>
+                            <top>44</top>
+                            <width>1190</width>
+                            <height>30</height>
                             <label>$INFO[ListItem.Artist]</label>
                             <font>font12</font>
                             <textcolor>FFFAFAFA</textcolor>
                         </control>
                         <control type="label">
-                            <left>1300</left>
+                            <left>1296</left>
                             <top>0</top>
-                            <width>360</width>
-                            <height>70</height>
+                            <width>344</width>
+                            <height>80</height>
                             <label>$INFO[ListItem.Duration]</label>
-                            <font>font13</font>
-                            <textcolor>FFFF5500</textcolor>
+                            <font>font12</font>
+                            <textcolor>FFA8A8A8</textcolor>
                             <align>right</align>
                             <aligny>center</aligny>
                         </control>
@@ -1079,11 +1104,137 @@
             <height>720</height>
             <visible>!String.IsEmpty(Window.Property(page)) + !String.IsEqual(Window.Property(page),home)</visible>
 
+            <!-- Vertical page list shown in the "list" layout. It is
+                 filled with the exact same content as the card panel
+                 (400) by _fill_page_list, so switching layouts live
+                 only moves the focus. Row style mirrors the home
+                 list: dark card, cover, title, artist, duration. -->
+            <control type="list" id="401">
+                <left>0</left>
+                <top>0</top>
+                <width>1660</width>
+                <height>720</height>
+                <visible>String.IsEqual(Window.Property(layout),list)</visible>
+                <onleft>110</onleft>
+                <onright>401</onright>
+                <onup>401</onup>
+                <ondown>401</ondown>
+                <scrolltime tween="sine" easing="out">300</scrolltime>
+                <itemlayout width="1660" height="80">
+                    <control type="group">
+                        <left>0</left>
+                        <top>0</top>
+                        <width>1660</width>
+                        <height>80</height>
+                        <control type="image">
+                            <left>0</left>
+                            <top>4</top>
+                            <width>1660</width>
+                            <height>72</height>
+                            <texture colordiffuse="FF252525">white.png</texture>
+                        </control>
+                        <control type="image">
+                            <left>16</left>
+                            <top>12</top>
+                            <width>56</width>
+                            <height>56</height>
+                            <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
+                            <aspectratio>scale</aspectratio>
+                        </control>
+                        <control type="label">
+                            <left>88</left>
+                            <top>10</top>
+                            <width>1190</width>
+                            <height>36</height>
+                            <label>$INFO[ListItem.Label]</label>
+                            <font>font13</font>
+                            <textcolor>FFFAFAFA</textcolor>
+                            <aligny>center</aligny>
+                        </control>
+                        <control type="label">
+                            <left>88</left>
+                            <top>44</top>
+                            <width>1190</width>
+                            <height>30</height>
+                            <label>$INFO[ListItem.Artist]</label>
+                            <font>font12</font>
+                            <textcolor>FFA8A8A8</textcolor>
+                        </control>
+                        <control type="label">
+                            <left>1296</left>
+                            <top>0</top>
+                            <width>344</width>
+                            <height>80</height>
+                            <label>$INFO[ListItem.Duration]</label>
+                            <font>font12</font>
+                            <textcolor>FFA8A8A8</textcolor>
+                            <align>right</align>
+                            <aligny>center</aligny>
+                        </control>
+                    </control>
+                </itemlayout>
+                <focusedlayout width="1660" height="80">
+                    <control type="group">
+                        <left>0</left>
+                        <top>0</top>
+                        <width>1660</width>
+                        <height>80</height>
+                        <control type="image">
+                            <left>0</left>
+                            <top>4</top>
+                            <width>1660</width>
+                            <height>72</height>
+                            <texture colordiffuse="FF2E2E2E">white.png</texture>
+                        </control>
+                        <control type="image">
+                            <left>16</left>
+                            <top>12</top>
+                            <width>56</width>
+                            <height>56</height>
+                            <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
+                            <aspectratio>scale</aspectratio>
+                        </control>
+                        <control type="label">
+                            <left>88</left>
+                            <top>10</top>
+                            <width>1190</width>
+                            <height>36</height>
+                            <label>$INFO[ListItem.Label]</label>
+                            <font>font13</font>
+                            <textcolor>FFFF5500</textcolor>
+                            <aligny>center</aligny>
+                        </control>
+                        <control type="label">
+                            <left>88</left>
+                            <top>44</top>
+                            <width>1190</width>
+                            <height>30</height>
+                            <label>$INFO[ListItem.Artist]</label>
+                            <font>font12</font>
+                            <textcolor>FFFAFAFA</textcolor>
+                        </control>
+                        <control type="label">
+                            <left>1296</left>
+                            <top>0</top>
+                            <width>344</width>
+                            <height>80</height>
+                            <label>$INFO[ListItem.Duration]</label>
+                            <font>font12</font>
+                            <textcolor>FFA8A8A8</textcolor>
+                            <align>right</align>
+                            <aligny>center</aligny>
+                        </control>
+                    </control>
+                </focusedlayout>
+                <content/>
+            </control>
+
             <control type="panel" id="400">
                 <left>0</left>
                 <top>0</top>
                 <width>1660</width>
                 <height>720</height>
+                <visible>!String.IsEqual(Window.Property(layout),list)</visible>
                 <onleft>110</onleft>
                 <onright>400</onright>
                 <onup>400</onup>

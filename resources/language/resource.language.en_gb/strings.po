@@ -249,8 +249,8 @@ msgid "Layout"
 msgstr "Layout"
 
 msgctxt "#30134"
-msgid "Choose the home screen layout: cards with the side menu, or a vertical list of trending tracks."
-msgstr "Choose the home screen layout: cards with the side menu, or a vertical list of trending tracks."
+msgid "Choose the interface layout: tiles with the side menu, or vertical lists on every page including the home screen."
+msgstr "Choose the interface layout: tiles with the side menu, or vertical lists on every page including the home screen."
 
 msgctxt "#30135"
 msgid "Rows only"
@@ -725,4 +725,8 @@ msgstr "Delete cached API responses older than this. Shorter means fresher conte
 msgctxt "#30379"
 msgid "List"
 msgstr "List"
+
+msgctxt "#30380"
+msgid "Tiles"
+msgstr "Tiles"
 
