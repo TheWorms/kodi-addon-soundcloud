@@ -84,8 +84,9 @@ class _ProgressUpdater(threading.Thread):
     500ms with a freshly-computed pixel value.
     """
     # Bar widths in pixels — must match the XML <width> for the bg track.
+    # (The compact track starts right of the side menu, so it is narrower.)
     CONTROLS_BAR_WIDTH = 700
-    COMPACT_BAR_WIDTH = 1000
+    COMPACT_BAR_WIDTH = 750
 
     # Control IDs of the orange fill images (set in the XML).
     ID_FILL_CONTROLS = 530

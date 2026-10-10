@@ -48,7 +48,7 @@
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
         <credits>jaylinski (original add-on), bromix, SLiX</credits>
-        <news>6.0.0 (2026-10-10) - quick settings, endless playback, sleep timer, likes from the addon, list layout, stations and personalized home rows, simplified mini-player and configurable screensaver, read-only client ID display, playback freeze fix, see more per home row, header band removed, one-press menu-to-content focus, orange playing duration and category titles, playing-cover wave
+        <news>6.0.0 (2026-10-10) - quick settings, endless playback, sleep timer, likes from the addon, list layout, stations and personalized home rows, simplified mini-player and configurable screensaver, read-only client ID display, playback freeze fix, see more per home row, header band removed, one-press menu-to-content focus, orange playing duration and category titles, playing-cover wave, mini-player clear of the side menu
 
 STATIONS: new "Stations" entry in the side menu, under "Following" - lists the genre stations served by SoundCloud's discover feed (All genres, Techno, House, Hip-hop, Pop, Electronic, R&amp;B, Ambient, ...) and, with an OAuth token, the stations you liked. Selecting a station opens its track list.
 
@@ -83,6 +83,8 @@ API FIX: an OAuth token pasted by mistake into the expert "Client ID" override f
 INTERFACE FIX: entering the content from the side menu now takes a single Right press in every situation - the menu buttons now target the first visible home row (tiles layout) or the page content instead of a possibly hidden row, and in list layout the home list no longer lands the focus invisibly on a section header (it skips straight to the first playable row).
 
 INTERFACE: visual polish - the tiles home row titles are now orange like the other accents; in the list layouts the title and the duration of the track currently playing are now orange in every state (not only while its row is selected), and the cover of the playing track carries a small animated wave; the Settings entry sits at the very bottom of the side menu.
+
+INTERFACE FIX: the Settings entry at the very bottom of the side menu was covered by the mini-player bar, which spanned the whole width of the screen bottom - the bar (cover, title, progress) now starts right of the side menu, so the menu column and its Settings entry stay visible and usable whenever the bar is shown.
 
 SETTINGS: new Playback options - configurable seek interval (5/10/15/30 s) for the arrow keys in the fullscreen player, option to skip 30-second Go+ excerpts, endless playback, and a sleep timer (15/30/60/120 min) that counts EFFECTIVE listening time (pause suspends the countdown).
 

@@ -2458,18 +2458,18 @@
 
             <!-- Background -->
             <control type="image" id="501">
-                <left>0</left>
+                <left>260</left>
                 <top>0</top>
-                <width>1920</width>
+                <width>1660</width>
                 <height>100</height>
                 <texture colordiffuse="FF121212">white.png</texture>
             </control>
 
             <!-- Top divider -->
             <control type="image">
-                <left>0</left>
+                <left>260</left>
                 <top>0</top>
-                <width>1920</width>
+                <width>1660</width>
                 <height>1</height>
                 <texture colordiffuse="40FFFFFF">white.png</texture>
             </control>
@@ -2478,9 +2478,9 @@
             <control type="group">
                 <visible>!Player.HasAudio</visible>
                 <control type="label">
-                    <left>40</left>
+                    <left>300</left>
                     <top>30</top>
-                    <width>1840</width>
+                    <width>1580</width>
                     <height>40</height>
                     <label>$ADDON[plugin.audio.soundcloud 30121]</label>
                     <font>font13</font>
@@ -2493,7 +2493,7 @@
                 <visible>Player.HasAudio</visible>
 
                 <control type="image" id="510">
-                    <left>20</left>
+                    <left>280</left>
                     <top>18</top>
                     <width>64</width>
                     <height>64</height>
@@ -2502,7 +2502,7 @@
                 </control>
 
                 <control type="label" id="511">
-                    <left>100</left>
+                    <left>360</left>
                     <top>22</top>
                     <width>520</width>
                     <height>28</height>
@@ -2512,7 +2512,7 @@
                 </control>
 
                 <control type="label" id="512">
-                    <left>100</left>
+                    <left>360</left>
                     <top>52</top>
                     <width>520</width>
                     <height>26</height>
@@ -2649,7 +2649,7 @@
 
                     <!-- Time on left -->
                     <control type="label">
-                        <left>670</left>
+                        <left>930</left>
                         <top>40</top>
                         <width>120</width>
                         <height>24</height>
@@ -2662,15 +2662,15 @@
                     <!-- Wide progress bar (custom, see notes above) -->
                     <control type="image">
                         <visible>Player.HasAudio</visible>
-                        <left>800</left>
+                        <left>1060</left>
                         <top>44</top>
-                        <width>1000</width>
+                        <width>750</width>
                         <height>6</height>
                         <texture colordiffuse="33FFFFFF">white.png</texture>
                     </control>
                     <control type="image" id="531">
                         <visible>Player.HasAudio</visible>
-                        <left>800</left>
+                        <left>1060</left>
                         <top>44</top>
                         <width>1</width>
                         <height>6</height>
