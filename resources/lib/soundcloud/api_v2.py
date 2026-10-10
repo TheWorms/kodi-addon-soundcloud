@@ -46,11 +46,22 @@ class ApiV2(ApiInterface):
 
     @property
     def api_client_id(self):
-        # It is possible to set a custom client ID in the settings
+        # It is possible to set a custom client ID in the settings.
+        # Client IDs are short alphanumeric keys; an OAuth token
+        # pasted here by mistake (tokens are much longer and contain
+        # dashes) would be sent as the client_id on every anonymous
+        # request and shown in the read-only client ID row - detect
+        # it and fall through to the cache/extraction instead.
         client_id_settings = self.settings.get("apiv2.client_id")
         if client_id_settings:
-            xbmc.log("plugin.audio.soundcloud::ApiV2() Using custom client ID", xbmc.LOGDEBUG)
-            return client_id_settings
+            if re.fullmatch(r"[0-9A-Za-z]{8,64}", client_id_settings):
+                xbmc.log("plugin.audio.soundcloud::ApiV2() Using custom client ID", xbmc.LOGDEBUG)
+                return client_id_settings
+            xbmc.log(
+                "plugin.audio.soundcloud::ApiV2() ignoring custom client ID "
+                "that looks like an OAuth token",
+                xbmc.LOGWARNING,
+            )
 
         # Check if there is a cached client ID
         client_id_cached = self.cache.get(

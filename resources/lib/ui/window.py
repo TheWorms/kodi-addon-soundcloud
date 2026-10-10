@@ -1636,10 +1636,10 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
     # the skin XML instead, and the bar simply covers the bottom of
     # the rows when it is shown.
     _CONTENT_GEOMETRY = (
-        (354, 770, 890),  # home list (list layout on home)
-        (295, 740, 900),  # generic page group (cards + list)
-        (401, 740, 900),  # page vertical list (list layout)
-        (400, 740, 900),  # page card panel (tiles layout)
+        (354, 910, 1030),  # home list (list layout on home)
+        (295, 880, 1040),  # generic page group (cards + list)
+        (401, 880, 1040),  # page vertical list (list layout)
+        (400, 880, 1040),  # page card panel (tiles layout)
     )
 
     def _apply_content_geometry(self, miniplayer_off):
@@ -2464,6 +2464,29 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                         "plugin.audio.soundcloud::HomeWindow skip item: %s" % str(e),
                         xbmc.LOGWARNING,
                     )
+            # When a section filled its whole limit, more content
+            # probably exists: end the section with a "See more"
+            # item that opens the row's dedicated page (see
+            # _show_row_page).
+            if len(collection.items) >= limit:
+                see_more = xbmcgui.ListItem(
+                    label=self.addon.getLocalizedString(30400)  # "See more"
+                )
+                see_more.setArt({
+                    "thumb": "DefaultFolderForward.png",
+                    "icon": "DefaultFolderForward.png",
+                })
+                see_more.setProperty("isSeeMore", "true")
+                see_more.setProperty("row_type", row_type)
+                try:
+                    control.addItem(see_more)
+                    self._lists[ID_HOME_LIST].append((None, see_more))
+                except Exception as e:
+                    xbmc.log(
+                        "plugin.audio.soundcloud::HomeWindow add_see_more "
+                        "failed: %s" % str(e),
+                        xbmc.LOGWARNING,
+                    )
         return added > 0
 
     def _show_search(self):
@@ -2587,6 +2610,32 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
 
         self._fill_page_list(merged)
 
+    def _show_row_page(self, row_type):
+        """
+        Dedicated page for one home row type, opened by the "See
+        more" item at the end of a home section (list layout).
+        Lists the row's content with the items-per-page limit and
+        the standard "Next page" pagination when the collection has
+        more results. The same fallbacks as the home sections apply
+        (e.g. trending when logged out).
+        """
+        self.setProperty("page", "browse")
+        self.setProperty(
+            "title",
+            self.addon.getLocalizedString(ROW_TYPES[row_type]["title_strid"]),
+        )
+        self.setProperty("subtitle", "")
+        try:
+            collection = self._fetch_home_section(row_type, self._page_size())
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow row page (%s) "
+                "failed: %s" % (row_type, str(e)),
+                xbmc.LOGERROR,
+            )
+            collection = None
+        self._fill_page_list(collection)
+
     # =====================================================================
     # Data loading helpers
     # =====================================================================
@@ -2698,6 +2747,17 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
 
         # Section headers in the home list are not clickable.
         if list_item.getProperty("isSectionHeader") == "true":
+            return
+
+        # "See more" at the end of a home section: open the row's
+        # dedicated page. The focus moves into the page list because
+        # the home list it came from is no longer visible.
+        if list_item.getProperty("isSeeMore") == "true":
+            row_type = list_item.getProperty("row_type") or ""
+            if row_type in ROW_TYPES:
+                self._push_nav_state()
+                self._show_row_page(row_type)
+                self.setFocusId(ID_PAGE_LIST_L)
             return
 
         # Handle the synthetic "Next page" item: load the next batch

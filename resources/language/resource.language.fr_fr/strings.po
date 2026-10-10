@@ -806,3 +806,7 @@ msgctxt "#30399"
 msgid "Show"
 msgstr "Afficher"
 
+msgctxt "#30400"
+msgid "See more"
+msgstr "En voir plus"
+

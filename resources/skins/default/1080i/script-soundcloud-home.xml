@@ -208,43 +208,6 @@
         <!-- ============================================================ -->
         <!-- PAGE HEADER                                                  -->
         <!-- ============================================================ -->
-        <control type="group" id="205">
-            <left>260</left>
-            <top>20</top>
-            <width>1660</width>
-            <height>120</height>
-
-            <!-- Orange accent line -->
-            <control type="image">
-                <left>0</left>
-                <top>0</top>
-                <width>60</width>
-                <height>3</height>
-                <texture colordiffuse="FFFF5500">white.png</texture>
-            </control>
-
-            <control type="label" id="200">
-                <left>0</left>
-                <top>20</top>
-                <width>1500</width>
-                <height>70</height>
-                <label>$INFO[Window.Property(title)]</label>
-                <font>font13_title</font>
-                <textcolor>FFFAFAFA</textcolor>
-            </control>
-
-            <control type="label" id="201">
-                <left>0</left>
-                <top>96</top>
-                <width>1500</width>
-                <height>30</height>
-                <label>$INFO[Window.Property(subtitle)]</label>
-                <font>font13</font>
-                <textcolor>FFA8A8A8</textcolor>
-            </control>
-
-        </control>
-
         <!-- ============================================================ -->
         <!-- HOME ROWS (only visible when page=home)                     -->
         <!-- The rows grouplist (290) sits inside a plain group (291).   -->
@@ -260,15 +223,15 @@
         <!-- ============================================================ -->
         <control type="group" id="291">
             <left>260</left>
-            <top>160</top>
+            <top>20</top>
             <width>1660</width>
-            <height>900</height>
+            <height>1040</height>
 
             <control type="grouplist" id="290">
             <left>0</left>
             <top>0</top>
             <width>1660</width>
-            <height>900</height>
+            <height>1040</height>
             <itemgap>24</itemgap>
             <orientation>vertical</orientation>
             <scrolltime tween="sine" easing="out">300</scrolltime>
@@ -782,16 +745,16 @@
         <!-- ============================================================ -->
         <control type="group">
             <left>260</left>
-            <top>160</top>
+            <top>20</top>
             <width>1660</width>
-            <height>800</height>
+            <height>940</height>
             <visible>String.IsEqual(Window.Property(layout),list) + String.IsEmpty(Window.Property(page)) | String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)</visible>
 
             <control type="list" id="354">
                 <left>0</left>
                 <top>10</top>
                 <width>1660</width>
-                <height>770</height>
+                <height>910</height>
                 <onleft>110</onleft>
                 <onright>354</onright>
                 <onup>110</onup>
@@ -1185,9 +1148,9 @@
         <!-- ============================================================ -->
         <control type="group" id="295">
             <left>260</left>
-            <top>160</top>
+            <top>20</top>
             <width>1660</width>
-            <height>740</height>
+            <height>880</height>
             <visible>!String.IsEmpty(Window.Property(page)) + !String.IsEqual(Window.Property(page),home)</visible>
 
             <!-- Vertical page list shown in the "list" layout. It is
@@ -1199,7 +1162,7 @@
                 <left>0</left>
                 <top>0</top>
                 <width>1660</width>
-                <height>740</height>
+                <height>880</height>
                 <visible>String.IsEqual(Window.Property(layout),list)</visible>
                 <onleft>110</onleft>
                 <onright>401</onright>
@@ -1537,7 +1500,7 @@
                 <left>0</left>
                 <top>0</top>
                 <width>1660</width>
-                <height>740</height>
+                <height>880</height>
                 <visible>!String.IsEqual(Window.Property(layout),list)</visible>
                 <onleft>110</onleft>
                 <onright>400</onright>
