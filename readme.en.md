@@ -19,6 +19,51 @@ Download the repository by clicking **[HERE](https://raw.githubusercontent.com/T
 
 **Manual install (alternative):** download the add-on zip from the [Releases](../../releases) page, then **Add-ons** → **Install from zip file**.
 
+## What's new in v6
+
+The v6 release consolidates the full-screen interface around
+**Stations, personalized home rows, endless playback and a full
+stability/security pass**:
+
+* **Quick settings** — the addon settings are reachable from the
+  sidebar, without leaving the interface
+* **Endless playback** — when the queue runs out, the addon fetches
+  related tracks and extends the playlist on its own
+* **Sleep timer** — stops playback after N minutes of *effective*
+  listening (pausing suspends the countdown)
+* **Likes from the addon** — long-press (context menu) a track to add
+  or remove it from your SoundCloud likes
+* **List layout** — third display mode: sidebar + a large vertical
+  trending list
+* **Stations** — dedicated sidebar entry: the genre stations from the
+  discover feed, plus your liked stations with an OAuth token
+* **5 new configurable home rows** — "Recently played", "Mixed for
+  you" (rebuilt locally from your play history), "Based on what you
+  like", "Created by SoundCloud" and "Buzzing artists"
+* **Simplified mini-player** — hidden, or a compact bar (cover + title
+  + progress); hidden = full-height content
+* **Configurable screensaver** — automatic fullscreen overlay after X
+  seconds of playback, with an on/off toggle
+* **Reliable playing markers** — the current track lights up in orange
+  (title/duration) with a cover wave in every list, including remote
+  Next/Previous
+* **OAuth token button** — guided token renewal without leaving the
+  interface, with an immediate check against SoundCloud
+* **Read-only client ID display** in Settings → Account
+* **Playback freeze fix** — signed CDN URLs that expire mid-track are
+  re-resolved and playback resumes where it stopped
+* **"See more" per row** — every home row opens its dedicated page
+* **One-press navigation** — a Right press from the side menu lands
+  directly in the content
+* **Stability and security (audit fixes)** — the fullscreen overlay is
+  built on the main thread (Back and arrows work, it closes at the
+  end of the queue and never opens on top of Settings), all
+  background threads stop when the interface closes (no more
+  "script didn't stop in 5 seconds" at Kodi shutdown), API paths are
+  validated before the OAuth token is attached (the token can no
+  longer be sent to a forged host), and API error responses no longer
+  crash the addon
+
 ## What's new in v5
 
 The v5 release introduced a **brand-new full-screen interface** that replaces

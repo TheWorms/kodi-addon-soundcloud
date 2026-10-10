@@ -33,6 +33,55 @@ automatique, un mini-lecteur intégré et quatre styles optionnels de
 superposition « en lecture » plein écran (Cinéma, Vagues, Éditorial,
 Vinyle).
 
+## Nouveautés en v6
+
+La v6 consolide l'interface plein écran autour des **Stations, des rangées
+d'accueil personnalisées, la lecture sans fin et un correctif complet de
+stabilité et sécurité** :
+
+* **Réglages rapides** — les paramètres de l'addon sont accessibles depuis
+  la barre latérale, sans quitter l'interface
+* **Lecture sans fin** — quand la file se termine, l'addon récupère des
+  morceaux liés et prolonge la playlist tout seul
+* **Minuterie de sommeil** — arrêt de la lecture après N minutes
+  d'écoute *effective* (la pause suspend le compte à rebours)
+* **J'aime depuis l'addon** — appui long (menu contextuel) sur un morceau
+  pour l'ajouter ou le retirer de vos likes SoundCloud
+* **Mode « Liste »** — troisième mise en page : barre latérale + grande
+  liste verticale des tendances
+* **Stations** — entrée dédiée dans la barre latérale : les stations de
+  genre du feed discover, plus vos stations likées avec un jeton OAuth
+* **5 nouvelles rangées d'accueil configurables** — « Récemment écouté »,
+  « Mixé pour vous » (reconstruit localement à partir de votre historique
+  d'écoute), « Basé sur ce que vous aimez », « Créé par SoundCloud » et
+  « Artistes en vogue »
+* **Mini-lecteur simplifié** — masqué, ou barre compacte (pochette +
+  titre + progression) ; masqué = contenu plein écran
+* **Écran de veille paramétrable** — superposition plein écran
+  automatique après X secondes de lecture, activable/désactivable
+* **Marqueurs « en lecture » fiables** — le morceau en cours s'affiche en
+  orange (titre/durée) avec une vague sur la pochette, dans toutes les
+  listes, y compris Next/Précédent à la télécommande
+* **Bouton « Jeton OAuth »** — renouvellement du jeton guidé, sans
+  quitter l'interface, avec vérification immédiate contre SoundCloud
+* **ID client affiché en lecture seule** dans Paramètres → Compte
+* **Correctif de gel de lecture** — les URL CDN signées qui expirent en
+  plein morceau sont re-résolues et la lecture reprend là où elle
+  s'était arrêtée
+* **« En voir plus » par rangée** — chaque rangée d'accueil ouvre sa
+  page dédiée
+* **Navigation à une pression** — un appui Droite depuis le menu
+  latéral entre directement dans le contenu
+* **Stabilité et sécurité (correctifs d'audit)** — la superposition
+  « en lecture » est construite sur le thread principal (Retour et
+  flèches fonctionnent, elle se ferme en fin de file et ne s'ouvre
+  jamais par-dessus les Réglages), tous les threads d'arrière-plan
+  s'arrêtent à la fermeture de l'interface (plus de « script didn't
+  stop in 5 seconds » à l'arrêt de Kodi), les chemins d'API sont
+  validés avant d'attacher le jeton OAuth (le jeton ne peut plus être
+  envoyé vers un hôte forgé), et les réponses d'erreur de l'API ne
+  font plus planter l'addon
+
 ## Nouveautés en v5
 
 La version v5 a introduit une **toute nouvelle interface plein écran**
