@@ -1434,10 +1434,6 @@ ID_PAGE_LIST_L = 401
 ID_HOME_LIST = 354
 # Max items per section of the sectioned home list ("list" layout).
 HOME_SECTION_LIMIT = 10
-# Genre chips shown on the home page above the list in the "list"
-# layout. Ids 360..367, one per GENRE_URNS entry, in the same order.
-ID_GENRE_CHIPS = (360, 361, 362, 363, 364, 365, 366, 367)
-
 # Available row types — used to map a setting value to a content loader.
 # Localized titles use the corresponding string ID.
 ROW_TYPES = {
@@ -1453,20 +1449,8 @@ ROW_TYPES = {
 }
 
 # Localized labels of the trending genres live in the .po files
-# (string ids 30365..30376) and are shown by the genre chips of the
-# home page in BOTH layouts.
-
-# Order of the genre chips shown on the home page. MUST match the
-GENRE_URNS = (
-    "soundcloud:genres:all-music",
-    "soundcloud:genres:techno",
-    "soundcloud:genres:house",
-    "soundcloud:genres:deephouse",
-    "soundcloud:genres:electronic",
-    "soundcloud:genres:hiphop",
-    "soundcloud:genres:ambient",
-    "soundcloud:genres:jazz",
-)
+# (string ids 30365..30376) and label the options of the
+# "trending.genre" addon setting.
 
 # Mini-player buttons
 ID_MP_PREV = 520
@@ -1554,7 +1538,9 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             layout_setting, "sidebar"
         )
         self.setProperty("layout", layout)
-        # Genre of the trending list (highlights the matching chip).
+        # Genre of the trending list - kept as an internal marker so
+        # _check_live_settings can detect a genre change made in the
+        # addon settings and refresh the trending content live.
         self.setProperty("trending_genre", self._trending_genre())
 
         # Apply miniplayer mode from settings.
@@ -1629,10 +1615,10 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
     # the skin XML instead, and the bar simply covers the bottom of
     # the rows when it is shown.
     _CONTENT_GEOMETRY = (
-        (354, 750, 870),  # home list (list layout on home)
-        (295, 720, 880),  # generic page group (cards + list)
-        (401, 720, 880),  # page vertical list (list layout)
-        (400, 720, 880),  # page card panel (tiles layout)
+        (354, 770, 890),  # home list (list layout on home)
+        (295, 740, 900),  # generic page group (cards + list)
+        (401, 740, 900),  # page vertical list (list layout)
+        (400, 740, 900),  # page card panel (tiles layout)
     )
 
     def _apply_content_geometry(self, miniplayer_off):
@@ -1698,24 +1684,21 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 except Exception:
                     pass
 
-        # Trending genre changed in the settings (the chips and the
-        # list subtitle follow it live, like the layout).
+        # Trending genre changed in the settings - the trending row
+        # and the home lists follow it live, like the layout.
         genre = self._trending_genre()
         if genre != (self.getProperty("trending_genre") or ""):
             self.setProperty("trending_genre", genre)
-            # Reload the home page in BOTH layouts: the genre chips
-            # and the trending row exist in tiles mode too now.
+            # Reload the home page in BOTH layouts: the trending
+            # content exists in tiles mode too.
             if (self.getProperty("page") or "home") == "home":
                 self._show_home()
 
         # Home rows (order / types) changed in the settings - applied
-        # immediately, like the layout and the genre. The chips bar
-        # follows too: it is only shown when a Trending row exists.
+        # immediately, like the layout and the genre.
         row_fingerprint = ",".join(self._row_configs())
         if row_fingerprint != (self.getProperty("row_configs") or ""):
             self.setProperty("row_configs", row_fingerprint)
-            self.setProperty("show_genre_chips",
-                             "true" if "trending" in row_fingerprint else "false")
             if (self.getProperty("page") or "home") == "home":
                 self._show_home()
 
@@ -1997,31 +1980,6 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             self.addon.openSettings()
             return
 
-        # ----- Genre chip clicked (home page of the "list" layout) -----
-        if control_id in ID_GENRE_CHIPS:
-            urn = GENRE_URNS[control_id - ID_GENRE_CHIPS[0]]
-            if urn != self._trending_genre():
-                try:
-                    self.addon.setSetting("trending.genre", urn)
-                except Exception as e:
-                    xbmc.log(
-                        "plugin.audio.soundcloud::HomeWindow genre chip "
-                        "persist failed: %s" % str(e),
-                        xbmc.LOGWARNING,
-                    )
-                self.setProperty("trending_genre", urn)
-                xbmc.log(
-                    "plugin.audio.soundcloud::HomeWindow trending genre "
-                    "switched to '%s'" % urn,
-                    xbmc.LOGINFO,
-                )
-                # Reload the trending list with the new genre. The
-                # chips are only reachable on the home page, and
-                # _show_home re-reads the (already persisted) genre.
-                if (self.getProperty("page") or "home") == "home":
-                    self._show_home()
-            return
-
         # ----- Mini-player controls -----
         if control_id == ID_MP_PREV:
             xbmc.executebuiltin("PlayerControl(Previous)")
@@ -2165,16 +2123,11 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
 
     def _apply_home_properties(self, row_configs):
         """
-        Window properties shared by both home layouts:
-        - show_genre_chips: the genre chips bar is only useful (and
-          only shown) when a Trending row is configured - the genre
-          setting only affects trending content;
+        Window property shared by both home layouts:
         - row_configs: the row-config fingerprint, compared by
           _check_live_settings so order/type changes in the settings
           are applied immediately.
         """
-        self.setProperty("show_genre_chips",
-                         "true" if "trending" in row_configs else "false")
         self.setProperty("row_configs", ",".join(row_configs))
 
     def _page_size(self):

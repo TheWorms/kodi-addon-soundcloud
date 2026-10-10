@@ -4,7 +4,7 @@
 
     Modes (set via Window.Property before doModal):
       - layout=sidebar  -> side menu + horizontal rows (cards)
-      - layout=list     -> side menu + vertical trending list + genre chips
+      - layout=list     -> side menu + vertical trending list
       - miniplayer=off / compact  (visibility of bottom bar)
 -->
 <window id="14000">
@@ -82,7 +82,6 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>115</onup>
                 <ondown>111</ondown>
-                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(show_genre_chips),true)">360</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list)">401</onright>
                 <onright>350</onright>
@@ -102,7 +101,6 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>110</onup>
                 <ondown>112</ondown>
-                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(show_genre_chips),true)">360</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list)">401</onright>
                 <onright>350</onright>
@@ -122,7 +120,6 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>111</onup>
                 <ondown>113</ondown>
-                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(show_genre_chips),true)">360</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list)">401</onright>
                 <onright>350</onright>
@@ -142,7 +139,6 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>112</onup>
                 <ondown>114</ondown>
-                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(show_genre_chips),true)">360</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list)">401</onright>
                 <onright>350</onright>
@@ -162,7 +158,6 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>113</onup>
                 <ondown>116</ondown>
-                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(show_genre_chips),true)">360</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list)">401</onright>
                 <onright>350</onright>
@@ -183,7 +178,6 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>114</onup>
                 <ondown>115</ondown>
-                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(show_genre_chips),true)">360</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list)">401</onright>
                 <onright>350</onright>
@@ -205,7 +199,6 @@
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>116</onup>
                 <ondown>110</ondown>
-                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(show_genre_chips),true)">360</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list)">401</onright>
                 <onright>350</onright>
@@ -217,7 +210,7 @@
         <!-- ============================================================ -->
         <control type="group" id="205">
             <left>260</left>
-            <top>40</top>
+            <top>20</top>
             <width>1660</width>
             <height>120</height>
 
@@ -253,258 +246,6 @@
         </control>
 
         <!-- ============================================================ -->
-        <!-- HOME GENRE CHIPS (both layouts, home page only)             -->
-        <!-- Ids 360-367, one per trending genre, same order as          -->
-        <!-- GENRE_URNS in window.py. The chip matching the current      -->
-        <!-- genre (Window.Property(trending_genre)) carries an orange   -->
-        <!-- underline; clicks are handled by window.py. The block lives  -->
-        <!-- outside the list-mode group so the TILES layout shows the   -->
-        <!-- chips too, sits right under the page title, and is only     -->
-        <!-- shown when a Trending row is configured                    -->
-        <!-- (Window.Property(show_genre_chips), set by window.py - the  -->
-        <!-- genre only affects trending content).                      -->
-        <!-- ============================================================ -->
-        <control type="group">
-            <left>260</left>
-            <top>130</top>
-            <width>1660</width>
-            <height>50</height>
-            <visible>String.IsEqual(Window.Property(show_genre_chips),true) + String.IsEmpty(Window.Property(page)) | String.IsEqual(Window.Property(show_genre_chips),true) + String.IsEqual(Window.Property(page),home)</visible>
-
-            <!-- Genre chips (ids 360-367, one per trending genre, same
-                 order as GENRE_URNS in window.py). The chip matching the
-                 current genre (Window.Property(trending_genre)) carries
-                 an orange underline; clicks are handled by window.py. -->
-            <control type="button" id="360">
-                <left>0</left>
-                <top>0</top>
-                <width>190</width>
-                <height>44</height>
-                <label>$ADDON[plugin.audio.soundcloud 30365]</label>
-                <font>font12</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <textcolor>FFA8A8A8</textcolor>
-                <focusedcolor>FFFF5500</focusedcolor>
-                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
-                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
-                <onleft>110</onleft>
-                <onright>361</onright>
-                <onup condition="String.IsEqual(Window.Property(layout),list)">354</onup>
-                <onup>110</onup>
-                <ondown condition="String.IsEqual(Window.Property(layout),list)">354</ondown>
-                <ondown>350</ondown>
-            </control>
-            <control type="button" id="361">
-                <left>210</left>
-                <top>0</top>
-                <width>190</width>
-                <height>44</height>
-                <label>$ADDON[plugin.audio.soundcloud 30370]</label>
-                <font>font12</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <textcolor>FFA8A8A8</textcolor>
-                <focusedcolor>FFFF5500</focusedcolor>
-                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
-                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
-                <onleft>360</onleft>
-                <onright>362</onright>
-                <onup condition="String.IsEqual(Window.Property(layout),list)">354</onup>
-                <onup>110</onup>
-                <ondown condition="String.IsEqual(Window.Property(layout),list)">354</ondown>
-                <ondown>350</ondown>
-            </control>
-            <control type="button" id="362">
-                <left>420</left>
-                <top>0</top>
-                <width>190</width>
-                <height>44</height>
-                <label>$ADDON[plugin.audio.soundcloud 30371]</label>
-                <font>font12</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <textcolor>FFA8A8A8</textcolor>
-                <focusedcolor>FFFF5500</focusedcolor>
-                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
-                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
-                <onleft>361</onleft>
-                <onright>363</onright>
-                <onup condition="String.IsEqual(Window.Property(layout),list)">354</onup>
-                <onup>110</onup>
-                <ondown condition="String.IsEqual(Window.Property(layout),list)">354</ondown>
-                <ondown>350</ondown>
-            </control>
-            <control type="button" id="363">
-                <left>630</left>
-                <top>0</top>
-                <width>190</width>
-                <height>44</height>
-                <label>$ADDON[plugin.audio.soundcloud 30372]</label>
-                <font>font12</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <textcolor>FFA8A8A8</textcolor>
-                <focusedcolor>FFFF5500</focusedcolor>
-                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
-                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
-                <onleft>362</onleft>
-                <onright>364</onright>
-                <onup condition="String.IsEqual(Window.Property(layout),list)">354</onup>
-                <onup>110</onup>
-                <ondown condition="String.IsEqual(Window.Property(layout),list)">354</ondown>
-                <ondown>350</ondown>
-            </control>
-            <control type="button" id="364">
-                <left>840</left>
-                <top>0</top>
-                <width>190</width>
-                <height>44</height>
-                <label>$ADDON[plugin.audio.soundcloud 30373]</label>
-                <font>font12</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <textcolor>FFA8A8A8</textcolor>
-                <focusedcolor>FFFF5500</focusedcolor>
-                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
-                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
-                <onleft>363</onleft>
-                <onright>365</onright>
-                <onup condition="String.IsEqual(Window.Property(layout),list)">354</onup>
-                <onup>110</onup>
-                <ondown condition="String.IsEqual(Window.Property(layout),list)">354</ondown>
-                <ondown>350</ondown>
-            </control>
-            <control type="button" id="365">
-                <left>1050</left>
-                <top>0</top>
-                <width>190</width>
-                <height>44</height>
-                <label>$ADDON[plugin.audio.soundcloud 30374]</label>
-                <font>font12</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <textcolor>FFA8A8A8</textcolor>
-                <focusedcolor>FFFF5500</focusedcolor>
-                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
-                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
-                <onleft>364</onleft>
-                <onright>366</onright>
-                <onup condition="String.IsEqual(Window.Property(layout),list)">354</onup>
-                <onup>110</onup>
-                <ondown condition="String.IsEqual(Window.Property(layout),list)">354</ondown>
-                <ondown>350</ondown>
-            </control>
-            <control type="button" id="366">
-                <left>1260</left>
-                <top>0</top>
-                <width>190</width>
-                <height>44</height>
-                <label>$ADDON[plugin.audio.soundcloud 30375]</label>
-                <font>font12</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <textcolor>FFA8A8A8</textcolor>
-                <focusedcolor>FFFF5500</focusedcolor>
-                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
-                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
-                <onleft>365</onleft>
-                <onright>367</onright>
-                <onup condition="String.IsEqual(Window.Property(layout),list)">354</onup>
-                <onup>110</onup>
-                <ondown condition="String.IsEqual(Window.Property(layout),list)">354</ondown>
-                <ondown>350</ondown>
-            </control>
-            <control type="button" id="367">
-                <left>1470</left>
-                <top>0</top>
-                <width>190</width>
-                <height>44</height>
-                <label>$ADDON[plugin.audio.soundcloud 30376]</label>
-                <font>font12</font>
-                <align>center</align>
-                <aligny>center</aligny>
-                <textcolor>FFA8A8A8</textcolor>
-                <focusedcolor>FFFF5500</focusedcolor>
-                <texturefocus colordiffuse="FF2E2E2E">white.png</texturefocus>
-                <texturenofocus colordiffuse="FF222222">white.png</texturenofocus>
-                <onleft>366</onleft>
-                <onright>367</onright>
-                <onup condition="String.IsEqual(Window.Property(layout),list)">354</onup>
-                <onup>110</onup>
-                <ondown condition="String.IsEqual(Window.Property(layout),list)">354</ondown>
-                <ondown>350</ondown>
-            </control>
-
-            <!-- Orange underline marking the selected genre chip. -->
-            <control type="image">
-                <left>0</left>
-                <top>46</top>
-                <width>190</width>
-                <height>3</height>
-                <texture colordiffuse="FFFF5500">white.png</texture>
-                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:all-music)</visible>
-            </control>
-            <control type="image">
-                <left>210</left>
-                <top>46</top>
-                <width>190</width>
-                <height>3</height>
-                <texture colordiffuse="FFFF5500">white.png</texture>
-                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:techno)</visible>
-            </control>
-            <control type="image">
-                <left>420</left>
-                <top>46</top>
-                <width>190</width>
-                <height>3</height>
-                <texture colordiffuse="FFFF5500">white.png</texture>
-                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:house)</visible>
-            </control>
-            <control type="image">
-                <left>630</left>
-                <top>46</top>
-                <width>190</width>
-                <height>3</height>
-                <texture colordiffuse="FFFF5500">white.png</texture>
-                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:deephouse)</visible>
-            </control>
-            <control type="image">
-                <left>840</left>
-                <top>46</top>
-                <width>190</width>
-                <height>3</height>
-                <texture colordiffuse="FFFF5500">white.png</texture>
-                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:electronic)</visible>
-            </control>
-            <control type="image">
-                <left>1050</left>
-                <top>46</top>
-                <width>190</width>
-                <height>3</height>
-                <texture colordiffuse="FFFF5500">white.png</texture>
-                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:hiphop)</visible>
-            </control>
-            <control type="image">
-                <left>1260</left>
-                <top>46</top>
-                <width>190</width>
-                <height>3</height>
-                <texture colordiffuse="FFFF5500">white.png</texture>
-                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:ambient)</visible>
-            </control>
-            <control type="image">
-                <left>1470</left>
-                <top>46</top>
-                <width>190</width>
-                <height>3</height>
-                <texture colordiffuse="FFFF5500">white.png</texture>
-                <visible>String.IsEqual(Window.Property(trending_genre),soundcloud:genres:jazz)</visible>
-            </control>
-
-        </control>
-
-        <!-- ============================================================ -->
         <!-- HOME ROWS (only visible when page=home)                     -->
         <!-- The rows grouplist (290) sits inside a plain group (291).   -->
         <!-- The side menu is always visible now, so nothing gets        -->
@@ -519,22 +260,22 @@
         <!-- ============================================================ -->
         <control type="group" id="291">
             <left>260</left>
-            <top>190</top>
+            <top>160</top>
             <width>1660</width>
-            <height>770</height>
+            <height>900</height>
 
             <control type="grouplist" id="290">
             <left>0</left>
             <top>0</top>
             <width>1660</width>
-            <height>870</height>
-            <itemgap>16</itemgap>
+            <height>900</height>
+            <itemgap>24</itemgap>
             <orientation>vertical</orientation>
             <scrolltime tween="sine" easing="out">300</scrolltime>
             <visible>String.IsEmpty(Window.Property(page)) | String.IsEqual(Window.Property(page),home)</visible>
 
             <control type="group" id="300">
-                <height>280</height>
+                <height>300</height>
                 <visible>String.IsEqual(Window.Property(row1_visible),true)</visible>
 
                 <control type="label" id="310">
@@ -551,7 +292,7 @@
                     <left>0</left>
                     <top>40</top>
                     <width>1640</width>
-                    <height>240</height>
+                    <height>260</height>
                     <orientation>horizontal</orientation>
                     <focusposition>1</focusposition>
                     <movement>3</movement>
@@ -559,56 +300,57 @@
                     <preloaditems>2</preloaditems>
                     <onleft>350</onleft>
                     <onright>350</onright>
-                    <onup condition="String.IsEqual(Window.Property(show_genre_chips),true)">360</onup>
                     <onup>110</onup>
                     <ondown>351</ondown>
-                    <itemlayout width="240" height="240">
+                    <itemlayout width="240" height="260">
                 <control type="group">
                     <left>20</left>
                     <top>10</top>
                     <width>200</width>
-                    <height>220</height>
+                    <height>240</height>
                     <control type="image">
                         <left>0</left>
                         <top>0</top>
                         <width>200</width>
-                        <height>160</height>
+                        <height>180</height>
                         <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                         <aspectratio>scale</aspectratio>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>168</top>
+                        <top>188</top>
                         <width>200</width>
                         <height>26</height>
                         <label>$INFO[ListItem.Label]</label>
                         <font>font13</font>
                         <textcolor>FFFAFAFA</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>198</top>
+                        <top>218</top>
                         <width>200</width>
                         <height>22</height>
                         <label>$INFO[ListItem.Artist]</label>
                         <font>font12</font>
                         <textcolor>FFA8A8A8</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                     </control>
                 </control>
             </itemlayout>
-                    <focusedlayout width="240" height="240">
+                    <focusedlayout width="240" height="260">
                 <control type="group">
                     <left>20</left>
                     <top>10</top>
                     <width>200</width>
-                    <height>220</height>
+                    <height>240</height>
                     <animation effect="zoom" start="100" end="106" tween="sine" easing="inout" time="150">Focus</animation>
                     <animation effect="zoom" start="106" end="100" tween="sine" easing="inout" time="150">UnFocus</animation>
                     <control type="image">
                         <left>0</left>
                         <top>0</top>
                         <width>200</width>
-                        <height>160</height>
+                        <height>180</height>
                         <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                         <aspectratio>scale</aspectratio>
                     </control>
@@ -616,38 +358,41 @@
                         <left>-3</left>
                         <top>-3</top>
                         <width>206</width>
-                        <height>166</height>
+                        <height>186</height>
                         <texture border="10">focus-border.png</texture>
                         <visible>Control.HasFocus(350)</visible>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>168</top>
+                        <top>188</top>
                         <width>200</width>
                         <height>26</height>
                         <label>$INFO[ListItem.Label]</label>
                         <font>font13</font>
                         <textcolor>FFFF5500</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                         <visible>Control.HasFocus(350)</visible>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>168</top>
+                        <top>188</top>
                         <width>200</width>
                         <height>26</height>
                         <label>$INFO[ListItem.Label]</label>
                         <font>font13</font>
                         <textcolor>FFFAFAFA</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                         <visible>!Control.HasFocus(350)</visible>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>198</top>
+                        <top>218</top>
                         <width>200</width>
                         <height>22</height>
                         <label>$INFO[ListItem.Artist]</label>
                         <font>font12</font>
                         <textcolor>FFFAFAFA</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                     </control>
                 </control>
             </focusedlayout>
@@ -655,7 +400,7 @@
                 </control>
             </control>
             <control type="group" id="301">
-                <height>280</height>
+                <height>300</height>
                 <visible>String.IsEqual(Window.Property(row2_visible),true)</visible>
 
                 <control type="label" id="311">
@@ -672,7 +417,7 @@
                     <left>0</left>
                     <top>40</top>
                     <width>1640</width>
-                    <height>240</height>
+                    <height>260</height>
                     <orientation>horizontal</orientation>
                     <focusposition>1</focusposition>
                     <movement>3</movement>
@@ -682,53 +427,55 @@
                     <onright>351</onright>
                     <onup>350</onup>
                     <ondown>352</ondown>
-                    <itemlayout width="240" height="240">
+                    <itemlayout width="240" height="260">
                 <control type="group">
                     <left>20</left>
                     <top>10</top>
                     <width>200</width>
-                    <height>220</height>
+                    <height>240</height>
                     <control type="image">
                         <left>0</left>
                         <top>0</top>
                         <width>200</width>
-                        <height>160</height>
+                        <height>180</height>
                         <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                         <aspectratio>scale</aspectratio>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>168</top>
+                        <top>188</top>
                         <width>200</width>
                         <height>26</height>
                         <label>$INFO[ListItem.Label]</label>
                         <font>font13</font>
                         <textcolor>FFFAFAFA</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>198</top>
+                        <top>218</top>
                         <width>200</width>
                         <height>22</height>
                         <label>$INFO[ListItem.Artist]</label>
                         <font>font12</font>
                         <textcolor>FFA8A8A8</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                     </control>
                 </control>
             </itemlayout>
-                    <focusedlayout width="240" height="240">
+                    <focusedlayout width="240" height="260">
                 <control type="group">
                     <left>20</left>
                     <top>10</top>
                     <width>200</width>
-                    <height>220</height>
+                    <height>240</height>
                     <animation effect="zoom" start="100" end="106" tween="sine" easing="inout" time="150">Focus</animation>
                     <animation effect="zoom" start="106" end="100" tween="sine" easing="inout" time="150">UnFocus</animation>
                     <control type="image">
                         <left>0</left>
                         <top>0</top>
                         <width>200</width>
-                        <height>160</height>
+                        <height>180</height>
                         <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                         <aspectratio>scale</aspectratio>
                     </control>
@@ -736,38 +483,41 @@
                         <left>-3</left>
                         <top>-3</top>
                         <width>206</width>
-                        <height>166</height>
+                        <height>186</height>
                         <texture border="10">focus-border.png</texture>
                         <visible>Control.HasFocus(351)</visible>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>168</top>
+                        <top>188</top>
                         <width>200</width>
                         <height>26</height>
                         <label>$INFO[ListItem.Label]</label>
                         <font>font13</font>
                         <textcolor>FFFF5500</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                         <visible>Control.HasFocus(351)</visible>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>168</top>
+                        <top>188</top>
                         <width>200</width>
                         <height>26</height>
                         <label>$INFO[ListItem.Label]</label>
                         <font>font13</font>
                         <textcolor>FFFAFAFA</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                         <visible>!Control.HasFocus(351)</visible>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>198</top>
+                        <top>218</top>
                         <width>200</width>
                         <height>22</height>
                         <label>$INFO[ListItem.Artist]</label>
                         <font>font12</font>
                         <textcolor>FFFAFAFA</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                     </control>
                 </control>
             </focusedlayout>
@@ -775,7 +525,7 @@
                 </control>
             </control>
             <control type="group" id="302">
-                <height>280</height>
+                <height>300</height>
                 <visible>String.IsEqual(Window.Property(row3_visible),true)</visible>
 
                 <control type="label" id="312">
@@ -792,7 +542,7 @@
                     <left>0</left>
                     <top>40</top>
                     <width>1640</width>
-                    <height>240</height>
+                    <height>260</height>
                     <orientation>horizontal</orientation>
                     <focusposition>1</focusposition>
                     <movement>3</movement>
@@ -802,53 +552,55 @@
                     <onright>352</onright>
                     <onup>351</onup>
                     <ondown>353</ondown>
-                    <itemlayout width="240" height="240">
+                    <itemlayout width="240" height="260">
                 <control type="group">
                     <left>20</left>
                     <top>10</top>
                     <width>200</width>
-                    <height>220</height>
+                    <height>240</height>
                     <control type="image">
                         <left>0</left>
                         <top>0</top>
                         <width>200</width>
-                        <height>160</height>
+                        <height>180</height>
                         <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                         <aspectratio>scale</aspectratio>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>168</top>
+                        <top>188</top>
                         <width>200</width>
                         <height>26</height>
                         <label>$INFO[ListItem.Label]</label>
                         <font>font13</font>
                         <textcolor>FFFAFAFA</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>198</top>
+                        <top>218</top>
                         <width>200</width>
                         <height>22</height>
                         <label>$INFO[ListItem.Artist]</label>
                         <font>font12</font>
                         <textcolor>FFA8A8A8</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                     </control>
                 </control>
             </itemlayout>
-                    <focusedlayout width="240" height="240">
+                    <focusedlayout width="240" height="260">
                 <control type="group">
                     <left>20</left>
                     <top>10</top>
                     <width>200</width>
-                    <height>220</height>
+                    <height>240</height>
                     <animation effect="zoom" start="100" end="106" tween="sine" easing="inout" time="150">Focus</animation>
                     <animation effect="zoom" start="106" end="100" tween="sine" easing="inout" time="150">UnFocus</animation>
                     <control type="image">
                         <left>0</left>
                         <top>0</top>
                         <width>200</width>
-                        <height>160</height>
+                        <height>180</height>
                         <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                         <aspectratio>scale</aspectratio>
                     </control>
@@ -856,38 +608,41 @@
                         <left>-3</left>
                         <top>-3</top>
                         <width>206</width>
-                        <height>166</height>
+                        <height>186</height>
                         <texture border="10">focus-border.png</texture>
                         <visible>Control.HasFocus(352)</visible>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>168</top>
+                        <top>188</top>
                         <width>200</width>
                         <height>26</height>
                         <label>$INFO[ListItem.Label]</label>
                         <font>font13</font>
                         <textcolor>FFFF5500</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                         <visible>Control.HasFocus(352)</visible>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>168</top>
+                        <top>188</top>
                         <width>200</width>
                         <height>26</height>
                         <label>$INFO[ListItem.Label]</label>
                         <font>font13</font>
                         <textcolor>FFFAFAFA</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                         <visible>!Control.HasFocus(352)</visible>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>198</top>
+                        <top>218</top>
                         <width>200</width>
                         <height>22</height>
                         <label>$INFO[ListItem.Artist]</label>
                         <font>font12</font>
                         <textcolor>FFFAFAFA</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                     </control>
                 </control>
             </focusedlayout>
@@ -895,7 +650,7 @@
                 </control>
             </control>
             <control type="group" id="303">
-                <height>280</height>
+                <height>300</height>
                 <visible>String.IsEqual(Window.Property(row4_visible),true)</visible>
 
                 <control type="label" id="313">
@@ -912,7 +667,7 @@
                     <left>0</left>
                     <top>40</top>
                     <width>1640</width>
-                    <height>240</height>
+                    <height>260</height>
                     <orientation>horizontal</orientation>
                     <focusposition>1</focusposition>
                     <movement>3</movement>
@@ -922,53 +677,55 @@
                     <onright>353</onright>
                     <onup>352</onup>
                     <ondown>521</ondown>
-                    <itemlayout width="240" height="240">
+                    <itemlayout width="240" height="260">
                 <control type="group">
                     <left>20</left>
                     <top>10</top>
                     <width>200</width>
-                    <height>220</height>
+                    <height>240</height>
                     <control type="image">
                         <left>0</left>
                         <top>0</top>
                         <width>200</width>
-                        <height>160</height>
+                        <height>180</height>
                         <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                         <aspectratio>scale</aspectratio>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>168</top>
+                        <top>188</top>
                         <width>200</width>
                         <height>26</height>
                         <label>$INFO[ListItem.Label]</label>
                         <font>font13</font>
                         <textcolor>FFFAFAFA</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>198</top>
+                        <top>218</top>
                         <width>200</width>
                         <height>22</height>
                         <label>$INFO[ListItem.Artist]</label>
                         <font>font12</font>
                         <textcolor>FFA8A8A8</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                     </control>
                 </control>
             </itemlayout>
-                    <focusedlayout width="240" height="240">
+                    <focusedlayout width="240" height="260">
                 <control type="group">
                     <left>20</left>
                     <top>10</top>
                     <width>200</width>
-                    <height>220</height>
+                    <height>240</height>
                     <animation effect="zoom" start="100" end="106" tween="sine" easing="inout" time="150">Focus</animation>
                     <animation effect="zoom" start="106" end="100" tween="sine" easing="inout" time="150">UnFocus</animation>
                     <control type="image">
                         <left>0</left>
                         <top>0</top>
                         <width>200</width>
-                        <height>160</height>
+                        <height>180</height>
                         <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                         <aspectratio>scale</aspectratio>
                     </control>
@@ -976,38 +733,41 @@
                         <left>-3</left>
                         <top>-3</top>
                         <width>206</width>
-                        <height>166</height>
+                        <height>186</height>
                         <texture border="10">focus-border.png</texture>
                         <visible>Control.HasFocus(353)</visible>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>168</top>
+                        <top>188</top>
                         <width>200</width>
                         <height>26</height>
                         <label>$INFO[ListItem.Label]</label>
                         <font>font13</font>
                         <textcolor>FFFF5500</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                         <visible>Control.HasFocus(353)</visible>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>168</top>
+                        <top>188</top>
                         <width>200</width>
                         <height>26</height>
                         <label>$INFO[ListItem.Label]</label>
                         <font>font13</font>
                         <textcolor>FFFAFAFA</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                         <visible>!Control.HasFocus(353)</visible>
                     </control>
                     <control type="label">
                         <left>0</left>
-                        <top>198</top>
+                        <top>218</top>
                         <width>200</width>
                         <height>22</height>
                         <label>$INFO[ListItem.Artist]</label>
                         <font>font12</font>
                         <textcolor>FFFAFAFA</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                     </control>
                 </control>
             </focusedlayout>
@@ -1022,19 +782,18 @@
         <!-- ============================================================ -->
         <control type="group">
             <left>260</left>
-            <top>180</top>
+            <top>160</top>
             <width>1660</width>
-            <height>780</height>
+            <height>800</height>
             <visible>String.IsEqual(Window.Property(layout),list) + String.IsEmpty(Window.Property(page)) | String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)</visible>
 
             <control type="list" id="354">
                 <left>0</left>
                 <top>10</top>
                 <width>1660</width>
-                <height>750</height>
+                <height>770</height>
                 <onleft>110</onleft>
                 <onright>354</onright>
-                <onup condition="String.IsEqual(Window.Property(show_genre_chips),true)">360</onup>
                 <onup>110</onup>
                 <ondown>521</ondown>
                 <scrolltime tween="sine" easing="out">300</scrolltime>
@@ -1077,6 +836,7 @@
                             <label>$INFO[ListItem.Label]</label>
                             <font>font14</font>
                             <textcolor>FFFAFAFA</textcolor>
+                            <selectedcolor>FFFF5500</selectedcolor>
                             <aligny>center</aligny>
                             <visible>!String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
@@ -1088,6 +848,7 @@
                             <label>$INFO[ListItem.Artist]</label>
                             <font>font13</font>
                             <textcolor>FFA8A8A8</textcolor>
+                            <selectedcolor>FFFF5500</selectedcolor>
                             <visible>!String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
                         <!-- Playing equalizer: accent-orange bars
@@ -1204,6 +965,7 @@
                             <label>$INFO[ListItem.Duration]</label>
                             <font>font13</font>
                             <textcolor>FFA8A8A8</textcolor>
+                            <selectedcolor>FFFF5500</selectedcolor>
                             <align>right</align>
                             <aligny>center</aligny>
                             <visible>!String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
@@ -1216,6 +978,7 @@
                             <label>$INFO[ListItem.Label]</label>
                             <font>font13_title</font>
                             <textcolor>FFFF5500</textcolor>
+                            <selectedcolor>FFFF5500</selectedcolor>
                             <aligny>center</aligny>
                             <visible>String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
@@ -1252,6 +1015,7 @@
                             <label>$INFO[ListItem.Label]</label>
                             <font>font14</font>
                             <textcolor>FFFF5500</textcolor>
+                            <selectedcolor>FFFF5500</selectedcolor>
                             <aligny>center</aligny>
                             <visible>!String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
@@ -1263,6 +1027,7 @@
                             <label>$INFO[ListItem.Artist]</label>
                             <font>font13</font>
                             <textcolor>FFFAFAFA</textcolor>
+                            <selectedcolor>FFFF5500</selectedcolor>
                             <visible>!String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
                         <!-- Playing equalizer: accent-orange bars
@@ -1379,6 +1144,7 @@
                             <label>$INFO[ListItem.Duration]</label>
                             <font>font13</font>
                             <textcolor>FFA8A8A8</textcolor>
+                            <selectedcolor>FFFF5500</selectedcolor>
                             <align>right</align>
                             <aligny>center</aligny>
                             <visible>!String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
@@ -1391,6 +1157,7 @@
                             <label>$INFO[ListItem.Label]</label>
                             <font>font13_title</font>
                             <textcolor>FFFF5500</textcolor>
+                            <selectedcolor>FFFF5500</selectedcolor>
                             <aligny>center</aligny>
                             <visible>String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
@@ -1418,9 +1185,9 @@
         <!-- ============================================================ -->
         <control type="group" id="295">
             <left>260</left>
-            <top>180</top>
+            <top>160</top>
             <width>1660</width>
-            <height>720</height>
+            <height>740</height>
             <visible>!String.IsEmpty(Window.Property(page)) + !String.IsEqual(Window.Property(page),home)</visible>
 
             <!-- Vertical page list shown in the "list" layout. It is
@@ -1432,7 +1199,7 @@
                 <left>0</left>
                 <top>0</top>
                 <width>1660</width>
-                <height>720</height>
+                <height>740</height>
                 <visible>String.IsEqual(Window.Property(layout),list)</visible>
                 <onleft>110</onleft>
                 <onright>401</onright>
@@ -1468,6 +1235,7 @@
                             <label>$INFO[ListItem.Label]</label>
                             <font>font14</font>
                             <textcolor>FFFAFAFA</textcolor>
+                            <selectedcolor>FFFF5500</selectedcolor>
                             <aligny>center</aligny>
                         </control>
                         <control type="label">
@@ -1478,6 +1246,7 @@
                             <label>$INFO[ListItem.Artist]</label>
                             <font>font13</font>
                             <textcolor>FFA8A8A8</textcolor>
+                            <selectedcolor>FFFF5500</selectedcolor>
                         </control>
                         <!-- Playing equalizer: accent-orange bars
                              bouncing on the row of the track currently
@@ -1593,6 +1362,7 @@
                             <label>$INFO[ListItem.Duration]</label>
                             <font>font13</font>
                             <textcolor>FFA8A8A8</textcolor>
+                            <selectedcolor>FFFF5500</selectedcolor>
                             <align>right</align>
                             <aligny>center</aligny>
                         </control>
@@ -1627,6 +1397,7 @@
                             <label>$INFO[ListItem.Label]</label>
                             <font>font14</font>
                             <textcolor>FFFF5500</textcolor>
+                            <selectedcolor>FFFF5500</selectedcolor>
                             <aligny>center</aligny>
                         </control>
                         <control type="label">
@@ -1637,6 +1408,7 @@
                             <label>$INFO[ListItem.Artist]</label>
                             <font>font13</font>
                             <textcolor>FFFAFAFA</textcolor>
+                            <selectedcolor>FFFF5500</selectedcolor>
                         </control>
                         <!-- Playing equalizer: accent-orange bars
                              bouncing on the row of the track currently
@@ -1752,6 +1524,7 @@
                             <label>$INFO[ListItem.Duration]</label>
                             <font>font13</font>
                             <textcolor>FFA8A8A8</textcolor>
+                            <selectedcolor>FFFF5500</selectedcolor>
                             <align>right</align>
                             <aligny>center</aligny>
                         </control>
@@ -1764,7 +1537,7 @@
                 <left>0</left>
                 <top>0</top>
                 <width>1660</width>
-                <height>720</height>
+                <height>740</height>
                 <visible>!String.IsEqual(Window.Property(layout),list)</visible>
                 <onleft>110</onleft>
                 <onright>400</onright>
@@ -1792,6 +1565,7 @@
                         <label>$INFO[ListItem.Label]</label>
                         <font>font13</font>
                         <textcolor>FFFAFAFA</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                     </control>
                     <control type="label">
                         <left>0</left>
@@ -1801,6 +1575,7 @@
                         <label>$INFO[ListItem.Artist]</label>
                         <font>font12</font>
                         <textcolor>FFA8A8A8</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                     </control>
                 </control>
             </itemlayout>
@@ -1835,6 +1610,7 @@
                         <label>$INFO[ListItem.Label]</label>
                         <font>font13</font>
                         <textcolor>FFFF5500</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                     </control>
                     <control type="label">
                         <left>0</left>
@@ -1844,6 +1620,7 @@
                         <label>$INFO[ListItem.Artist]</label>
                         <font>font12</font>
                         <textcolor>FFFAFAFA</textcolor>
+                        <selectedcolor>FFFF5500</selectedcolor>
                     </control>
                 </control>
             </focusedlayout>

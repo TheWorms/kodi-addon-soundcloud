@@ -62,6 +62,12 @@ MINI-PLAYER: the setting now offers only two choices - "Hidden" (the content lis
 
 SCREENSAVER: the fullscreen "Now Playing" overlay is now a real screensaver: a new on/off toggle hides the style and delay settings when disabled, and a configurable delay (immediate, 5, 10, 30 seconds, 1 or 2 minutes) postpones the overlay after playback starts instead of taking over the screen the moment a track begins. Default: 30 seconds.
 
+INTERFACE: the interface loses its top band - the page header sits higher and the home rows and page lists start higher and reach further down (both layouts, with or without the mini-player), and the tile rows are taller with more air between the cards.
+
+INTERFACE: the genre chips were removed from the home page - they duplicated the "Trending genre" addon setting, which stays the single place to pick the genre (still applied live when leaving the settings: rows and lists refresh immediately).
+
+INTERFACE: the title and artist of the track currently playing are now accent orange in every list and card row - skins mark the playing item as "selected" and some skins (Arctic Zephyr mods in particular) paint that text pink; the addon now forces its own orange.
+
 SETTINGS: new Playback options - configurable seek interval (5/10/15/30 s) for the arrow keys in the fullscreen player, option to skip 30-second Go+ excerpts, endless playback, and a sleep timer (15/30/60/120 min) that counts EFFECTIVE listening time (pause suspends the countdown).
 
 DISPLAY: the Trending row and the trending widget now follow a configurable genre (All genres, Techno, House, Deep House, Electronic, Hip-hop, Ambient, Jazz).
