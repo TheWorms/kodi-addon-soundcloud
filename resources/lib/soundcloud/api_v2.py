@@ -299,6 +299,11 @@ class ApiV2(ApiInterface):
 
     def resolve_id(self, id):
         res = self._do_request("/tracks", {"ids": id})
+        # Error responses come back as dicts (e.g. {"collection": []})
+        # instead of the expected list of tracks - guard the mapper
+        # (audit ST3).
+        if not isinstance(res, list):
+            res = []
         return self._map_json_to_collection({"collection": res})
 
     def resolve_url(self, url):
@@ -371,6 +376,35 @@ class ApiV2(ApiInterface):
             payload["client_id"] = self.api_client_id
         payload["app_locale"] = self.api_lang
 
+        # Security (audit S1): validate the request path BEFORE the
+        # OAuth Authorization header is added below. A forged "call"
+        # value like ".evil.example/x" or "@evil.example/x" would
+        # otherwise be glued to the API host and send the user's
+        # token to an attacker-controlled host. Only plain "/..."
+        # paths on the official API host ever carry authentication.
+        if (
+            not isinstance(path, str)
+            or not path.startswith("/")
+            or path.startswith("//")
+            or "@" in path
+            or "\\" in path
+        ):
+            xbmc.log(
+                "plugin.audio.soundcloud::ApiV2 refusing suspicious "
+                "API path",
+                xbmc.LOGWARNING,
+            )
+            return {"collection": []}
+        request_url = self.api_host + path
+        if urllib.parse.urlsplit(request_url).hostname \
+                != "api-v2.soundcloud.com":
+            xbmc.log(
+                "plugin.audio.soundcloud::ApiV2 refusing API request "
+                "to a foreign host",
+                xbmc.LOGWARNING,
+            )
+            return {"collection": []}
+
         headers = {
             "Accept-Encoding": "gzip",
             "User-Agent": self.api_user_agent,
@@ -385,7 +419,7 @@ class ApiV2(ApiInterface):
         if authenticated:
             headers["Authorization"] = "OAuth " + oauth_token
 
-        path = self.api_host + path
+        path = request_url
         cache_key = hashlib.sha1((path + str(payload)).encode()).hexdigest()
 
         # Redact the token before logging the headers.
@@ -658,8 +692,14 @@ class ApiV2(ApiInterface):
             json_obj = {"collection": [json_obj]}
 
         if "collection" in json_obj:
+            raw_collection = json_obj["collection"]
+            # API error payloads can put a non-list here; treat as
+            # empty instead of crashing with "string indices must be
+            # integers" (audit ST3).
+            if not isinstance(raw_collection, list):
+                raw_collection = []
 
-            for item in json_obj["collection"]:
+            for item in raw_collection:
                 kind = item.get("kind", None)
 
                 # /me/* endpoints wrap the actual content in a "like" / "repost" /
@@ -757,7 +797,7 @@ class ApiV2(ApiInterface):
                              "Could not convert JSON kind to model...",
                              xbmc.LOGWARNING)
 
-        elif "tracks" in json_obj:
+        elif "tracks" in json_obj and isinstance(json_obj["tracks"], list):
 
             for item in json_obj["tracks"]:
                 if "title" not in item:
@@ -770,7 +810,14 @@ class ApiV2(ApiInterface):
                 collection.items.append(track)
 
         else:
-            raise RuntimeError("ApiV2 JSON seems to be invalid")
+            # Audit ST3: an unexpected API payload (e.g. a user
+            # profile where a collection was expected) used to raise
+            # and crash the caller; log and return empty instead.
+            xbmc.log(
+                "plugin.audio.soundcloud::ApiV2 could not map JSON "
+                "(keys: %s)" % sorted(json_obj.keys()),
+                xbmc.LOGWARNING,
+            )
 
         # Load unresolved tracks
         if collection.load:
@@ -778,6 +825,8 @@ class ApiV2(ApiInterface):
             for chunk in self._chunks(collection.load, self.api_limit_tracks):
                 track_ids = ",".join(str(x) for x in chunk)
                 loaded_tracks = self._do_request("/tracks", {"ids": track_ids})
+                if not isinstance(loaded_tracks, list):
+                    loaded_tracks = []
                 # Because returned tracks are not sorted, we have to manually match them
                 for track_id in chunk:
                     loaded_track = [lt for lt in loaded_tracks if lt["id"] == track_id]
@@ -807,7 +856,7 @@ class ApiV2(ApiInterface):
             "genre": item.get("genre", None),
             "date": item.get("display_date", None),
             "description": item.get("description", None),
-            "duration": int(item["duration"]) / 1000,
+            "duration": int(item.get("duration") or 0) / 1000,
             "playback_count": item.get("playback_count", 0),
             # Stashed here for the fullscreen "now playing" overlay
             # (waveform style); harmless for other consumers.

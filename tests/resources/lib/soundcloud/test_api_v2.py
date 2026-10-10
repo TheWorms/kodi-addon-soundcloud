@@ -31,6 +31,11 @@ class ApiV2TestCase(TestCase):
     def _side_effect_settings_get(*args):
         if args[0] == "audio.format":
             return "2"  # Default in settings (mp3 progressive)
+        elif args[0] == "apiv2.client_id":
+            # No custom override; the ApiV2 client-id guard requires
+            # a string (audit N6: the old mock returned a Mock object
+            # and failed the re.fullmatch client-id check).
+            return ""
         else:
             return DEFAULT
 

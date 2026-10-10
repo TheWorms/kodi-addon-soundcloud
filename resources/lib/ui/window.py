@@ -231,19 +231,29 @@ class _ProgressUpdater(threading.Thread):
 
 class _AbortWatcher(threading.Thread):
     """
-    Closes the home window when Kodi shuts down. Without this, the
-    modal doModal() loop keeps the script alive at shutdown; Kodi
+    Closes the home window when Kodi shuts down, and stops watching
+    once the window has closed normally. Without the shutdown half,
+    the modal doModal() loop keeps the script alive at shutdown; Kodi
     waits 5 seconds then force-kills the interpreter ("script didn't
     stop in 5 seconds - let's kill it" + a threading SystemExit
-    traceback in the log). Daemon thread: costs nothing while idle.
+    traceback in the log). Without the event check, this watcher
+    loops forever after a normal window close - one leaked thread
+    (and one held interpreter) per UI open/close. Daemon thread:
+    costs nothing while idle.
     """
-    def __init__(self, window):
+    def __init__(self, window, closed_event):
         super().__init__(daemon=True)
         self._window = window
+        self._closed_event = closed_event
 
     def run(self):
         monitor = xbmc.Monitor()
-        monitor.waitForAbort()
+        # Poll instead of blocking: a normal window close sets the
+        # event and this thread returns instead of lingering until
+        # the next Kodi shutdown.
+        while not monitor.waitForAbort(0.5):
+            if self._closed_event.is_set():
+                return
         try:
             self._window.close()
             xbmc.log(
@@ -286,7 +296,7 @@ class _SleepTimer(threading.Thread):
         return max(0, minutes) * 60
 
     def run(self):
-        import time
+        monitor = xbmc.Monitor()
 
         while not self._cancelled:
             target = self._target_seconds()
@@ -314,7 +324,11 @@ class _SleepTimer(threading.Thread):
                     xbmc.LOGWARNING,
                 )
                 return
-            time.sleep(self.POLL_SECONDS)
+            # waitForAbort instead of time.sleep: returns True when
+            # Kodi is shutting down, so the timer thread never keeps
+            # the interpreter alive at exit (audit ST2).
+            if monitor.waitForAbort(self.POLL_SECONDS):
+                return
 
 
 class _PlayerObserver(xbmc.Player):
@@ -340,13 +354,23 @@ class _PlayerObserver(xbmc.Player):
         # seconds, instead of hijacking the screen the moment a track
         # starts.
         self._ss_timer = None
+        # Fullscreen dialog built on the application thread by
+        # _maybe_open_now_playing, waiting for its delay timer to
+        # show it. Kept separately from _np_dialog because a Python
+        # window binds its onInit/onAction callbacks to the thread
+        # that CONSTRUCTED it - the dialog must never be built on the
+        # timer thread (audit N1).
+        self._pending_np = None
 
     def onAVStarted(self):
         # Kodi does NOT re-render the window lists when the playing
         # track changes - ask the window to re-fill them so the playing
         # markers (orange title/duration, cover wave) follow the track.
-        # Scheduled, never inline: Player callbacks run on Kodi's
-        # application thread (see onPlayBackEnded below).
+        # Scheduled, never inline: Player callbacks run on the Python
+        # thread that created this observer (the main script thread,
+        # inside the doModal() loop). Scheduling keeps the callback
+        # cheap so the UI loop is never blocked by a container
+        # re-fill.
         try:
             self._window._sync_playing_marker_property()
         except Exception as e:
@@ -436,12 +460,12 @@ class _PlayerObserver(xbmc.Player):
         # leave the dialog open here and rely on Player.* infolabels to
         # update inside the still-open dialog.
         #
-        # Kodi invokes Player callbacks on its application thread. The
-        # track-end work below does network requests and calls
-        # player.play(); doing that re-entrantly from inside the
-        # callback can deadlock Kodi entirely (frozen UI, no sound —
-        # observed once on CoreELEC). The callback therefore only
-        # schedules the work on a daemon thread and returns at once.
+        # Player callbacks run on the Python thread that created this
+        # observer (the main script thread, inside the doModal() loop)
+        # — NOT on a Kodi-internal thread. The track-end work below
+        # still moves to a daemon thread: it does network requests
+        # and calls player.play(), which would stall the UI loop (and
+        # risk re-entrancy) if done inside the callback.
         # Re-render the lists: either the queue continues (the fresh
         # onAVStarted re-schedules a refresh that shows the new track)
         # or nothing plays anymore and the markers clear.
@@ -492,6 +516,31 @@ class _PlayerObserver(xbmc.Player):
             xbmc.log(
                 "plugin.audio.soundcloud::PlayerObserver endless queue "
                 "extension failed: %s" % str(e),
+                xbmc.LOGWARNING,
+            )
+
+        # Queue-over backstop (audit N1/N5): with endless playback
+        # disabled, nothing ever closed a fullscreen overlay left open
+        # at the end of the queue, and a dialog whose callbacks died
+        # with its building thread swallows the Back key. Give a
+        # possible queue extension a second to kick in, then close the
+        # overlay if nothing is playing (close() is a direct call,
+        # safe from any thread).
+        monitor = xbmc.Monitor()
+        if monitor.waitForAbort(1.0):
+            return
+        try:
+            if not xbmc.Player().isPlayingAudio():
+                self._close_now_playing()
+                xbmc.log(
+                    "plugin.audio.soundcloud::PlayerObserver queue "
+                    "ended - closing fullscreen overlay",
+                    xbmc.LOGINFO,
+                )
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::PlayerObserver overlay "
+                "close after queue end failed: %s" % str(e),
                 xbmc.LOGWARNING,
             )
 
@@ -692,7 +741,17 @@ class _PlayerObserver(xbmc.Player):
     def _maybe_open_now_playing(self):
         """Open the configured fullscreen overlay, if any, and only if
         not already open. Honours the playback.screensaver on/off
-        toggle and the playback.screensaver_delay setting."""
+        toggle and the playback.screensaver_delay setting.
+
+        Audit N1 fix: the dialog is BUILT here, on Kodi's application
+        thread (the thread that runs the Player callbacks and the
+        doModal() loop). A Python window binds its onInit/onAction
+        callbacks to the thread that constructed it - building the
+        dialog on the delay timer's thread (as this used to do)
+        produced an overlay whose callbacks ran on a thread that died
+        right after show(): Back/arrows were swallowed and the
+        overlay could never close. The timer thread is now only
+        trusted with SHOWING an already-built dialog."""
         enabled = (self._window.settings.get("playback.screensaver")
                    or "true").strip().lower() == "true"
         style = (self._window.settings.get("playback.fullscreen_style")
@@ -709,63 +768,94 @@ class _PlayerObserver(xbmc.Player):
             # Already open — just leave it; infolabels will refresh.
             return
 
+        # Cancel any pending show, then build the dialog NOW (on the
+        # application thread) so its callbacks are bound to a live
+        # thread; the delay timer below only calls show() on it.
+        self._cancel_screensaver_timer()
+        dialog = self._build_now_playing_dialog(style)
+        if dialog is None:
+            return
+        self._pending_np = dialog
+
         delay = 30
         try:
             delay = int(float((self._window.settings.get(
                 "playback.screensaver_delay") or "30").strip() or "30"))
         except Exception:
             delay = 30
-        if delay <= 0:
-            # Never open the overlay directly from inside the Player
-            # callback (Kodi's application thread): creating and
-            # showing a dialog there can deadlock Kodi. Route through
-            # the timer thread like the delayed case, with a minimal
-            # delay.
-            self._cancel_screensaver_timer()
-            self._ss_timer = threading.Timer(
-                0.1, self._open_now_playing_safely
-            )
-            self._ss_timer.daemon = True
-            self._ss_timer.start()
-            return
-        self._cancel_screensaver_timer()
-        self._ss_timer = threading.Timer(delay, self._open_now_playing_safely)
+        # max(delay, 0.1): delay 0 also goes through the timer with a
+        # minimal delay, so we never show a dialog re-entrantly from
+        # inside the Player callback.
+        self._ss_timer = threading.Timer(
+            max(delay, 0.1), self._show_pending_np
+        )
         self._ss_timer.daemon = True
         self._ss_timer.start()
 
     def _cancel_screensaver_timer(self):
-        """Cancel a pending screensaver delay timer, if any."""
+        """Cancel a pending screensaver delay timer and forget its
+        not-yet-shown dialog, if any."""
         timer, self._ss_timer = self._ss_timer, None
+        self._pending_np = None
         if timer is not None:
             try:
                 timer.cancel()
             except Exception:
                 pass
 
-    def _open_now_playing_safely(self):
-        """Timer callback: open the overlay if playback is still up."""
+    def _show_pending_np(self):
+        """Timer callback: SHOW the dialog built by
+        _maybe_open_now_playing — but only if audio is still playing,
+        the SoundCloud interface is still the foreground dialog and
+        no other overlay took its place. Building happened on the
+        application thread, so the dialog's onInit/onAction callbacks
+        work (that is the whole point of the split)."""
         self._ss_timer = None
+        dialog, self._pending_np = self._pending_np, None
+        if dialog is None:
+            return
+        if self._np_dialog is not None:
+            return  # another overlay got opened meanwhile
         try:
-            if xbmc.Player().isPlayingAudio():
-                self._open_now_playing()
+            if not xbmc.Player().isPlayingAudio():
+                return
+            # Never show on top of the addon settings screen, the
+            # virtual keyboard or a select dialog: those are modal
+            # dialogs ABOVE us, and an overlay shown while one of them
+            # is up would steal every key press with no way back.
+            # getCurrentWindowDialogId() returns the topmost modal
+            # dialog - show only when that is the SoundCloud window
+            # itself.
+            if xbmcgui.getCurrentWindowDialogId() != self._window.getId():
+                xbmc.log(
+                    "plugin.audio.soundcloud::PlayerObserver skipping "
+                    "fullscreen overlay - SoundCloud UI is not the "
+                    "foreground dialog",
+                    xbmc.LOGDEBUG,
+                )
+                return
+            self._np_dialog = dialog
+            dialog.show()
+            xbmc.log(
+                "plugin.audio.soundcloud::PlayerObserver opened fullscreen "
+                "overlay (timer)",
+                xbmc.LOGINFO,
+            )
         except Exception as e:
+            self._np_dialog = None
             xbmc.log(
                 "plugin.audio.soundcloud::PlayerObserver screensaver "
-                "open failed: %s" % str(e),
+                "show failed: %s" % str(e),
                 xbmc.LOGWARNING,
             )
 
-    def _open_now_playing(self):
-        """Open the configured fullscreen overlay right now (defensive
-        re-checks: the settings may have changed while a delay timer
-        was pending, and the dialog may already be open)."""
-        style = (self._window.settings.get("playback.fullscreen_style")
-                 or "off").strip()
+    def _build_now_playing_dialog(self, style):
+        """Build (but do not show) the fullscreen overlay for the given
+        style. Returns the dialog or None. Must be called on the
+        application thread (Player callback / doModal loop) so the
+        dialog's onInit/onAction callbacks are bound to it."""
         if style in ("", "off"):
-            return
-        if self._np_dialog is not None:
-            # Already open — just leave it; infolabels will refresh.
-            return
+            return None
 
         xml_for_style = {
             "cinema": "script-soundcloud-now-playing-cinema.xml",
@@ -780,7 +870,7 @@ class _PlayerObserver(xbmc.Player):
                 "'%s' not yet implemented — falling back to no overlay" %
                 style, xbmc.LOGINFO,
             )
-            return
+            return None
 
         # Extract cover URL from Kodi infolabel — that one is reliably
         # available because Kodi sets it from the playing ListItem.
@@ -812,7 +902,7 @@ class _PlayerObserver(xbmc.Player):
 
         addon_path = self._window.addon.getAddonInfo("path")
         try:
-            self._np_dialog = NowPlayingDialog(
+            dialog = NowPlayingDialog(
                 xml_file, addon_path, "default", "1080i",
                 observer=self,
                 style=style,
@@ -820,21 +910,14 @@ class _PlayerObserver(xbmc.Player):
                 waveform_url=waveform_url,
                 description=description,
             )
-            self._np_dialog.show()
-            xbmc.log(
-                "plugin.audio.soundcloud::PlayerObserver opened fullscreen "
-                "'%s' (cover=%s, waveform=%s, descr=%d chars)" %
-                (style, bool(cover_url), bool(waveform_url),
-                 len(description)),
-                xbmc.LOGINFO,
-            )
+            return dialog
         except Exception as e:
-            self._np_dialog = None
             xbmc.log(
-                "plugin.audio.soundcloud::PlayerObserver could not open "
+                "plugin.audio.soundcloud::PlayerObserver could not build "
                 "fullscreen '%s': %s" % (style, str(e)),
                 xbmc.LOGWARNING,
             )
+            return None
 
     def _close_now_playing(self):
         """Close the fullscreen overlay if open."""
@@ -1676,9 +1759,14 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         # Sleep-timer thread — (re)armed on every playback start.
         self._sleep_timer_thread = None
 
+        # Closed-event shared with the abort watcher and open_home():
+        # set once the window is done (normal close OR Kodi shutdown)
+        # so the watcher thread stops instead of holding the
+        # interpreter alive forever (audit ST1).
+        self._closed_event = threading.Event()
         # Closes this window on Kodi shutdown so the script exits
         # cleanly instead of being force-killed after 5 seconds.
-        self._abort_watcher = _AbortWatcher(self)
+        self._abort_watcher = _AbortWatcher(self, self._closed_event)
 
         # Progress bar updater — created here, started in onInit() once
         # the controls actually exist in the GUI tree. Starting it from
@@ -2119,6 +2207,62 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 xbmc.LOGDEBUG,
             )
 
+    def _shutdown(self):
+        """
+        Stop every background helper of this window, exactly once:
+        marker watchdog flag, closed event, progress updater, sleep
+        timer, screensaver timer, pending overlay, fullscreen
+        overlay. Called by close() (any exit path) and by open_home()
+        after doModal() returns, so no thread outlives the window
+        (audit ST1/ST2: leaked threads held the interpreter alive
+        after the UI closed, and made Kodi kill the script 5 seconds
+        into every shutdown while the UI was open).
+        """
+        if getattr(self, "_shutdown_done", False):
+            return
+        self._shutdown_done = True
+        try:
+            # Stops the marker-watchdog poll loop.
+            self._closed = True
+        except Exception:
+            pass
+        try:
+            # Stops the abort watcher.
+            self._closed_event.set()
+        except Exception:
+            pass
+        try:
+            self._progress_updater.stop()
+        except Exception:
+            pass
+        try:
+            if self._sleep_timer_thread is not None:
+                self._sleep_timer_thread.cancel()
+        except Exception:
+            pass
+        try:
+            self._player_observer._cancel_screensaver_timer()
+            self._player_observer._pending_np = None
+            self._player_observer._close_now_playing()
+        except Exception:
+            pass
+        xbmc.log(
+            "plugin.audio.soundcloud::HomeWindow shutdown complete",
+            xbmc.LOGINFO,
+        )
+
+    def close(self):
+        """
+        Window close with guaranteed cleanup: _shutdown() first
+        (idempotent), then the real close. Replaces the scattered
+        per-thread stops that used to miss most exit paths.
+        """
+        try:
+            self._shutdown()
+        except Exception:
+            pass
+        super().close()
+
     def onAction(self, action):
         action_id = action.getId()
 
@@ -2173,11 +2317,8 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                     )
                 return
 
-            # Stack empty -> exit addon
-            try:
-                self._progress_updater.stop()
-            except Exception:
-                pass
+            # Stack empty -> exit addon (close() runs the full
+            # thread/overlay shutdown).
             self.close()
             xbmc.executebuiltin("ActivateWindow(Home)")
             return
@@ -3670,29 +3811,16 @@ def open_home(api, addon, settings, startup_track_id=None,
         startup_track_source=startup_track_source,
     )
 
-    # Abort watchdog: doModal() blocks until the window is closed, and
-    # Kodi does NOT close Python windows on shutdown — it waits 5
-    # seconds then force-kills the interpreter ("script didn't stop in
-    # 5 seconds - let's kill it" in the log), delaying every Kodi
-    # shutdown/restart by 5s while our UI is open. This daemon thread
-    # waits for the abort signal and closes the window so doModal()
-    # returns immediately and the script exits cleanly.
-    import threading
-
-    def _close_on_abort(win):
-        monitor = xbmc.Monitor()
-        monitor.waitForAbort()
-        try:
-            win.close()
-        except Exception:
-            pass
-
-    watchdog = threading.Thread(
-        target=_close_on_abort, args=(window,), daemon=True
-    )
-    watchdog.start()
-
-    window.doModal()
-    # Stop the marker watchdog poll loop.
-    window._closed = True
+    # doModal() blocks until the window closes. The abort watcher
+    # (started in onInit) closes the window on Kodi shutdown so the
+    # script exits cleanly; the finally block then stops every
+    # remaining thread and the overlay so nothing outlives the
+    # interpreter (audit ST1/ST2 — leaked watchers used to hold a
+    # Python interpreter alive per UI open/close).
+    try:
+        window.doModal()
+    finally:
+        window._closed_event.set()
+        window._closed = True
+        window._shutdown()
     del window

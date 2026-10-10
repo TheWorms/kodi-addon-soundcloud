@@ -60,6 +60,10 @@ def _purge_cache_once():
         )
 
 
+_CLIENT_ID_FAIL_MARKER = "client-id-extract-failed"
+_CLIENT_ID_FAIL_TTL = 3600  # seconds
+
+
 def _sync_client_id_info():
     """
     Keep the read-only "apiv2.client_id_info" display setting in sync
@@ -69,24 +73,80 @@ def _sync_client_id_info():
     extraction, so the ID is shown whether the user browses
     anonymously or with an OAuth token (a token is sent INSTEAD of
     the client ID, but the ID is still resolved and used for
-    anonymous fallback calls). Cheap while the 24h cache is warm; on
-    a cold cache the extraction runs at most once per day - and on
-    failure the previously stored value simply stays.
+    anonymous fallback calls).
+
+    Audit N3: this used to run BEFORE the routing on EVERY plugin
+    call - every /play/ of the queue, every widget refresh - which
+    forced a full client-ID extraction (soundcloud.com plus every JS
+    asset, each with network timeouts) whenever the 24h cache was
+    cold, and again on every call while the extraction kept failing
+    (no negative cache). It now runs once per UI open in the
+    background (_sync_client_id_info_bg), and a failed or empty
+    resolution is remembered for one hour so repeated calls don't
+    re-download the whole site before each failure.
     """
     try:
+        if _client_id_failed_recently():
+            return
         current = settings.get("apiv2.client_id_info") or ""
         resolved = api.api_client_id
+        if not resolved:
+            raise RuntimeError("client id resolution returned nothing")
         if resolved != current:
             addon.setSetting("apiv2.client_id_info", resolved)
             xbmc.log(
                 "%s: client id info refreshed" % addon_id,
                 xbmc.LOGDEBUG,
             )
+        _forget_client_id_failure()
     except Exception as e:
+        _remember_client_id_failure()
         xbmc.log(
             "%s: client id info sync failed: %s" % (addon_id, str(e)),
             xbmc.LOGWARNING,
         )
+
+
+def _client_id_failed_recently():
+    """
+    True when a failed client-ID extraction is less than an hour old.
+    get_mtime raises on a missing marker file - that means "no recent
+    failure".
+    """
+    try:
+        import time
+        mtime = vfs_cache.get_mtime(_CLIENT_ID_FAIL_MARKER)
+        return (time.time() - mtime) < _CLIENT_ID_FAIL_TTL
+    except Exception:
+        return False
+
+
+def _remember_client_id_failure():
+    try:
+        vfs_cache.write(_CLIENT_ID_FAIL_MARKER, "1")
+    except Exception:
+        pass
+
+
+def _forget_client_id_failure():
+    try:
+        vfs_cache.delete(_CLIENT_ID_FAIL_MARKER)
+    except Exception:
+        pass
+
+
+def _sync_client_id_info_bg():
+    """
+    Run _sync_client_id_info on a daemon thread so the (potentially
+    slow) client-ID resolution never delays a UI launch: the plugin
+    call returns at once and the read-only display setting updates a
+    moment later.
+    """
+    import threading
+
+    threading.Thread(
+        target=_sync_client_id_info, daemon=True
+    ).start()
 
 
 def run():
@@ -105,9 +165,6 @@ def run():
     # One-shot cache purge — keeps the cache folder bounded.
     _purge_cache_once()
 
-    # Read-only client ID display (Settings > Account).
-    _sync_client_id_info()
-
     # Widget track click → open the full-screen UI playing that track.
     # Widget track items point at /?play_track=<id> (not /play/) since
     # 5.9.6023, so that clicking a track on the skin home screen opens
@@ -124,6 +181,9 @@ def run():
         )
         home_signal = xbmcgui.Window(10000)
         home_signal.setProperty("soundcloud.splash", "show")
+        # Client ID display syncs in the background, not on this
+        # latency-critical click path (audit N3).
+        _sync_client_id_info_bg()
         runscript_args = "play_track=%s" % track_id
         if track_source:
             runscript_args += ",source=%s" % track_source
@@ -224,6 +284,9 @@ def run():
                         )
 
                 home_signal.setProperty("soundcloud.splash", "show")
+                # Client ID display syncs in the background, off the
+                # UI launch path (audit N3).
+                _sync_client_id_info_bg()
 
                 # Step 2: launch script.py via RunScript. Python's
                 # process scheduler will let it start in parallel with
@@ -268,7 +331,15 @@ def run():
             # navigate inside the plugin's data tree. We don't know what
             # the call returns, so we inspect the resulting collection
             # and set content accordingly.
-            collection = api.call(args.get("call")[0])
+            try:
+                collection = api.call(args.get("call")[0])
+            except Exception as e:
+                xbmc.log(
+                    addon_id + ": call action failed: %s" % str(e),
+                    xbmc.LOGWARNING,
+                )
+                xbmcplugin.endOfDirectory(handle, succeeded=False)
+                return
             _set_content_for_collection(handle, collection)
             list_items = listItems.from_collection(collection)
             _add_sort_methods_for_collection(handle, collection)
@@ -282,6 +353,9 @@ def run():
             # Launches the full-screen UI as a separate Kodi script so
             # the directory handler returns cleanly.
             xbmcplugin.endOfDirectory(handle, succeeded=False, cacheToDisc=False)
+            # Client ID display syncs in the background, off the UI
+            # launch path (audit N3).
+            _sync_client_id_info_bg()
             xbmc.executebuiltin("RunScript(" + addon_id + ")")
             return
         else:
@@ -341,10 +415,31 @@ def run():
                     handle, succeeded=False, listitem=xbmcgui.ListItem()
                 )
         elif track_id:
-            collection = listItems.from_collection(api.resolve_id(track_id))
-            playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
-            resolve_list_item(handle, collection[0][1])
-            playlist.add(url=collection[0][0], listitem=collection[0][1])
+            try:
+                collection = listItems.from_collection(
+                    api.resolve_id(track_id)
+                )
+            except Exception as e:
+                xbmc.log(
+                    addon_id + ": track lookup failed: %s" % str(e),
+                    xbmc.LOGWARNING,
+                )
+                collection = []
+            if not collection:
+                # Audit ST3: a failed lookup (network down, track
+                # gone) used to crash on collection[0]. Resolve as
+                # failed so Kodi skips to the next queue item.
+                xbmc.log(
+                    addon_id + ": track %s not resolvable" % track_id,
+                    xbmc.LOGWARNING,
+                )
+                xbmcplugin.setResolvedUrl(
+                    handle, succeeded=False, listitem=xbmcgui.ListItem()
+                )
+            else:
+                playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
+                resolve_list_item(handle, collection[0][1])
+                playlist.add(url=collection[0][0], listitem=collection[0][1])
         elif playlist_id:
             call = "/playlists/{id}".format(id=playlist_id)
             collection = listItems.from_collection(api.call(call))
@@ -417,17 +512,32 @@ def run():
 
     elif path == PATH_USER:
         xbmcplugin.setContent(handle, "songs")
-        user_id = args.get("id")[0]
-        default_action = args.get("call")[0]
-        if user_id:
-            items = listItems.user(user_id)
-            collection = listItems.from_collection(api.call(default_action))
-            _add_song_sort_methods(handle)
-            xbmcplugin.addDirectoryItems(handle, items, len(items))
-            xbmcplugin.addDirectoryItems(handle, collection, len(collection))
-            xbmcplugin.endOfDirectory(handle)
-        else:
+        user_id = (args.get("id") or [None])[0]
+        default_action = (args.get("call") or [None])[0]
+        if not user_id or not default_action:
+            # Audit ST3: a /user/ URL without id or call used to
+            # crash on args[...][0] (KeyError) - e.g. a stale
+            # favourite from an older addon version.
             xbmc.log(addon_id + ": Invalid user action", xbmc.LOGERROR)
+            xbmcplugin.endOfDirectory(handle, succeeded=False)
+        else:
+            try:
+                items = listItems.user(user_id)
+                collection = listItems.from_collection(
+                    api.call(default_action)
+                )
+                _add_song_sort_methods(handle)
+                xbmcplugin.addDirectoryItems(handle, items, len(items))
+                xbmcplugin.addDirectoryItems(
+                    handle, collection, len(collection)
+                )
+                xbmcplugin.endOfDirectory(handle)
+            except Exception as e:
+                xbmc.log(
+                    addon_id + ": user action failed: %s" % str(e),
+                    xbmc.LOGWARNING,
+                )
+                xbmcplugin.endOfDirectory(handle, succeeded=False)
 
     elif path == PATH_ME:
         # "My profile" — requires an OAuth token configured in settings.
