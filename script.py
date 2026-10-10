@@ -63,6 +63,8 @@ if __name__ == "__main__":
     # queue the rest of the widget category after it.
     startup_track_id = None
     startup_track_source = None
+    token_mode = False
+    from_settings = False
     for _arg in sys.argv[1:]:
         if not isinstance(_arg, str):
             continue
@@ -70,6 +72,41 @@ if __name__ == "__main__":
             startup_track_id = _arg.split("=", 1)[1].strip() or None
         elif _arg.startswith("source="):
             startup_track_source = _arg.split("=", 1)[1].strip() or None
+        elif _arg.strip() == "token":
+            token_mode = True
+        elif _arg.strip() == "from_settings":
+            from_settings = True
+
+    if token_mode:
+        # RunScript(plugin.audio.soundcloud,token[,from_settings]):
+        # the "OAuth token" window alone - no splash, no full-screen UI.
+        # Settings > Account runs it with <close>true</close>, so Kodi
+        # has already saved and closed the settings dialog (it would
+        # otherwise write its stale copy of the token back on close);
+        # it is reopened afterwards so the user lands where they were.
+        if from_settings:
+            # Settings opened via Add-ons > SoundCloud > Configure: the
+            # add-on information dialog underneath keeps its own copy
+            # of the settings (with the old token) and would write it
+            # back the next time Configure is used. Close it; the
+            # settings are reopened from a fresh copy below.
+            xbmc.executebuiltin("Dialog.Close(addoninformation,true)")
+        _addon = xbmcaddon.Addon()
+        _profile = xbmcvfs.translatePath(_addon.getAddonInfo("profile"))
+        from resources.lib.kodi.cache import Cache
+        from resources.lib.kodi.settings import Settings
+        from resources.lib.kodi.vfs import VFS
+        from resources.lib.soundcloud.api_v2 import ApiV2
+        from resources.lib.ui.token_dialog import open_token_dialog
+        _settings = Settings(_addon)
+        _api = ApiV2(_settings, xbmc.getLanguage(xbmc.ISO_639_1),
+                     Cache(_settings, VFS(os.path.join(_profile, "cache"))))
+        try:
+            open_token_dialog(_addon, _settings, _api)
+        finally:
+            if from_settings:
+                xbmc.executebuiltin("Addon.OpenSettings(%s)" % _addon.getAddonInfo("id"))
+        sys.exit(0)
     if startup_track_id:
         _t(t0, "startup track requested: %s (source=%s)" % (
             startup_track_id, startup_track_source or "-"))

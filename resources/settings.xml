@@ -295,8 +295,32 @@
                     </constraints>
                     <control type="button" format="infolabel"/>
                 </setting>
-                <setting id="auth.oauth_token" type="string" label="30021" help="30023">
+                <!-- Token management happens in the "OAuth token" window
+                     (resources/lib/ui/token_dialog.py): the token is
+                     only saved after SoundCloud has accepted it. The raw
+                     value stays stored here but is internal (level 4)
+                     so it can no longer be edited without that check.
+                     <close>true</close> makes Kodi save and close this
+                     dialog BEFORE the window opens; otherwise closing
+                     the settings afterwards would write the old token
+                     back over the new one. -->
+                <setting id="auth.token_window" type="action" label="30410" help="30411">
                     <level>0</level>
+                    <data>RunScript(plugin.audio.soundcloud,token,from_settings)</data>
+                    <control type="button" format="action">
+                        <close>true</close>
+                    </control>
+                </setting>
+                <setting id="auth.token_status" type="string" label="30412" help="30413">
+                    <level>0</level>
+                    <default/>
+                    <constraints>
+                        <allowempty>true</allowempty>
+                    </constraints>
+                    <control type="button" format="infolabel"/>
+                </setting>
+                <setting id="auth.oauth_token" type="string" label="30021" help="30023">
+                    <level>4</level>
                     <default/>
                     <constraints>
                         <allowempty>true</allowempty>
@@ -304,20 +328,6 @@
                     <control type="edit" format="string">
                         <heading>30021</heading>
                         <hidden>true</hidden>
-                    </control>
-                </setting>
-                <setting id="auth.test" type="action" label="30240" help="30241">
-                    <level>0</level>
-                    <data>RunPlugin(plugin://plugin.audio.soundcloud/settings/auth/test/)</data>
-                    <control type="button" format="action">
-                        <close>false</close>
-                    </control>
-                </setting>
-                <setting id="auth.help" type="action" label="30022" help="">
-                    <level>0</level>
-                    <data>RunPlugin(plugin://plugin.audio.soundcloud/settings/auth/help/)</data>
-                    <control type="button" format="action">
-                        <close>false</close>
                     </control>
                 </setting>
             </group>

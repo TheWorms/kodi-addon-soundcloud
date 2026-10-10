@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+<header>
+  <img src="icons/icon-32.png" alt="" width="24" height="24">
+  <h1 data-i18n="extName"></h1>
+</header>
+
+<section id="perm" hidden>
+  <p data-i18n="needPermission"></p>
+  <button id="grant" class="primary" data-i18n="btnGrant"></button>
+</section>
+
+<section id="main">
+  <p id="status" class="status"></p>
+  <div id="tokenBox" hidden>
+    <input id="token" type="password" readonly spellcheck="false" autocomplete="off">
+    <div class="row">
+      <button id="copy" class="primary" data-i18n="btnCopy"></button>
+      <button id="toggle" data-i18n="btnShow"></button>
+    </div>
+    <p id="meta" class="meta"></p>
+  </div>
+  <div class="row">
+    <button id="open" data-i18n="btnOpen"></button>
+    <button id="clear" class="ghost" data-i18n="btnClear" hidden></button>
+  </div>
+</section>
+
+<details id="kodi" hidden>
+  <summary data-i18n="kodiTitle"></summary>
+  <p class="help" data-i18n="kodiHelp"></p>
+  <label><span data-i18n="kodiHost"></span>
+    <input id="kHost" placeholder="192.168.x.x" spellcheck="false" autocomplete="off">
+  </label>
+  <div class="grid">
+    <label><span data-i18n="kodiPort"></span><input id="kPort" value="8080" inputmode="numeric"></label>
+    <label><span data-i18n="kodiUser"></span><input id="kUser" value="kodi" autocomplete="off"></label>
+  </div>
+  <label><span data-i18n="kodiPassword"></span>
+    <input id="kPass" type="password" autocomplete="off">
+  </label>
+  <div class="row">
+    <button id="send" class="primary" data-i18n="btnSend"></button>
+    <button id="sendAnyway" data-i18n="btnSendAnyway" hidden></button>
+  </div>
+  <p id="kodiMsg" class="msg"></p>
+</details>
+
+<footer>
+  <p class="help" data-i18n="privacy"></p>
+  <a href="https://theworms.github.io/kodi-addon-soundcloud/" target="_blank" rel="noopener" data-i18n="helpLink"></a>
+</footer>
+<script src="popup.js"></script>
+</body>
+</html>

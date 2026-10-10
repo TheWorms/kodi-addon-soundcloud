@@ -566,3 +566,109 @@ class ApiV2TestCase(TestCase):
         url, list_item, is_folder = track.to_list_item("plugin://plugin.audio.soundcloud")
         self.assertIsNotNone(list_item)
         self.assertFalse(is_folder)
+
+
+class ApiV2HistoryAndTokenTestCase(TestCase):
+    """6.0.1: listening history endpoint and the token window check."""
+
+    def setUp(self):
+        self.api = ApiV2(settings=Settings(MagicMock()), lang="en", cache=MagicMock())
+
+    def test_play_history_reads_the_tracks_endpoint(self):
+        # Bare /me/play-history is the write/clear endpoint: reading it
+        # returned no history, so "Recently played" and "Mixed for you"
+        # both fell back to the same trending list.
+        entry = {"played_at": 1, "track": {"kind": "track", "id": 7, "title": "T",
+                                           "duration": 1000, "user": {"username": "u"}}}
+        with mock.patch.object(self.api, "_do_request",
+                               return_value={"collection": [entry]}) as do_request:
+            collection = self.api.play_history(5)
+        self.assertEqual(do_request.call_args[0][0], "/me/play-history/tracks")
+        self.assertEqual([t.id for t in collection.items], [7])
+
+    def test_play_history_none_on_error_payload(self):
+        with mock.patch.object(self.api, "_do_request", return_value={"collection": []}):
+            self.assertIsNone(self.api.play_history(5))
+
+    @mock.patch("requests.get")
+    def test_check_token_valid(self, mock_get):
+        mock_get.return_value = Mock(status_code=200, json=lambda: {
+            "id": 1, "username": "thib",
+            "consumer_subscription": {"product": {"id": "go_plus"}}})
+        res = self.api.check_token("2-1-2-abc")
+        self.assertEqual((res["state"], res["username"], res["tier"]), ("valid", "thib", "go_plus"))
+        sent = mock_get.call_args.kwargs["headers"]
+        self.assertEqual(sent["Authorization"], "OAuth 2-1-2-abc")
+        self.assertEqual(mock_get.call_args.args[0], "https://api-v2.soundcloud.com/me")
+
+    @mock.patch("time.sleep")
+    @mock.patch("requests.get")
+    def test_check_token_refused(self, mock_get, _sleep):
+        mock_get.return_value = Mock(status_code=401)
+        self.assertEqual(self.api.check_token("2-1-2-abc")["state"], "invalid")
+        self.assertEqual(mock_get.call_count, 2)
+
+    @mock.patch("time.sleep")
+    @mock.patch("requests.get")
+    def test_check_token_single_401_is_retried(self, mock_get, _sleep):
+        mock_get.side_effect = [Mock(status_code=401),
+                                Mock(status_code=200, json=lambda: {"id": 1, "username": "thib"})]
+        self.assertEqual(self.api.check_token("2-1-2-abc")["state"], "valid")
+
+    @mock.patch("requests.get")
+    def test_check_token_403_is_not_a_refusal(self, mock_get):
+        mock_get.return_value = Mock(status_code=403)
+        res = self.api.check_token("2-1-2-abc")
+        self.assertEqual((res["state"], res["http"], res["error"]), ("error", 403, "HTTP 403"))
+        self.assertEqual(mock_get.call_count, 1)
+
+    def test_get_me_rearms_after_token_change(self):
+        self.api._token_invalid = True
+        self.api._last_invalid_token = "2-1-2-old"
+        with mock.patch.object(self.api.settings, "get_oauth_token", return_value="2-1-2-new"), \
+                mock.patch.object(self.api.cache, "get", return_value=None), \
+                mock.patch.object(self.api, "_do_request", return_value={"id": 5}) as do_request:
+            self.assertEqual(self.api.get_me(), {"id": 5})
+        do_request.assert_called_once_with("/me", {})
+        self.assertFalse(self.api._token_invalid)
+
+    def test_cache_key_depends_on_token(self):
+        keys = []
+        def cache_get(key, age):
+            keys.append(key)
+            return '{"collection": []}'
+        self.api.cache.get.side_effect = cache_get
+        for token in ("2-1-2-aaa", "2-1-2-bbb", "2-1-2-aaa"):
+            with mock.patch.object(self.api.settings, "get_oauth_token", return_value=token):
+                self.api._do_request("/mixed-selections", {}, 60)
+        self.assertEqual(len(keys), 3)
+        self.assertNotEqual(keys[0], keys[1])
+        self.assertEqual(keys[0], keys[2])
+        self.assertTrue(all("aaa" not in k and "bbb" not in k for k in keys))
+
+    def test_get_me_stays_off_for_the_same_invalid_token(self):
+        self.api._token_invalid = True
+        self.api._last_invalid_token = "2-1-2-old"
+        with mock.patch.object(self.api.settings, "get_oauth_token", return_value="2-1-2-old"), \
+                mock.patch.object(self.api, "_do_request") as do_request:
+            self.assertIsNone(self.api.get_me())
+        do_request.assert_not_called()
+
+    @mock.patch("requests.get")
+    def test_check_token_network_error(self, mock_get):
+        import requests
+        mock_get.side_effect = requests.exceptions.ConnectionError("down")
+        res = self.api.check_token("2-1-2-abc")
+        self.assertEqual((res["state"], res["error"]), ("error", "ConnectionError"))
+
+    def test_reset_auth_state_clears_latch_and_profile(self):
+        self.api._token_invalid = True
+        self.api._consecutive_401 = 2
+        self.api.reset_auth_state()
+        self.assertFalse(self.api._token_invalid)
+        self.assertEqual(self.api._consecutive_401, 0)
+        self.api.cache.vfs.delete.assert_called_with("api-me-profile")
+
+    def test_clean_token(self):
+        self.assertEqual(Settings.clean_token('  "OAuth 2-1-2-ab\u200bc"\n'), "2-1-2-abc")
+        self.assertIsNone(Settings.clean_token("   "))

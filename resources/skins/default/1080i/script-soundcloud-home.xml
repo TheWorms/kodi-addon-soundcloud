@@ -201,7 +201,7 @@
                 <textoffsetx>16</textoffsetx>
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
                 <onup>113</onup>
-                <ondown>117</ondown>
+                <ondown>115</ondown>
 
                 <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEmpty(Window.Property(page)) | String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
                 <onright condition="String.IsEqual(Window.Property(layout),list) + !String.IsEmpty(Window.Property(page)) + !String.IsEqual(Window.Property(page),home)">401</onright>
@@ -213,30 +213,6 @@
             </control>
 
             <!-- Bottom buttons -->
-            <control type="button" id="117">
-                <left>10</left>
-                <top>954</top>
-                <width>220</width>
-                <height>50</height>
-                <label>$ADDON[plugin.audio.soundcloud 30021]</label>
-                <font>font13</font>
-                <textcolor>FFA8A8A8</textcolor>
-                <focusedcolor>FFFFFFFF</focusedcolor>
-                <align>left</align>
-                <aligny>center</aligny>
-                <textoffsetx>16</textoffsetx>
-                <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
-                <onup>114</onup>
-                <ondown>115</ondown>
-
-                <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEmpty(Window.Property(page)) | String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
-                <onright condition="String.IsEqual(Window.Property(layout),list) + !String.IsEmpty(Window.Property(page)) + !String.IsEqual(Window.Property(page),home)">401</onright>
-                <onright condition="String.IsEmpty(Window.Property(page)) + String.IsEqual(Window.Property(row1_visible),true) | String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(row1_visible),true)">350</onright>
-                <onright condition="String.IsEmpty(Window.Property(page)) + String.IsEqual(Window.Property(row2_visible),true) | String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(row2_visible),true)">351</onright>
-                <onright condition="String.IsEmpty(Window.Property(page)) + String.IsEqual(Window.Property(row3_visible),true) | String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(row3_visible),true)">352</onright>
-                <onright condition="String.IsEmpty(Window.Property(page)) + String.IsEqual(Window.Property(row4_visible),true) | String.IsEqual(Window.Property(page),home) + String.IsEqual(Window.Property(row4_visible),true)">353</onright>
-                <onright>400</onright>
-            </control>
             <control type="button" id="115">
                 <left>10</left>
                 <top>1010</top>
@@ -250,7 +226,7 @@
                 <aligny>center</aligny>
                 <textoffsetx>16</textoffsetx>
                 <texturefocus border="0" colordiffuse="FFFF5500">white.png</texturefocus>
-                <onup>117</onup>
+                <onup>114</onup>
                 <ondown>110</ondown>
 
                 <onright condition="String.IsEqual(Window.Property(layout),list) + String.IsEmpty(Window.Property(page)) | String.IsEqual(Window.Property(layout),list) + String.IsEqual(Window.Property(page),home)">354</onright>
@@ -337,60 +313,78 @@
                         <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                         <aspectratio>scale</aspectratio>
                     </control>
-<!-- Playing wave: dark chip with animated orange bars laid over
-     the cover of the track currently playing. -->
+<!-- Playing wave: the cover of the track currently playing is dimmed
+     and five orange bars bounce over almost its whole height
+     (zoom anchored on the bottom of each bar, pulse = up and down). -->
 <control type="image">
-    <left>51</left>
-    <top>138</top>
-    <width>96</width>
-    <height>34</height>
-    <texture colordiffuse="B4000000">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <left>0</left>
+    <top>0</top>
+    <width>200</width>
+    <height>180</height>
+    <texture colordiffuse="A0000000">white.png</texture>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
 </control>
 <control type="image">
-    <left>63</left>
-    <top>148</top>
-    <width>10</width>
-    <height>18</height>
+    <left>26</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,30" end="100,100" center="36,164" time="520" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>79</left>
-    <top>140</top>
-    <width>10</width>
-    <height>26</height>
+    <left>58</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,55" end="100,100" center="68,164" time="380" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>95</left>
-    <top>152</top>
-    <width>10</width>
-    <height>14</height>
+    <left>90</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,20" end="100,100" center="100,164" time="610" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>111</left>
-    <top>144</top>
-    <width>10</width>
-    <height>22</height>
+    <left>122</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,45" end="100,100" center="132,164" time="450" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>127</left>
-    <top>156</top>
-    <width>10</width>
-    <height>10</height>
+    <left>154</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,35" end="100,100" center="164,164" time="560" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
+</control>
+<!-- "See more" card ending a home row: replaces the cover. -->
+<control type="image">
+    <left>0</left>
+    <top>0</top>
+    <width>200</width>
+    <height>180</height>
+    <texture colordiffuse="FF262626">white.png</texture>
+    <visible>String.IsEqual(ListItem.Property(isSeeMore),true)</visible>
+</control>
+<control type="image">
+    <left>56</left>
+    <top>46</top>
+    <width>88</width>
+    <height>88</height>
+    <texture colordiffuse="FFFF5500">see-more.png</texture>
+    <visible>String.IsEqual(ListItem.Property(isSeeMore),true)</visible>
 </control>
                     <control type="label">
                         <left>0</left>
@@ -430,60 +424,78 @@
                         <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                         <aspectratio>scale</aspectratio>
                     </control>
-<!-- Playing wave: dark chip with animated orange bars laid over
-     the cover of the track currently playing. -->
+<!-- Playing wave: the cover of the track currently playing is dimmed
+     and five orange bars bounce over almost its whole height
+     (zoom anchored on the bottom of each bar, pulse = up and down). -->
 <control type="image">
-    <left>51</left>
-    <top>138</top>
-    <width>96</width>
-    <height>34</height>
-    <texture colordiffuse="B4000000">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <left>0</left>
+    <top>0</top>
+    <width>200</width>
+    <height>180</height>
+    <texture colordiffuse="A0000000">white.png</texture>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
 </control>
 <control type="image">
-    <left>63</left>
-    <top>148</top>
-    <width>10</width>
-    <height>18</height>
+    <left>26</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,30" end="100,100" center="36,164" time="520" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>79</left>
-    <top>140</top>
-    <width>10</width>
-    <height>26</height>
+    <left>58</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,55" end="100,100" center="68,164" time="380" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>95</left>
-    <top>152</top>
-    <width>10</width>
-    <height>14</height>
+    <left>90</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,20" end="100,100" center="100,164" time="610" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>111</left>
-    <top>144</top>
-    <width>10</width>
-    <height>22</height>
+    <left>122</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,45" end="100,100" center="132,164" time="450" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>127</left>
-    <top>156</top>
-    <width>10</width>
-    <height>10</height>
+    <left>154</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,35" end="100,100" center="164,164" time="560" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
+</control>
+<!-- "See more" card ending a home row: replaces the cover. -->
+<control type="image">
+    <left>0</left>
+    <top>0</top>
+    <width>200</width>
+    <height>180</height>
+    <texture colordiffuse="FF262626">white.png</texture>
+    <visible>String.IsEqual(ListItem.Property(isSeeMore),true)</visible>
+</control>
+<control type="image">
+    <left>56</left>
+    <top>46</top>
+    <width>88</width>
+    <height>88</height>
+    <texture colordiffuse="FFFF5500">see-more.png</texture>
+    <visible>String.IsEqual(ListItem.Property(isSeeMore),true)</visible>
 </control>
                     <control type="image">
                         <left>-3</left>
@@ -572,60 +584,78 @@
                         <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                         <aspectratio>scale</aspectratio>
                     </control>
-<!-- Playing wave: dark chip with animated orange bars laid over
-     the cover of the track currently playing. -->
+<!-- Playing wave: the cover of the track currently playing is dimmed
+     and five orange bars bounce over almost its whole height
+     (zoom anchored on the bottom of each bar, pulse = up and down). -->
 <control type="image">
-    <left>51</left>
-    <top>138</top>
-    <width>96</width>
-    <height>34</height>
-    <texture colordiffuse="B4000000">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <left>0</left>
+    <top>0</top>
+    <width>200</width>
+    <height>180</height>
+    <texture colordiffuse="A0000000">white.png</texture>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
 </control>
 <control type="image">
-    <left>63</left>
-    <top>148</top>
-    <width>10</width>
-    <height>18</height>
+    <left>26</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,30" end="100,100" center="36,164" time="520" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>79</left>
-    <top>140</top>
-    <width>10</width>
-    <height>26</height>
+    <left>58</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,55" end="100,100" center="68,164" time="380" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>95</left>
-    <top>152</top>
-    <width>10</width>
-    <height>14</height>
+    <left>90</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,20" end="100,100" center="100,164" time="610" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>111</left>
-    <top>144</top>
-    <width>10</width>
-    <height>22</height>
+    <left>122</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,45" end="100,100" center="132,164" time="450" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>127</left>
-    <top>156</top>
-    <width>10</width>
-    <height>10</height>
+    <left>154</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,35" end="100,100" center="164,164" time="560" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
+</control>
+<!-- "See more" card ending a home row: replaces the cover. -->
+<control type="image">
+    <left>0</left>
+    <top>0</top>
+    <width>200</width>
+    <height>180</height>
+    <texture colordiffuse="FF262626">white.png</texture>
+    <visible>String.IsEqual(ListItem.Property(isSeeMore),true)</visible>
+</control>
+<control type="image">
+    <left>56</left>
+    <top>46</top>
+    <width>88</width>
+    <height>88</height>
+    <texture colordiffuse="FFFF5500">see-more.png</texture>
+    <visible>String.IsEqual(ListItem.Property(isSeeMore),true)</visible>
 </control>
                     <control type="label">
                         <left>0</left>
@@ -665,60 +695,78 @@
                         <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                         <aspectratio>scale</aspectratio>
                     </control>
-<!-- Playing wave: dark chip with animated orange bars laid over
-     the cover of the track currently playing. -->
+<!-- Playing wave: the cover of the track currently playing is dimmed
+     and five orange bars bounce over almost its whole height
+     (zoom anchored on the bottom of each bar, pulse = up and down). -->
 <control type="image">
-    <left>51</left>
-    <top>138</top>
-    <width>96</width>
-    <height>34</height>
-    <texture colordiffuse="B4000000">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <left>0</left>
+    <top>0</top>
+    <width>200</width>
+    <height>180</height>
+    <texture colordiffuse="A0000000">white.png</texture>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
 </control>
 <control type="image">
-    <left>63</left>
-    <top>148</top>
-    <width>10</width>
-    <height>18</height>
+    <left>26</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,30" end="100,100" center="36,164" time="520" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>79</left>
-    <top>140</top>
-    <width>10</width>
-    <height>26</height>
+    <left>58</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,55" end="100,100" center="68,164" time="380" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>95</left>
-    <top>152</top>
-    <width>10</width>
-    <height>14</height>
+    <left>90</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,20" end="100,100" center="100,164" time="610" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>111</left>
-    <top>144</top>
-    <width>10</width>
-    <height>22</height>
+    <left>122</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,45" end="100,100" center="132,164" time="450" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>127</left>
-    <top>156</top>
-    <width>10</width>
-    <height>10</height>
+    <left>154</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,35" end="100,100" center="164,164" time="560" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
+</control>
+<!-- "See more" card ending a home row: replaces the cover. -->
+<control type="image">
+    <left>0</left>
+    <top>0</top>
+    <width>200</width>
+    <height>180</height>
+    <texture colordiffuse="FF262626">white.png</texture>
+    <visible>String.IsEqual(ListItem.Property(isSeeMore),true)</visible>
+</control>
+<control type="image">
+    <left>56</left>
+    <top>46</top>
+    <width>88</width>
+    <height>88</height>
+    <texture colordiffuse="FFFF5500">see-more.png</texture>
+    <visible>String.IsEqual(ListItem.Property(isSeeMore),true)</visible>
 </control>
                     <control type="image">
                         <left>-3</left>
@@ -807,60 +855,78 @@
                         <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                         <aspectratio>scale</aspectratio>
                     </control>
-<!-- Playing wave: dark chip with animated orange bars laid over
-     the cover of the track currently playing. -->
+<!-- Playing wave: the cover of the track currently playing is dimmed
+     and five orange bars bounce over almost its whole height
+     (zoom anchored on the bottom of each bar, pulse = up and down). -->
 <control type="image">
-    <left>51</left>
-    <top>138</top>
-    <width>96</width>
-    <height>34</height>
-    <texture colordiffuse="B4000000">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <left>0</left>
+    <top>0</top>
+    <width>200</width>
+    <height>180</height>
+    <texture colordiffuse="A0000000">white.png</texture>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
 </control>
 <control type="image">
-    <left>63</left>
-    <top>148</top>
-    <width>10</width>
-    <height>18</height>
+    <left>26</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,30" end="100,100" center="36,164" time="520" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>79</left>
-    <top>140</top>
-    <width>10</width>
-    <height>26</height>
+    <left>58</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,55" end="100,100" center="68,164" time="380" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>95</left>
-    <top>152</top>
-    <width>10</width>
-    <height>14</height>
+    <left>90</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,20" end="100,100" center="100,164" time="610" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>111</left>
-    <top>144</top>
-    <width>10</width>
-    <height>22</height>
+    <left>122</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,45" end="100,100" center="132,164" time="450" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>127</left>
-    <top>156</top>
-    <width>10</width>
-    <height>10</height>
+    <left>154</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,35" end="100,100" center="164,164" time="560" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
+</control>
+<!-- "See more" card ending a home row: replaces the cover. -->
+<control type="image">
+    <left>0</left>
+    <top>0</top>
+    <width>200</width>
+    <height>180</height>
+    <texture colordiffuse="FF262626">white.png</texture>
+    <visible>String.IsEqual(ListItem.Property(isSeeMore),true)</visible>
+</control>
+<control type="image">
+    <left>56</left>
+    <top>46</top>
+    <width>88</width>
+    <height>88</height>
+    <texture colordiffuse="FFFF5500">see-more.png</texture>
+    <visible>String.IsEqual(ListItem.Property(isSeeMore),true)</visible>
 </control>
                     <control type="label">
                         <left>0</left>
@@ -900,60 +966,78 @@
                         <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                         <aspectratio>scale</aspectratio>
                     </control>
-<!-- Playing wave: dark chip with animated orange bars laid over
-     the cover of the track currently playing. -->
+<!-- Playing wave: the cover of the track currently playing is dimmed
+     and five orange bars bounce over almost its whole height
+     (zoom anchored on the bottom of each bar, pulse = up and down). -->
 <control type="image">
-    <left>51</left>
-    <top>138</top>
-    <width>96</width>
-    <height>34</height>
-    <texture colordiffuse="B4000000">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <left>0</left>
+    <top>0</top>
+    <width>200</width>
+    <height>180</height>
+    <texture colordiffuse="A0000000">white.png</texture>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
 </control>
 <control type="image">
-    <left>63</left>
-    <top>148</top>
-    <width>10</width>
-    <height>18</height>
+    <left>26</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,30" end="100,100" center="36,164" time="520" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>79</left>
-    <top>140</top>
-    <width>10</width>
-    <height>26</height>
+    <left>58</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,55" end="100,100" center="68,164" time="380" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>95</left>
-    <top>152</top>
-    <width>10</width>
-    <height>14</height>
+    <left>90</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,20" end="100,100" center="100,164" time="610" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>111</left>
-    <top>144</top>
-    <width>10</width>
-    <height>22</height>
+    <left>122</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,45" end="100,100" center="132,164" time="450" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>127</left>
-    <top>156</top>
-    <width>10</width>
-    <height>10</height>
+    <left>154</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,35" end="100,100" center="164,164" time="560" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
+</control>
+<!-- "See more" card ending a home row: replaces the cover. -->
+<control type="image">
+    <left>0</left>
+    <top>0</top>
+    <width>200</width>
+    <height>180</height>
+    <texture colordiffuse="FF262626">white.png</texture>
+    <visible>String.IsEqual(ListItem.Property(isSeeMore),true)</visible>
+</control>
+<control type="image">
+    <left>56</left>
+    <top>46</top>
+    <width>88</width>
+    <height>88</height>
+    <texture colordiffuse="FFFF5500">see-more.png</texture>
+    <visible>String.IsEqual(ListItem.Property(isSeeMore),true)</visible>
 </control>
                     <control type="image">
                         <left>-3</left>
@@ -1042,60 +1126,78 @@
                         <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                         <aspectratio>scale</aspectratio>
                     </control>
-<!-- Playing wave: dark chip with animated orange bars laid over
-     the cover of the track currently playing. -->
+<!-- Playing wave: the cover of the track currently playing is dimmed
+     and five orange bars bounce over almost its whole height
+     (zoom anchored on the bottom of each bar, pulse = up and down). -->
 <control type="image">
-    <left>51</left>
-    <top>138</top>
-    <width>96</width>
-    <height>34</height>
-    <texture colordiffuse="B4000000">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <left>0</left>
+    <top>0</top>
+    <width>200</width>
+    <height>180</height>
+    <texture colordiffuse="A0000000">white.png</texture>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
 </control>
 <control type="image">
-    <left>63</left>
-    <top>148</top>
-    <width>10</width>
-    <height>18</height>
+    <left>26</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,30" end="100,100" center="36,164" time="520" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>79</left>
-    <top>140</top>
-    <width>10</width>
-    <height>26</height>
+    <left>58</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,55" end="100,100" center="68,164" time="380" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>95</left>
-    <top>152</top>
-    <width>10</width>
-    <height>14</height>
+    <left>90</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,20" end="100,100" center="100,164" time="610" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>111</left>
-    <top>144</top>
-    <width>10</width>
-    <height>22</height>
+    <left>122</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,45" end="100,100" center="132,164" time="450" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>127</left>
-    <top>156</top>
-    <width>10</width>
-    <height>10</height>
+    <left>154</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,35" end="100,100" center="164,164" time="560" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
+</control>
+<!-- "See more" card ending a home row: replaces the cover. -->
+<control type="image">
+    <left>0</left>
+    <top>0</top>
+    <width>200</width>
+    <height>180</height>
+    <texture colordiffuse="FF262626">white.png</texture>
+    <visible>String.IsEqual(ListItem.Property(isSeeMore),true)</visible>
+</control>
+<control type="image">
+    <left>56</left>
+    <top>46</top>
+    <width>88</width>
+    <height>88</height>
+    <texture colordiffuse="FFFF5500">see-more.png</texture>
+    <visible>String.IsEqual(ListItem.Property(isSeeMore),true)</visible>
 </control>
                     <control type="label">
                         <left>0</left>
@@ -1135,60 +1237,78 @@
                         <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                         <aspectratio>scale</aspectratio>
                     </control>
-<!-- Playing wave: dark chip with animated orange bars laid over
-     the cover of the track currently playing. -->
+<!-- Playing wave: the cover of the track currently playing is dimmed
+     and five orange bars bounce over almost its whole height
+     (zoom anchored on the bottom of each bar, pulse = up and down). -->
 <control type="image">
-    <left>51</left>
-    <top>138</top>
-    <width>96</width>
-    <height>34</height>
-    <texture colordiffuse="B4000000">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <left>0</left>
+    <top>0</top>
+    <width>200</width>
+    <height>180</height>
+    <texture colordiffuse="A0000000">white.png</texture>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
 </control>
 <control type="image">
-    <left>63</left>
-    <top>148</top>
-    <width>10</width>
-    <height>18</height>
+    <left>26</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,30" end="100,100" center="36,164" time="520" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>79</left>
-    <top>140</top>
-    <width>10</width>
-    <height>26</height>
+    <left>58</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,55" end="100,100" center="68,164" time="380" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>95</left>
-    <top>152</top>
-    <width>10</width>
-    <height>14</height>
+    <left>90</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,20" end="100,100" center="100,164" time="610" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>111</left>
-    <top>144</top>
-    <width>10</width>
-    <height>22</height>
+    <left>122</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,45" end="100,100" center="132,164" time="450" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>127</left>
-    <top>156</top>
-    <width>10</width>
-    <height>10</height>
+    <left>154</left>
+    <top>16</top>
+    <width>20</width>
+    <height>148</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,35" end="100,100" center="164,164" time="560" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
+</control>
+<!-- "See more" card ending a home row: replaces the cover. -->
+<control type="image">
+    <left>0</left>
+    <top>0</top>
+    <width>200</width>
+    <height>180</height>
+    <texture colordiffuse="FF262626">white.png</texture>
+    <visible>String.IsEqual(ListItem.Property(isSeeMore),true)</visible>
+</control>
+<control type="image">
+    <left>56</left>
+    <top>46</top>
+    <width>88</width>
+    <height>88</height>
+    <texture colordiffuse="FFFF5500">see-more.png</texture>
+    <visible>String.IsEqual(ListItem.Property(isSeeMore),true)</visible>
 </control>
                     <control type="image">
                         <left>-3</left>
@@ -1297,7 +1417,7 @@
     <width>52</width>
     <height>30</height>
     <texture colordiffuse="B4000000">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
 </control>
 <control type="image">
     <left>44</left>
@@ -1305,8 +1425,8 @@
     <width>10</width>
     <height>16</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>54</left>
@@ -1314,8 +1434,8 @@
     <width>10</width>
     <height>10</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="90" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="90" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>64</left>
@@ -1323,8 +1443,8 @@
     <width>10</width>
     <height>20</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>74</left>
@@ -1332,8 +1452,8 @@
     <width>10</width>
     <height>12</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="270" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="270" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
                         <control type="label">
                             <left>124</left>
@@ -1345,7 +1465,7 @@
                             <textcolor>FFFAFAFA</textcolor>
                             <selectedcolor>FFFF5500</selectedcolor>
                             <aligny>center</aligny>
-                            <visible>!String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <visible>!String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>                        <control type="label">
                             <left>124</left>
                             <top>14</top>
@@ -1356,7 +1476,7 @@
                             <textcolor>FFFF5500</textcolor>
                             <selectedcolor>FFFF5500</selectedcolor>
                             <aligny>center</aligny>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
                         <control type="label">
                             <left>124</left>
@@ -1382,8 +1502,8 @@
                             <width>16</width>
                             <height>18</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1256</left>
@@ -1391,8 +1511,8 @@
                             <width>16</width>
                             <height>30</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="60" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="60" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1280</left>
@@ -1400,8 +1520,8 @@
                             <width>16</width>
                             <height>12</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="120" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="120" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1304</left>
@@ -1409,8 +1529,8 @@
                             <width>16</width>
                             <height>24</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1328</left>
@@ -1418,8 +1538,8 @@
                             <width>16</width>
                             <height>16</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="240" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="240" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1352</left>
@@ -1427,8 +1547,8 @@
                             <width>16</width>
                             <height>28</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1376</left>
@@ -1436,8 +1556,8 @@
                             <width>16</width>
                             <height>18</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="360" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="360" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1400</left>
@@ -1445,8 +1565,8 @@
                             <width>16</width>
                             <height>30</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="420" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="420" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1424</left>
@@ -1454,8 +1574,8 @@
                             <width>16</width>
                             <height>12</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="480" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="480" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1448</left>
@@ -1463,8 +1583,8 @@
                             <width>16</width>
                             <height>24</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="540" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="540" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1472</left>
@@ -1472,8 +1592,8 @@
                             <width>16</width>
                             <height>16</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="600" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="600" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="label">
                             <left>1296</left>
@@ -1486,7 +1606,7 @@
                             <selectedcolor>FFFF5500</selectedcolor>
                             <align>right</align>
                             <aligny>center</aligny>
-                            <visible>!String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <visible>!String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>                        <control type="label">
                             <left>1296</left>
                             <top>0</top>
@@ -1498,7 +1618,7 @@
                             <selectedcolor>FFFF5500</selectedcolor>
                             <align>right</align>
                             <aligny>center</aligny>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
                         <control type="label">
                             <left>20</left>
@@ -1545,7 +1665,7 @@
     <width>52</width>
     <height>30</height>
     <texture colordiffuse="B4000000">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
 </control>
 <control type="image">
     <left>44</left>
@@ -1553,8 +1673,8 @@
     <width>10</width>
     <height>16</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>54</left>
@@ -1562,8 +1682,8 @@
     <width>10</width>
     <height>10</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="90" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="90" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>64</left>
@@ -1571,8 +1691,8 @@
     <width>10</width>
     <height>20</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>74</left>
@@ -1580,8 +1700,8 @@
     <width>10</width>
     <height>12</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="270" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="270" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
                         <control type="label">
                             <left>124</left>
@@ -1619,8 +1739,8 @@
                             <width>16</width>
                             <height>18</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1256</left>
@@ -1628,8 +1748,8 @@
                             <width>16</width>
                             <height>30</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="60" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="60" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1280</left>
@@ -1637,8 +1757,8 @@
                             <width>16</width>
                             <height>12</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="120" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="120" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1304</left>
@@ -1646,8 +1766,8 @@
                             <width>16</width>
                             <height>24</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1328</left>
@@ -1655,8 +1775,8 @@
                             <width>16</width>
                             <height>16</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="240" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="240" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1352</left>
@@ -1664,8 +1784,8 @@
                             <width>16</width>
                             <height>28</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1376</left>
@@ -1673,8 +1793,8 @@
                             <width>16</width>
                             <height>18</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="360" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="360" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1400</left>
@@ -1682,8 +1802,8 @@
                             <width>16</width>
                             <height>30</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="420" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="420" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1424</left>
@@ -1691,8 +1811,8 @@
                             <width>16</width>
                             <height>12</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="480" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="480" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1448</left>
@@ -1700,8 +1820,8 @@
                             <width>16</width>
                             <height>24</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="540" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="540" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1472</left>
@@ -1709,8 +1829,8 @@
                             <width>16</width>
                             <height>16</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="600" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="600" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="label">
                             <left>1296</left>
@@ -1723,7 +1843,7 @@
                             <selectedcolor>FFFF5500</selectedcolor>
                             <align>right</align>
                             <aligny>center</aligny>
-                            <visible>!String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <visible>!String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>                        <control type="label">
                             <left>1296</left>
                             <top>0</top>
@@ -1735,7 +1855,7 @@
                             <selectedcolor>FFFF5500</selectedcolor>
                             <align>right</align>
                             <aligny>center</aligny>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker)) + !String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
                         <control type="label">
                             <left>20</left>
@@ -1823,7 +1943,7 @@
     <width>52</width>
     <height>30</height>
     <texture colordiffuse="B4000000">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
 </control>
 <control type="image">
     <left>44</left>
@@ -1831,8 +1951,8 @@
     <width>10</width>
     <height>16</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>54</left>
@@ -1840,8 +1960,8 @@
     <width>10</width>
     <height>10</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="90" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="90" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>64</left>
@@ -1849,8 +1969,8 @@
     <width>10</width>
     <height>20</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>74</left>
@@ -1858,8 +1978,8 @@
     <width>10</width>
     <height>12</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="270" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="270" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
                         <control type="label">
                             <left>124</left>
@@ -1871,7 +1991,7 @@
                             <textcolor>FFFAFAFA</textcolor>
                             <selectedcolor>FFFF5500</selectedcolor>
                             <aligny>center</aligny>
-                            <visible>!String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <visible>!String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
                         </control>                        <control type="label">
                             <left>124</left>
                             <top>14</top>
@@ -1882,7 +2002,7 @@
                             <textcolor>FFFF5500</textcolor>
                             <selectedcolor>FFFF5500</selectedcolor>
                             <aligny>center</aligny>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
                         </control>
                         <control type="label">
                             <left>124</left>
@@ -1907,8 +2027,8 @@
                             <width>16</width>
                             <height>18</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1256</left>
@@ -1916,8 +2036,8 @@
                             <width>16</width>
                             <height>30</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="60" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="60" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1280</left>
@@ -1925,8 +2045,8 @@
                             <width>16</width>
                             <height>12</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="120" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="120" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1304</left>
@@ -1934,8 +2054,8 @@
                             <width>16</width>
                             <height>24</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1328</left>
@@ -1943,8 +2063,8 @@
                             <width>16</width>
                             <height>16</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="240" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="240" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1352</left>
@@ -1952,8 +2072,8 @@
                             <width>16</width>
                             <height>28</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1376</left>
@@ -1961,8 +2081,8 @@
                             <width>16</width>
                             <height>18</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="360" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="360" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1400</left>
@@ -1970,8 +2090,8 @@
                             <width>16</width>
                             <height>30</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="420" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="420" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1424</left>
@@ -1979,8 +2099,8 @@
                             <width>16</width>
                             <height>12</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="480" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="480" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1448</left>
@@ -1988,8 +2108,8 @@
                             <width>16</width>
                             <height>24</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="540" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="540" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1472</left>
@@ -1997,8 +2117,8 @@
                             <width>16</width>
                             <height>16</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="600" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="600" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="label">
                             <left>1296</left>
@@ -2011,7 +2131,7 @@
                             <selectedcolor>FFFF5500</selectedcolor>
                             <align>right</align>
                             <aligny>center</aligny>
-                            <visible>!String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <visible>!String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
                         </control>                        <control type="label">
                             <left>1296</left>
                             <top>0</top>
@@ -2023,7 +2143,7 @@
                             <selectedcolor>FFFF5500</selectedcolor>
                             <align>right</align>
                             <aligny>center</aligny>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
                         </control>
                     </control>
                 </itemlayout>
@@ -2056,7 +2176,7 @@
     <width>52</width>
     <height>30</height>
     <texture colordiffuse="B4000000">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
 </control>
 <control type="image">
     <left>44</left>
@@ -2064,8 +2184,8 @@
     <width>10</width>
     <height>16</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>54</left>
@@ -2073,8 +2193,8 @@
     <width>10</width>
     <height>10</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="90" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="90" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>64</left>
@@ -2082,8 +2202,8 @@
     <width>10</width>
     <height>20</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
     <left>74</left>
@@ -2091,8 +2211,8 @@
     <width>10</width>
     <height>12</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="270" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="slide" start="0,0" end="0,-6" time="500" delay="270" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
                         <control type="label">
                             <left>124</left>
@@ -2128,8 +2248,8 @@
                             <width>16</width>
                             <height>18</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1256</left>
@@ -2137,8 +2257,8 @@
                             <width>16</width>
                             <height>30</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="60" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="60" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1280</left>
@@ -2146,8 +2266,8 @@
                             <width>16</width>
                             <height>12</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="120" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="120" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1304</left>
@@ -2155,8 +2275,8 @@
                             <width>16</width>
                             <height>24</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="180" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1328</left>
@@ -2164,8 +2284,8 @@
                             <width>16</width>
                             <height>16</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="240" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="240" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1352</left>
@@ -2173,8 +2293,8 @@
                             <width>16</width>
                             <height>28</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1376</left>
@@ -2182,8 +2302,8 @@
                             <width>16</width>
                             <height>18</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="360" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="360" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1400</left>
@@ -2191,8 +2311,8 @@
                             <width>16</width>
                             <height>30</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="420" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="420" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1424</left>
@@ -2200,8 +2320,8 @@
                             <width>16</width>
                             <height>12</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="480" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="480" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1448</left>
@@ -2209,8 +2329,8 @@
                             <width>16</width>
                             <height>24</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="540" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="540" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="image">
                             <left>1472</left>
@@ -2218,8 +2338,8 @@
                             <width>16</width>
                             <height>16</height>
                             <texture colordiffuse="FFFF5500">white.png</texture>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="600" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+                            <animation effect="slide" start="0,0" end="0,-10" time="500" delay="600" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
                         </control>
                         <control type="label">
                             <left>1296</left>
@@ -2232,7 +2352,7 @@
                             <selectedcolor>FFFF5500</selectedcolor>
                             <align>right</align>
                             <aligny>center</aligny>
-                            <visible>!String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <visible>!String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
                         </control>                        <control type="label">
                             <left>1296</left>
                             <top>0</top>
@@ -2244,7 +2364,7 @@
                             <selectedcolor>FFFF5500</selectedcolor>
                             <align>right</align>
                             <aligny>center</aligny>
-                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+                            <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
                         </control>
                     </control>
                 </focusedlayout>
@@ -2275,60 +2395,61 @@
                         <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                         <aspectratio>scale</aspectratio>
                     </control>
-<!-- Playing wave: dark chip with animated orange bars laid over
-     the cover of the track currently playing. -->
+<!-- Playing wave: the cover of the track currently playing is dimmed
+     and five orange bars bounce over almost its whole height
+     (zoom anchored on the bottom of each bar, pulse = up and down). -->
 <control type="image">
-    <left>51</left>
-    <top>158</top>
-    <width>96</width>
-    <height>34</height>
-    <texture colordiffuse="B4000000">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <left>0</left>
+    <top>0</top>
+    <width>200</width>
+    <height>200</height>
+    <texture colordiffuse="A0000000">white.png</texture>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
 </control>
 <control type="image">
-    <left>63</left>
-    <top>168</top>
-    <width>10</width>
-    <height>18</height>
+    <left>26</left>
+    <top>16</top>
+    <width>20</width>
+    <height>168</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,30" end="100,100" center="36,184" time="520" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>79</left>
-    <top>160</top>
-    <width>10</width>
-    <height>26</height>
+    <left>58</left>
+    <top>16</top>
+    <width>20</width>
+    <height>168</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,55" end="100,100" center="68,184" time="380" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>95</left>
-    <top>172</top>
-    <width>10</width>
-    <height>14</height>
+    <left>90</left>
+    <top>16</top>
+    <width>20</width>
+    <height>168</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,20" end="100,100" center="100,184" time="610" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>111</left>
-    <top>164</top>
-    <width>10</width>
-    <height>22</height>
+    <left>122</left>
+    <top>16</top>
+    <width>20</width>
+    <height>168</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,45" end="100,100" center="132,184" time="450" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>127</left>
-    <top>176</top>
-    <width>10</width>
-    <height>10</height>
+    <left>154</left>
+    <top>16</top>
+    <width>20</width>
+    <height>168</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,35" end="100,100" center="164,184" time="560" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
                     <control type="label">
                         <left>0</left>
@@ -2368,60 +2489,61 @@
                         <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                         <aspectratio>scale</aspectratio>
                     </control>
-<!-- Playing wave: dark chip with animated orange bars laid over
-     the cover of the track currently playing. -->
+<!-- Playing wave: the cover of the track currently playing is dimmed
+     and five orange bars bounce over almost its whole height
+     (zoom anchored on the bottom of each bar, pulse = up and down). -->
 <control type="image">
-    <left>51</left>
-    <top>158</top>
-    <width>96</width>
-    <height>34</height>
-    <texture colordiffuse="B4000000">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
+    <left>0</left>
+    <top>0</top>
+    <width>200</width>
+    <height>200</height>
+    <texture colordiffuse="A0000000">white.png</texture>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
 </control>
 <control type="image">
-    <left>63</left>
-    <top>168</top>
-    <width>10</width>
-    <height>18</height>
+    <left>26</left>
+    <top>16</top>
+    <width>20</width>
+    <height>168</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="0" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,30" end="100,100" center="36,184" time="520" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>79</left>
-    <top>160</top>
-    <width>10</width>
-    <height>26</height>
+    <left>58</left>
+    <top>16</top>
+    <width>20</width>
+    <height>168</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="100" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,55" end="100,100" center="68,184" time="380" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>95</left>
-    <top>172</top>
-    <width>10</width>
-    <height>14</height>
+    <left>90</left>
+    <top>16</top>
+    <width>20</width>
+    <height>168</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="200" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,20" end="100,100" center="100,184" time="610" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>111</left>
-    <top>164</top>
-    <width>10</width>
-    <height>22</height>
+    <left>122</left>
+    <top>16</top>
+    <width>20</width>
+    <height>168</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="300" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,45" end="100,100" center="132,184" time="450" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
 <control type="image">
-    <left>127</left>
-    <top>176</top>
-    <width>10</width>
-    <height>10</height>
+    <left>154</left>
+    <top>16</top>
+    <width>20</width>
+    <height>168</height>
     <texture colordiffuse="FFFF5500">white.png</texture>
-    <visible>String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))</visible>
-    <animation effect="slide" start="0,0" end="0,-8" time="500" delay="400" loop="true" reversible="true" tween="sine" condition="String.IsEqual(ListItem.Property(playing_marker), Window.Property(playing_marker))">Conditional</animation>
+    <visible>String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))</visible>
+    <animation effect="zoom" start="100,35" end="100,100" center="164,184" time="560" pulse="true" tween="sine" easing="inout" condition="String.IsEqual(ListItem.Property(playing_marker), Window(Home).Property(soundcloud.playing_marker))">Conditional</animation>
 </control>
                     <control type="image">
                         <left>-3</left>

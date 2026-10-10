@@ -3,7 +3,7 @@
 # SoundCloud Add-on for [Kodi](https://github.com/xbmc/xbmc)
 
 <!-- version:auto -->
-**Version : 5.9.6027**
+**Version : 6.0.2**
 <!-- /version:auto -->
 
 <img align="right" src="https://github.com/xbmc/xbmc/raw/master/addons/webinterface.default/icon-128.png" alt="Kodi logo">
@@ -13,370 +13,336 @@
 [![Kodi wiki link](https://img.shields.io/badge/Kodi-Wiki-informational.svg)](https://kodi.wiki/view/Add-on:SoundCloud)
 [![Kodi versions link](https://img.shields.io/badge/Kodi-v21%20%22Omega%22-green.svg)](https://kodi.wiki/view/Releases)
 
-> 🍴 **This is a community fork** of
-> [jaylinski/kodi-addon-soundcloud](https://github.com/jaylinski/kodi-addon-soundcloud)
-> maintained at
-> [github.com/TheWorms/kodi-addon-soundcloud](https://github.com/TheWorms/kodi-addon-soundcloud).
-> It adds an "app-like" full-screen interface, OAuth token
-> authentication, a French translation, skin home-screen widgets and
-> fullscreen "now playing" overlays on top of the original add-on.
-> Bug reports and pull requests for the v5+ features should go to
-> **this** fork; for the classic plugin-style menu (v4 and earlier),
-> refer to the original project.
+SoundCloud in Kodi, with a real full-screen interface: side menu,
+customisable home rows, automatic play queue, mini-player, stations and
+four "Now playing" screens. Connect your account in one click with the
+bundled browser extension and get your likes, playlists, followings and
+listening history.
 
-This [Kodi](https://github.com/xbmc/xbmc) add-on provides a modern
-full-screen interface for SoundCloud, with a sidebar, horizontal
-carousel rows on the home screen, autoplay, a built-in mini-player and
-four optional fullscreen "now playing" overlay styles (Cinema,
-Waveform, Editorial, Vinyl).
+![Home screen in tiles layout: the playing track is marked by the orange wave, a "See more" card ends the row, mini-player at the bottom](docs/screenshots/home-playing.jpg)
 
-## Installation
+> **Community fork** of
+> [jaylinski/kodi-addon-soundcloud](https://github.com/jaylinski/kodi-addon-soundcloud),
+> maintained at [TheWorms/kodi-addon-soundcloud](https://github.com/TheWorms/kodi-addon-soundcloud).
+> Bug reports and requests about the full-screen interface (v5 and
+> later) belong here; for the old plugin menu (v4 and earlier), see the
+> original project.
 
-**Recommended — TheWorms repository** (automatic updates).
+## Contents
 
-Download the repository by clicking **[HERE](https://raw.githubusercontent.com/TheWorms/kodi-repo/main/zips/repository.theworms/repository.theworms.zip)**, then in Kodi:
-
-1. **Add-ons** → **Install from zip file** → select the downloaded zip
-   *(if Kodi blocks it, enable **Unknown sources** under Settings → Add-ons)*
-2. **Install from repository** → **TheWorms Repository** → pick the add-on
-3. Updates will then be automatic
-
-**Manual install (alternative):** download the add-on zip from the [Releases](../../releases) page, then **Add-ons** → **Install from zip file**.
-
-## What's new in v6
-
-The v6 release consolidates the full-screen interface around
-**Stations, personalized home rows, endless playback and a full
-stability/security pass**:
-
-* **Quick settings** — the addon settings are reachable from the
-  sidebar, without leaving the interface
-* **Endless playback** — when the queue runs out, the addon fetches
-  related tracks and extends the playlist on its own
-* **Sleep timer** — stops playback after N minutes of *effective*
-  listening (pausing suspends the countdown)
-* **Likes from the addon** — long-press (context menu) a track to add
-  or remove it from your SoundCloud likes
-* **List layout** — third display mode: sidebar + large vertical
-  lists on every page; the home screen shows one section per
-  configured row
-* **Stations** — dedicated sidebar entry: the genre stations from the
-  discover feed, plus your liked stations with an OAuth token
-* **5 new configurable home rows** — "Recently played", "Mixed for
-  you" (rebuilt locally from your play history), "Based on what you
-  like", "Created by SoundCloud" and "Buzzing artists"
-* **Simplified mini-player** — hidden, or a compact bar (cover + title
-  + progress); hidden = full-height content
-* **Configurable screensaver** — automatic fullscreen overlay after X
-  seconds of playback, with an on/off toggle
-* **Reliable playing markers** — the current track lights up in orange
-  (title/duration) with a cover wave in every list, including remote
-  Next/Previous
-* **OAuth token button** — guided token renewal without leaving the
-  interface, with an immediate check against SoundCloud
-* **Read-only client ID display** in Settings → Account
-* **Playback freeze fix** — signed CDN URLs that expire mid-track are
-  re-resolved and playback resumes where it stopped
-* **"See more" per row** — every home row opens its dedicated page
-* **One-press navigation** — a Right press from the side menu lands
-  directly in the content
-* **Stability and security (audit fixes)** — the fullscreen overlay is
-  built on the main thread (Back and arrows work, it closes at the
-  end of the queue and never opens on top of Settings), all
-  background threads stop when the interface closes (no more
-  "script didn't stop in 5 seconds" at Kodi shutdown), API paths are
-  validated before the OAuth token is attached (the token can no
-  longer be sent to a forged host), and API error responses no longer
-  crash the addon
-
-## What's new in v5
-
-The v5 release introduced a **brand-new full-screen interface** that replaces
-the classic plugin-style menu with an "app-like" experience:
-
-* **Sidebar navigation** — Home, Search, Likes, My playlists, Following, Settings
-* **Home screen with up to 4 horizontal rows** (configurable order and content):
-  Likes, Trending, My playlists, Following
-* **Mini-player** at the bottom showing cover, title, artist, time and a
-  SoundCloud-orange progress bar — with optional play/pause/next/prev controls
-* **Auto-play next track**: clicking a track queues all visible tracks so Kodi
-  plays them in sequence automatically
-* **Pagination**: pages show a "Next page" item at the end when there are more
-  results
-* **Selection follows the playing track** during autoplay
-* **Configurable everywhere** — toggles in Settings (layout, mini-player
-  mode, autoplay, shuffle, row contents)
-* **Fullscreen "Now Playing" overlays** (v5.8+): pick from 4 visual
-  styles — *Cinema* (Apple-Music-like Ken Burns), *Waveform* (animated
-  audio visualizer), *Editorial* (magazine layout with pull quote from
-  the track description), *Vinyl* (spinning record with cover in the
-  central label). Disable entirely if you prefer the mini-player only.
-* **Account tier detection** — the addon reads your
-  consumer subscription product from `/me` and stores it (Free /
-  Go / Go+) so future code paths can adapt.
-* **Keyboard navigation in fullscreen Now Playing**  —
-  Left/Right seek ±10 s, Up skips to next track, Down restarts the
-  current track (or jumps to previous if you're within the first 3
-  seconds), OK toggles pause/play.
-* **One-click token helper page** — a companion web page at
-  [theworms.github.io/kodi-addon-soundcloud](https://theworms.github.io/kodi-addon-soundcloud/)
-  with a console snippet that grabs your SoundCloud OAuth token in a
-  single click — no more F12 / Network tab manual fiddling.
-
-Since v5.7 the full-screen UI is the only interface — the classic
-plugin-style menu was removed. Skin home widgets continue to work via
-the dedicated `/widget/*` routes (see "Widgets" below).
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Installation](#installation)
+- [Connecting your SoundCloud account](#connecting-your-soundcloud-account)
+- [Usage](#usage)
+- [Settings](#settings)
+- [Now playing screens](#now-playing-screens)
+- [Opening SoundCloud faster](#opening-soundcloud-faster)
+- [Home screen widgets](#home-screen-widgets)
+- [Privacy](#privacy)
+- [Troubleshooting](#troubleshooting)
+- [What's new](#whats-new)
+- [Credits and license](#credits-and-license)
 
 ## Features
 
-* Search
-* Discover new music
-* Play tracks, albums and playlists (Free tier compatible)
-* Optional sign-in via OAuth token to access your likes, playlists, following and reposts
-* Full-screen interface with sidebar, carousel rows and mini-player (v5)
-* Fullscreen "Now Playing" overlays in 4 styles (v5.8+)
-* Keyboard shortcuts in fullscreen Now Playing (v5.9.6008+)
-* Optional background service for instant startup (v5.9.6017+)
+**Interface**
+- Side menu: Home, Search, Likes, Stations, My playlists, Following and
+  Settings.
+- Two layouts, switchable on the fly: **Tiles** (horizontal rows) or
+  **List** (large vertical lists).
+- **4 configurable home rows**, each opened as a full page by its
+  **"See more"** card.
+- **Mini-player** at the bottom of the screen (cover, title, progress),
+  can be hidden.
+- The playing track is marked everywhere: **orange wave** over the
+  cover, orange title and duration in the List layout. Rows follow the
+  play queue.
 
-## Optional dependency — Pillow
+**Playback**
+- Selecting a track queues every track of the row or page.
+- Shuffle, **endless playback** (related tracks added when the queue
+  ends), **sleep timer**.
+- Choice of audio format: light Opus, adaptive MP3 HLS or progressive
+  MP3.
+- Automatic recovery when a SoundCloud stream URL expires mid-track.
 
-The fullscreen "Now Playing" overlays (Cinema/Waveform/Editorial/Vinyl)
-look noticeably better with [Pillow](https://pypi.org/project/Pillow/)
-installed, because Pillow lets the addon generate a real Gaussian-blurred
-version of the cover art for the background. Without Pillow, the cover
-is just shown dimmed.
+**SoundCloud account** (with an OAuth token)
+- Your likes, playlists, followings and listening history.
+- Personal rows: "Recently played", "Mixed for you", "Based on what you
+  like".
+- Like and unlike tracks from Kodi (context menu).
+- Your liked stations, on top of the genre stations.
 
-To install: Kodi → *Add-ons → Install from repository → Kodi Add-on
-repository → Look and feel → Pillow* (or directly search for
-`script.module.pil`). The addon will pick it up automatically on next
-playback.
+**Also**
+- Four fullscreen "Now playing" screens: Cinema, Waveform, Editorial
+  and Vinyl.
+- Widgets for the Kodi home screen.
+- Optional background service for an instant start.
+- French and English interface (German and Dutch partial).
 
-Pillow is **optional**: the addon still works without it, you just lose
-the blur effect.
+## Screenshots
 
-## Launching SoundCloud without the music browser flash
+| Home, tiles layout | List layout |
+|:---:|:---:|
+| ![Home in tiles layout](docs/screenshots/home.jpg) | ![List layout, playing track in orange](docs/screenshots/list-layout.jpg) |
+| **Stations** | **Inside a station** |
+| ![Genre stations](docs/screenshots/stations.jpg) | ![Tracks of a station as a grid](docs/screenshots/station-tracks.jpg) |
+| **Settings** | **"OAuth token" window** |
+| ![Settings, Display tab](docs/screenshots/settings.jpg) | ![OAuth token window: token valid and saved](docs/screenshots/token-saved.jpg) |
 
-When you click SoundCloud from Kodi's *Music → Add-ons* page, Kodi
-briefly shows the music browser before the full-screen UI takes over.
-There are three ways to deal with this, from least to most invasive:
+The screenshots show the French interface; the add-on follows Kodi's
+language.
 
-### Option 1 — Background service (v5.9.6017+, recommended)
+## Installation
 
-The addon includes an optional background service that runs from Kodi
-login until Kodi shutdown. Its only job is to pre-create the loading
-splash window so it appears in ~50 ms when you click the addon,
-masking the music browser entirely.
+**Recommended: the TheWorms repository**, for automatic updates.
 
-1. *Settings → Account → Background service (faster open)* → toggle ON
-2. Restart Kodi (the service only starts at login)
-3. Click SoundCloud — the splash now appears instantly, hiding the
-   music browser
+1. Download the repository:
+   **[repository.theworms.zip](https://raw.githubusercontent.com/TheWorms/kodi-repo/main/zips/repository.theworms/repository.theworms.zip)**.
+2. In Kodi: **Add-ons → Install from zip file** → pick the zip. If Kodi
+   refuses, enable **Unknown sources** under *System → Add-ons*.
+3. **Install from repository → TheWorms Repository → Music add-ons →
+   SoundCloud**.
 
-Cost: a few MB of RAM consumed continuously by the running service.
-Default: off (opt-in).
+**Manual install**: download the add-on zip from the
+[Releases](../../releases) page, then **Install from zip file**.
+Updates are then not automatic.
 
-### Option 2 — Add a Kodi favourite
+**Requirements**: Kodi 21 "Omega". Dependencies
+(`script.module.requests`) are installed automatically.
 
-This bypasses the music browser entirely and is the fastest possible
-launch path.
+### Pillow (optional)
 
-1. Right-click (or context-menu) on SoundCloud in *Music → Add-ons*
-2. Choose **Add to favourites** — call it "SoundCloud" or whatever you like
-3. Edit your favourites file at
-   `~/.kodi/userdata/favourites.xml` and change the line for
-   SoundCloud from
-   `ActivateWindow(...)` to
-   `RunScript(plugin.audio.soundcloud)`
-4. Use the favourite from Kodi's home screen (or pin it to your skin's
-   home menu)
+With [Pillow](https://pypi.org/project/Pillow/) (`script.module.pil`),
+the "Now playing" screens show a blurred cover in the background.
+Without Pillow the cover is simply dimmed. Install it from the official
+Kodi repository (*Add-ons → Search → Pillow*); the add-on picks it up
+with the next track.
 
-### Option 3 — Add a home-menu shortcut in your skin
+## Connecting your SoundCloud account
 
-In Arctic Zephyr Reloaded:
-1. *Settings → Interface → Skin → Configure skin → Customise Home Menu*
-2. Pick (or add) a menu item
-3. For "Activate window" or "Action", use:
-   `RunScript(plugin.audio.soundcloud)`
+The add-on works without an account (search, trending, genre
+stations). For your likes, playlists, followings and history it needs
+the **OAuth token** of your soundcloud.com session. SoundCloud has not
+accepted new applications on its public API since 2021, so there is no
+"Sign in" button: the add-on reuses the website's token.
 
-In Estuary / Estuary MOD:
-1. *Customise Home Menu → choose item → Action*
-2. Set: `RunScript(plugin.audio.soundcloud)`
+The easiest way is the bundled **browser extension**, which picks up
+the token and sends it to Kodi. The full, illustrated procedure is on
+the help page:
 
-With either approach the UI opens immediately on top of the Kodi home
-screen — no music-browser flash, no detour.
+**➜ [theworms.github.io/kodi-addon-soundcloud](https://theworms.github.io/kodi-addon-soundcloud/get-token.html)**
 
-## Authentication (optional)
+<img align="right" width="420" src="docs/screenshots/token-window.jpg" alt="OAuth token window in Kodi">
 
-The add-on can access your personal SoundCloud data (likes, playlists,
-following, reposts) by authenticating with an OAuth token that you paste
-into the settings.
+1. **Install the "SoundCloud token for Kodi" extension**
+   ([download](https://theworms.github.io/kodi-addon-soundcloud/soundcloud-token-extension.zip);
+   Firefox 128+, Chrome, Edge, Brave). In Firefox it loads as a
+   temporary add-on, to be reloaded after the browser restarts; the
+   help page details the install. Source code:
+   [`tools/token-extension`](tools/token-extension).
+2. **Open [soundcloud.com](https://soundcloud.com)** while signed in.
+   The extension icon shows a green **OK** badge once the token is
+   picked up and accepted by SoundCloud.
+3. **In Kodi**, open *Settings → Account → Manage the OAuth token…*:
+   the window tells you whether the saved token is still valid.
+4. **In the extension, click "Send to Kodi"** (Kodi's IP address, web
+   server user name and password). The extension opens the window's
+   keyboard and types the token. Kodi must have *Settings → Services →
+   Control → Allow remote control via HTTP* enabled.
+5. **Press Save.** SoundCloud is asked right away: **valid** (with your
+   name and plan), **refused** (expired or wrong token, it is not kept)
+   or **could not be checked** (you choose whether to save it anyway).
 
-There is no "Sign in" button: SoundCloud's public API registration has
-been closed since 2021, so we reuse the token the SoundCloud website
-itself uses. The token is stored locally in Kodi's addon settings and
-sent only to `api-v2.soundcloud.com`.
+<br clear="right">
 
-### How to get your OAuth token
+**Without automatic sending**: *Copy token* in the extension, then
+*Enter token* in Kodi and paste it (a remote app such as Kore or Yatse
+can paste from your phone).
 
-Open the helper page:
-**[https://theworms.github.io/kodi-addon-soundcloud/](https://theworms.github.io/kodi-addon-soundcloud/)**
+**Without the extension**: the help page also covers the browser
+developer tools Network tab (F12), the `oauth_token` cookie, and the
+[`scripts/get_soundcloud_token.py`](scripts/get_soundcloud_token.py)
+script, which reads the token from your Firefox profile and can send it
+to Kodi.
 
-The page walks you through a one-click console snippet that grabs your
-token from soundcloud.com and shows it in a popup with a Copy button.
-The snippet runs entirely in your browser — the token never leaves
-your machine.
+**Renewal**: a token expires after a few months, or when you sign out
+of soundcloud.com. *Settings → Account → Token status* sums up the last
+check. A new token is used immediately, without restarting Kodi: the
+interface reloads its rows by itself.
 
-The helper page also includes a fallback manual procedure (F12
-DevTools, `Authorization` header) for the rare cases where the
-snippet doesn't work.
+**Free, Go, Go+**: all three plans work. On a Free account, SoundCloud
+only serves a 30-second excerpt of Go+ tracks; the *Skip Go+ excerpts*
+option keeps them out of the queue.
 
-Tokens expire after a few months or when you sign out from
-soundcloud.com — just repeat the procedure on the helper page when
-needed. The addon picks up token changes immediately, no Kodi restart
-required.
+## Usage
 
-### Free, Go, Go+ — what works?
+- **Navigation**: Right from the side menu enters the content, Back
+  returns to the previous page and then closes the add-on.
+- **Playback**: OK on a track starts it and queues the rest of the row
+  or page. On a playlist, an artist or a station, OK opens its content.
+- **"See more"**: the last card of a full row opens the row as a full
+  page, with *Next page* when SoundCloud has more.
+- **Likes**: context menu (C key or long press) on a track → *Add to
+  likes* / *Remove from likes*.
+- **Mini-player**: cover, title and progress of the playing track; the
+  remote's play/pause, next and previous keys drive the queue.
+- **Settings**: the button at the bottom of the side menu. Display
+  changes (layout, rows, trending genre) apply when you return to the
+  interface, without reopening it.
 
-Since v5.9.6005 the addon detects your SoundCloud subscription tier
-from `/me` and stores it. Today all three tiers work for streaming
-your own tracks and tracks marked as fully playable. Go+ exclusive
-tracks return a 30-second preview snippet on Free accounts (this is a
-SoundCloud server-side limitation, not an addon one).
+## Settings
 
-You can see your detected tier under *Settings → Account → Test
-authentication*.
+| Tab | Setting | What it does |
+|---|---|---|
+| **Display** | Layout | *Tiles* or *List* |
+| | Mini-player | Show or hide the bottom bar |
+| | Row 1 to 4 | Content of each home row: Your likes, Trending, Your playlists, You follow, Recently played, Mixed for you, Based on what you like, Created by SoundCloud, Buzzing artists, or off |
+| | Trending genre | All genres, Techno, House, Deep House, Electronic, Hip-hop, Ambient, Jazz… |
+| **Playback** | Audio format | Light Opus, adaptive MP3 HLS, progressive MP3 (default, the most stable) |
+| | Auto-play next track, Shuffle playback | Play the queue through, in order or not |
+| | Skip Go+ excerpts | Keep 30-second excerpts out of the queue |
+| | Endless playback | Append related tracks when the queue ends |
+| | Sleep timer | Stop after 15, 30, 60 or 120 min of actual listening (pausing suspends the countdown) |
+| | Tracks per page | 10, 20, 30 or 50 items per row and per page |
+| | Automatic fullscreen, style, delay | See [Now playing screens](#now-playing-screens) |
+| **Account** | Manage the OAuth token… | Opens the token window |
+| | Token status | Result of the last check (read-only) |
+| | Clear cache | Deletes the SoundCloud answers cached by the add-on |
+| | Background service | Instant add-on start (requires a Kodi restart) |
 
-### Privacy
+## Now playing screens
 
-* The token is stored **only** on your device, in Kodi's addon profile folder.
-* It is sent **only** to `api-v2.soundcloud.com` as the `Authorization` request header.
-* It is **redacted** from debug logs (the header value is replaced by `<redacted>` in `kodi.log`).
+During playback, the add-on can show a fullscreen screen over the
+interface. Pick the style in *Settings → Playback → Fullscreen style*;
+*Automatic fullscreen overlay* and *Delay before opening* decide
+whether it opens by itself and after how long.
 
-## Fullscreen "Now Playing" overlays
-
-When audio playback starts, the addon can open a custom fullscreen
-overlay on top of the home UI showing the cover, title, artist and
-progress. Pick one of four visual styles in
-*Settings → Playback → Fullscreen on playback*, or keep it disabled
-to rely on the mini-player only.
-
-| Style       | Look                                                                                                                |
-| ----------- | ------------------------------------------------------------------------------------------------------------------- |
-| **Off**     | No overlay. The mini-player at the bottom of the home UI is the only feedback.                                       |
-| **Cinema**  | Apple-Music style. Centred cover with slow Ken Burns zoom, blurred background, large title and artist underneath.    |
-| **Waveform**| 90 orange bars at the bottom animated continuously to simulate an audio visualizer. Real progress bar above the bars.|
-| **Editorial** | Magazine layout. Cover on the left third, large title and artist on the right, with a pull quote pulled from the SoundCloud track description (URLs and hashtag chains stripped, truncated at a sentence boundary). |
-| **Vinyl**   | A detailed black vinyl record on the left with the cover embedded in the central label, both rotating together at ~33⅓ RPM. Title and artist on the right.|
-
-### Keyboard shortcuts in Now Playing (v5.9.6008+)
-
-While a fullscreen overlay is visible, the following keys work:
-
-| Key            | Action                                                                |
-| -------------- | --------------------------------------------------------------------- |
-| **OK / Enter** | Toggle pause / play                                                   |
-| **Left**       | Seek backward 10 seconds                                              |
-| **Right**      | Seek forward 10 seconds                                               |
-| **Up**         | Next track                                                            |
-| **Down**       | Restart current track — or jump to previous if you're within the first 3 seconds |
-| **Back**       | Dismiss the overlay (music keeps playing, overlay re-opens on next track) |
-
-### Honest limitations
-
-* **Waveform is not actually audio-reactive.** Kodi's Python API
-  doesn't expose audio samples to addons, so the bars are animated by a
-  pseudo-random sinusoidal pattern. It LOOKS audio-reactive but is
-  decoupled from the actual music. The progress bar above the
-  visualizer however reflects real playback position.
-* **Vinyl rotation** uses Kodi's native continuous-rotate animation.
-  It's smooth on modern boxes but may stutter on lower-end devices
-  (Raspberry Pi 3 etc.). If so, switch to a different style.
-* **Editorial pull quote** depends on the SoundCloud track having a
-  description. Many user uploads don't, in which case the quote area
-  is left empty (intentional editorial restraint, not a bug).
-* **Custom fonts**: Kodi's Python WindowXML system does not allow addons
-  to register their own TTF fonts. All overlays therefore use the
-  standard Kodi font names. The editorial style achieves its feel
-  through layout and hierarchy, not through a bundled serif font.
-
-## Integration with Kodi
-
-Since v5.7 there is no classic plugin-style menu — the addon opens
-directly into its full-screen "app-like" interface.
-
-For different ways to launch the addon (Music browser, skin home
-shortcut, Kodi favourite, background service) see the
-[Launching SoundCloud without the music browser flash](#launching-soundcloud-without-the-music-browser-flash)
-section above. This section covers integration on Kodi's home screen
-through skin widgets.
-
-### Widgets (skin home menu)
-
-For users who want SoundCloud content directly on their Kodi home menu
-(e.g. a "My Likes" carousel on Arctic Zephyr Reloaded), the addon
-exposes flat directory routes that any skin's widget pane can target:
-
-| Route | Returns |
+| Style | Look |
 |---|---|
-| `plugin://plugin.audio.soundcloud/widget/likes/` | Tracks you've liked (requires OAuth token) |
-| `plugin://plugin.audio.soundcloud/widget/playlists/` | Your own playlists (requires OAuth token) |
-| `plugin://plugin.audio.soundcloud/widget/following/` | Artists you follow (requires OAuth token) |
-| `plugin://plugin.audio.soundcloud/widget/trending/` | Worldwide trending tracks |
-| `plugin://plugin.audio.soundcloud/widget/discover/` | SoundCloud's "Discover" mix |
-| `plugin://plugin.audio.soundcloud/widgets/` | Browseable list of all the above |
+| **Off** | No fullscreen screen, only the mini-player |
+| **Cinema** | Centred cover with a slow zoom, blurred background, title and artist below |
+| **Waveform** | Animated orange bars at the bottom, real progress bar above |
+| **Editorial** | Magazine layout: cover on the left, large title and a quote taken from the track description |
+| **Vinyl with sleeve** | Spinning vinyl record with the cover in the centre |
 
-#### Setting up widgets in Arctic Zephyr Reloaded
+**Keys**
 
-Arctic Zephyr Reloaded only lets widgets point at an addon's root URL —
-it doesn't let you pick a specific sub-directory like
-`/widget/likes/`. To work around this, the addon has a **Widget mode**
-setting that changes what the root URL returns:
+| Key | Action |
+|---|---|
+| OK | Pause / resume |
+| Left / Right | Back / forward 10 s (*Seek interval*: 5 to 30 s) |
+| Up | Next track |
+| Down | Back to the start of the track, or previous track within the first 3 seconds |
+| Back | Close the screen (playback continues) |
 
-1. In Kodi, open SoundCloud's **Settings → Display**, scroll to the
-   bottom and find **Skin home widget → Widget mode**.
-2. Pick the content you want the widget to show (Likes / My playlists /
-   Following / Trending / Discover).
-3. Now go to *Settings → Interface → Skin → Configure skin →
-   Customise Home Menu* in Arctic Zephyr Reloaded.
-4. Pick a menu item and click **+ Use as widget** on SoundCloud.
-5. The widget now displays the content you chose in step 2.
+Kodi's Python API gives add-ons no access to the audio signal: the
+*Waveform* animation is decorative, only the progress bar follows
+playback. The vinyl rotation may stutter on older devices (Raspberry
+Pi 3…). The *Editorial* quote stays empty when the track has no
+description.
 
-Important: while Widget mode is set to anything but "Off", opening
-SoundCloud from the Add-ons screen will *also* return the chosen
-content instead of the full-screen UI. To get the full UI back, set
-Widget mode to "Off (show full UI)" in the addon settings.
+## Opening SoundCloud faster
 
-If you want **multiple different widgets** (e.g. one for Likes and one
-for Trending), Arctic Zephyr Reloaded alone can't do it because all
-SoundCloud widgets share the same root URL. You need a more advanced
-skin that supports custom widget paths (e.g. via Skin Helper Service)
-to point each widget at a different `/widget/...` route.
+Opened from *Music → Add-ons*, Kodi briefly shows its music browser
+before the interface. Three ways to avoid it:
 
-#### Setting up widgets in Estuary / Estuary MOD
+1. **Background service** (recommended): *Settings → Account →
+   Background service*, then restart Kodi. The loading screen appears
+   in ~50 ms. Cost: a few MB of memory.
+2. **Kodi favourite**: add SoundCloud to your favourites, then in
+   `userdata/favourites.xml` replace its action with
+   `RunScript(plugin.audio.soundcloud)`.
+3. **Home menu shortcut** in your skin, with the action
+   `RunScript(plugin.audio.soundcloud)` (Arctic Zephyr Reloaded:
+   *Configure skin → Customise home menu*; Estuary: *Customise home
+   menu → Action*).
 
-Estuary lets you navigate sub-directories when picking a widget. Go to
-*Customise Home Menu → choose item → Add Widget* and navigate to
-*Add-ons → Music add-ons → SoundCloud → Widgets* — pick the widget you
-want directly without needing the Widget mode workaround.
+## Home screen widgets
 
-## Attributions
+The add-on provides plain lists that skin widgets can display:
 
-This fork is maintained by **[TheWorms](https://github.com/TheWorms)**,
-who contributed the full-screen interface, OAuth token integration, the
-widget routes, the four fullscreen "now playing" overlay styles, the
-French translation, the background service architecture, and many UX
-improvements.
+| Path | Content |
+|---|---|
+| `plugin://plugin.audio.soundcloud/widget/likes/` | Your likes (token required) |
+| `plugin://plugin.audio.soundcloud/widget/playlists/` | Your playlists (token required) |
+| `plugin://plugin.audio.soundcloud/widget/following/` | Your followings (token required) |
+| `plugin://plugin.audio.soundcloud/widget/trending/` | Trending |
+| `plugin://plugin.audio.soundcloud/widget/discover/` | Discover |
+| `plugin://plugin.audio.soundcloud/widgets/` | List of all the widgets above |
 
-It is built on top of the
-[Kodi SoundCloud add-on by jaylinski](https://github.com/jaylinski/kodi-addon-soundcloud),
-which itself was strongly inspired by the
-[original add-on](https://github.com/SLiX69/plugin.audio.soundcloud)
-developed by [bromix](https://kodi.tv/addon-author/bromix) and
+- **Estuary** and skins that let you browse an add-on: *Add widget →
+  Add-ons → Music add-ons → SoundCloud*, then pick the widget you want.
+- **Arctic Zephyr Reloaded** and skins that only take the root path:
+  the widget shows the list of widgets (*Likes*, *My playlists*,
+  *Trending*…) after *▶ Open SoundCloud*. For a direct content widget
+  you need a skin that accepts a custom path (e.g. through Skin Helper
+  Service).
+
+A track picked in a widget opens the interface and plays it. With
+*Continue with widget category after track ends*, the rest of the
+category is queued.
+
+## Privacy
+
+- The token is stored **only** in the add-on settings on your device,
+  and sent **only** to `api-v2.soundcloud.com`.
+- It is masked in `kodi.log` (`OAuth <redacted>`).
+- The extension keeps the token in memory only (forgotten when the
+  browser closes) and contacts Kodi only when you click *Send to
+  Kodi*. Kodi's remote control runs over plain HTTP, so the token then
+  crosses your local network unencrypted, as with any Kodi remote app.
+
+## Troubleshooting
+
+| Symptom | Cause and fix |
+|---|---|
+| Personal rows show Trending | No token, or an expired one: open *Manage the OAuth token…*, the window tells you which |
+| The extension says "Cannot reach Kodi" | Check Kodi's IP address and the *Allow remote control via HTTP* option |
+| A track stops after 30 s | Go+ excerpt on a Free account; enable *Skip Go+ excerpts* |
+| The music browser flashes on open | See [Opening SoundCloud faster](#opening-soundcloud-faster) |
+| Lists do not update | *Settings → Account → Clear cache* |
+
+## What's new
+
+**6.0.2**
+- Tiles layout: **"See more"** card at the end of the rows, as in the
+  List layout.
+- Playing wave over **the full height** of the cover.
+- Rows **follow the queue**: the next track's tile comes into view.
+- Fix: with the settings open, a whole row showed the playing wave.
+
+**6.0.1**
+- **"OAuth token" window** with a *Save* button and an instant check;
+  token entry moved from the side menu to the settings.
+- **Browser extension** "SoundCloud token for Kodi" and a help page
+  rewritten around it.
+- "Mixed for you" no longer copies "Recently played" (history read from
+  the right endpoint).
+
+**6.0**
+- Stations, five new home rows, endless playback, sleep timer, likes
+  from the add-on, List layout, simplified mini-player, automatic "Now
+  playing" screen.
+- Stability and security fixes from an audit (threads stopped cleanly,
+  token never sent outside SoundCloud, API errors no longer crash).
+
+**v5** introduced the full-screen interface, which has replaced the old
+plugin menu since 5.7. The detailed history of every version is in the
+`<news>` tag of [`addon.xml`](addon.xml).
+
+## Credits and license
+
+Fork maintained by **[TheWorms](https://github.com/TheWorms)**:
+full-screen interface, OAuth token sign-in and browser extension,
+widgets, "Now playing" screens, French translation, background service.
+
+Based on [jaylinski's SoundCloud add-on](https://github.com/jaylinski/kodi-addon-soundcloud),
+itself inspired by the [original add-on](https://github.com/SLiX69/plugin.audio.soundcloud)
+by [bromix](https://kodi.tv/addon-author/bromix) and
 [SLiX](https://github.com/SLiX69).
 
-All upstream and original contributions remain licensed under the MIT
-License — see `LICENSE.txt` and the upstream repositories for details.
-
-## Copyright and license
-
-This add-on is licensed under the MIT License - see `LICENSE.txt` for details.
+MIT licensed, like the original projects: see
+[`LICENSE.txt`](LICENSE.txt). This add-on is not official, nor endorsed
+by SoundCloud.

@@ -68,7 +68,15 @@ class Settings:
         Reads from a fresh Addon() instance so token edits in the same
         Kodi session are picked up immediately (without needing a restart).
         """
-        token = self._fresh_addon().getSetting("auth.oauth_token")
+        return self.clean_token(self._fresh_addon().getSetting("auth.oauth_token"))
+
+    @staticmethod
+    def clean_token(token):
+        """
+        Normalise a token as typed or pasted by the user (see
+        get_oauth_token for the artefacts removed). Returns None when
+        nothing is left.
+        """
         if not token:
             return None
         # Step 1: strip surrounding whitespace and quotes

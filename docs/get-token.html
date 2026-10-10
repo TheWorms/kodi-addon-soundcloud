@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Get your SoundCloud OAuth token — Kodi addon helper</title>
+<title>SoundCloud token for Kodi</title>
+<meta name="description" content="Get your SoundCloud OAuth token for the TheWorms Kodi SoundCloud add-on: browser extension, OAuth token window, manual method.">
 <style>
 :root {
   --bg: #1a1a1a;
@@ -17,6 +18,7 @@
   --border: #333;
   --success: #4caf50;
   --warning: #ff9800;
+  --error: #ef5350;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -24,242 +26,290 @@ body {
   background: var(--bg); color: var(--fg); line-height: 1.6; padding: 0 16px;
   min-height: 100vh;
 }
-.container { max-width: 880px; margin: 0 auto; padding: 48px 0; }
-header { text-align: center; margin-bottom: 48px; }
-header .logo { display: inline-block; font-size: 64px; margin-bottom: 16px; }
+.container { max-width: 880px; margin: 0 auto; padding: 40px 0 48px; }
+header { text-align: center; margin-bottom: 36px; }
+header .logo { display: inline-block; font-size: 56px; margin-bottom: 12px; }
 h1 { font-size: 32px; font-weight: 600; margin-bottom: 8px; }
 header p { color: var(--fg-dim); font-size: 16px; }
 section {
-  background: var(--bg-elev); border-radius: 12px; padding: 32px;
-  margin-bottom: 24px; border: 1px solid var(--border);
+  background: var(--bg-elev); border-radius: 12px; padding: 28px 32px;
+  margin-bottom: 20px; border: 1px solid var(--border);
 }
 section h2 {
-  font-size: 22px; margin-bottom: 16px;
+  font-size: 21px; margin-bottom: 14px;
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
 }
+section h3 { font-size: 16px; margin: 18px 0 6px; }
 .step-num {
   display: inline-flex; align-items: center; justify-content: center;
   width: 32px; height: 32px; background: var(--accent); color: #000;
   font-weight: 700; border-radius: 50%; font-size: 16px; flex-shrink: 0;
 }
-p { margin-bottom: 12px; color: var(--fg); }
-p.subtle { color: var(--fg-dim); font-size: 14px; }
+p { margin-bottom: 12px; }
+p.subtle, .subtle { color: var(--fg-dim); font-size: 14px; }
 a { color: var(--accent); text-decoration: none; }
 a:hover { color: var(--accent-hover); text-decoration: underline; }
-.btn-soundcloud {
-  display: inline-block; background: #fff; color: #000 !important;
-  padding: 10px 20px; border-radius: 6px; font-weight: 500; margin: 8px 0;
-  text-decoration: none;
-}
-.btn-soundcloud:hover { background: #f0f0f0; text-decoration: none; color: #000 !important; }
-.btn-copy {
+.btn {
   display: inline-flex; align-items: center; gap: 8px;
   background: var(--accent); color: #000 !important;
-  padding: 12px 24px; border: none; border-radius: 8px;
-  font-weight: 700; font-size: 15px; cursor: pointer; font-family: inherit;
-  transition: background 0.15s;
+  padding: 12px 24px; border-radius: 8px;
+  font-weight: 700; font-size: 15px; text-decoration: none !important;
 }
-.btn-copy:hover { background: var(--accent-hover); color: #000 !important; }
-.btn-copy.copied { background: var(--success); color: #fff !important; }
-code, .code-block, .snippet {
+.btn:hover { background: var(--accent-hover); }
+.btn.secondary { background: #fff; }
+.btn.secondary:hover { background: #e8e8e8; }
+.center { text-align: center; margin: 20px 0; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+code {
   font-family: "SF Mono", Menlo, Consolas, monospace; background: var(--bg-code);
   padding: 2px 6px; border-radius: 4px; font-size: 13px; color: #e0e0e0;
+  overflow-wrap: anywhere;
 }
-.snippet {
-  display: block; padding: 16px; border-radius: 8px; margin: 16px 0 12px 0;
-  border: 1px solid var(--border); white-space: pre-wrap; word-break: break-all;
-  max-height: 240px; overflow-y: auto; font-size: 12px; line-height: 1.5;
-  color: #c0e0c0;
+pre {
+  font-family: "SF Mono", Menlo, Consolas, monospace; background: var(--bg-code);
+  border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;
+  font-size: 13px; color: #c0e0c0; white-space: pre-wrap; overflow-wrap: anywhere;
+  margin: 10px 0 14px;
 }
 kbd {
   font-family: "SF Mono", Menlo, Consolas, monospace; background: #333;
   color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px;
   border: 1px solid #555; box-shadow: 0 1px 0 #000;
 }
-ol { padding-left: 24px; margin: 12px 0; }
-ol li { margin-bottom: 10px; }
-.note {
-  background: #2a1810; border-left: 3px solid var(--warning);
-  padding: 12px 16px; margin: 16px 0; border-radius: 4px;
-  font-size: 14px; color: #ffcc99;
+ol, ul { padding-left: 24px; margin: 10px 0; }
+li { margin-bottom: 8px; }
+.note, .ok-note {
+  padding: 12px 16px; margin: 14px 0; border-radius: 4px; font-size: 14px;
 }
+.note { background: #2a1810; border-left: 3px solid var(--warning); color: #ffcc99; }
 .note strong { color: var(--warning); }
-.success-note {
-  background: #102018; border-left: 3px solid var(--success);
-  padding: 12px 16px; margin: 16px 0; border-radius: 4px;
-  font-size: 14px; color: #c0e0c0;
+.ok-note { background: #102018; border-left: 3px solid var(--success); color: #c0e0c0; }
+.ok-note strong { color: var(--success); }
+.results { display: grid; gap: 8px; margin: 12px 0; }
+.result { padding: 10px 14px; border-radius: 6px; background: var(--bg-code); font-size: 14px; }
+.result b.v { color: var(--success); }
+.result b.r { color: var(--error); }
+.result b.w { color: var(--warning); }
+figure.shot { margin: 16px 0 4px; }
+figure.shot img {
+  display: block; width: 100%; height: auto; border-radius: 8px;
+  border: 1px solid var(--border);
 }
-.success-note strong { color: var(--success); }
-.fallback { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
-.fallback summary {
-  cursor: pointer; font-weight: 500; padding: 8px 0; color: var(--fg-dim);
-  list-style: none;
+figure.shot figcaption { color: var(--fg-muted); font-size: 13px; margin-top: 6px; }
+details {
+  background: var(--bg-elev); border: 1px solid var(--border); border-radius: 12px;
+  margin-bottom: 20px; padding: 18px 32px;
 }
-.fallback summary::-webkit-details-marker { display: none; }
-.fallback summary::before { content: '\25B6  '; color: var(--accent); font-size: 12px; }
-.fallback[open] summary::before { content: '\25BC  '; }
-.fallback summary:hover { color: var(--fg); }
-.fallback[open] summary { margin-bottom: 16px; }
+details > summary { cursor: pointer; font-size: 18px; font-weight: 600; list-style: none; }
+details > summary::-webkit-details-marker { display: none; }
+details > summary::before { content: "\25B6"; color: var(--accent); font-size: 13px; margin-right: 10px; }
+details[open] > summary::before { content: "\25BC"; }
+details[open] > summary { margin-bottom: 12px; }
 footer {
-  text-align: center; margin-top: 48px; padding-top: 24px;
+  text-align: center; margin-top: 40px; padding-top: 20px;
   border-top: 1px solid var(--border); color: var(--fg-muted); font-size: 13px;
 }
 footer a { color: var(--fg-muted); }
-.lang-switch { text-align: right; margin-bottom: -16px; }
+.lang-switch { text-align: right; margin-bottom: -12px; }
 .lang-switch button {
   background: transparent; border: 1px solid var(--border); color: var(--fg-dim);
-  padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer;
-  margin-left: 4px;
+  padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; margin-left: 4px;
 }
-.lang-switch button.active { background: var(--border); color: var(--fg); }
-[data-lang-fr] { display: none; }
-body.lang-fr [data-lang-fr] { display: block; }
-body.lang-fr [data-lang-en] { display: none; }
-body.lang-fr .lang-switch button[data-lang="en"] { background: transparent; color: var(--fg-dim); }
+body:not(.lang-fr) .lang-switch button[data-lang="en"],
 body.lang-fr .lang-switch button[data-lang="fr"] { background: var(--border); color: var(--fg); }
-.center { text-align: center; margin: 24px 0; }
+/* Only the inactive language is hidden; the visible one keeps its display. */
+body:not(.lang-fr) [data-lang-fr] { display: none !important; }
+body.lang-fr [data-lang-en] { display: none !important; }
+@media (max-width: 600px) {
+  section, details { padding: 20px 16px; }
+  h1 { font-size: 26px; }
+}
 </style>
 </head>
 <body>
 <div class="container">
 
 <div class="lang-switch">
-  <button data-lang="en" class="active" onclick="document.body.classList.remove('lang-fr')">EN</button>
-  <button data-lang="fr" onclick="document.body.classList.add('lang-fr')">FR</button>
+  <button data-lang="en" onclick="setLang('en')">EN</button>
+  <button data-lang="fr" onclick="setLang('fr')">FR</button>
 </div>
 
 <header>
   <div class="logo">&#127925;</div>
-  <h1 data-lang-en>Get your SoundCloud token</h1>
-  <h1 data-lang-fr>Obtenez votre jeton SoundCloud</h1>
-  <p data-lang-en>For the <a href="https://github.com/TheWorms/kodi-addon-soundcloud">TheWorms Kodi SoundCloud addon</a>.</p>
-  <p data-lang-fr>Pour le <a href="https://github.com/TheWorms/kodi-addon-soundcloud">module SoundCloud Kodi de TheWorms</a>.</p>
+  <h1 data-lang-en>SoundCloud token for Kodi</h1>
+  <h1 data-lang-fr>Jeton SoundCloud pour Kodi</h1>
+  <p data-lang-en>For the <a href="https://github.com/TheWorms/kodi-addon-soundcloud">TheWorms Kodi SoundCloud add-on</a> (version 6.0.1 or later).</p>
+  <p data-lang-fr>Pour l'<a href="https://github.com/TheWorms/kodi-addon-soundcloud">addon SoundCloud Kodi de TheWorms</a> (version 6.0.1 ou plus r&eacute;cente).</p>
 </header>
 
-<div class="note">
-  <strong data-lang-en>Two methods below.</strong>
-  <strong data-lang-fr>Deux m&eacute;thodes ci-dessous.</strong>
-  <span data-lang-en> The console snippet tries to find your token automatically. If it can't (SoundCloud sometimes keeps the token in their internal app state, out of reach for scripts), the manual Network-tab method always works. Both are documented here.</span>
-  <span data-lang-fr> Le code dans la console essaie de trouver votre jeton automatiquement. S'il n'y arrive pas (SoundCloud garde parfois le jeton dans son &eacute;tat interne, hors de port&eacute;e des scripts), la m&eacute;thode manuelle via l'onglet Network fonctionne toujours. Les deux sont document&eacute;es ici.</span>
-</div>
+<section>
+  <p data-lang-en>The add-on needs your <strong>SoundCloud OAuth token</strong> to show your likes, playlists, followed artists and listening history. You take it from your browser, where you are signed in to soundcloud.com, and give it to Kodi in the add-on's <strong>OAuth token</strong> window. Kodi checks it with SoundCloud before keeping it.</p>
+  <p data-lang-fr>L'addon a besoin de votre <strong>jeton OAuth SoundCloud</strong> pour afficher vos J'aime, playlists, abonnements et votre historique d'&eacute;coute. Vous le prenez dans votre navigateur, o&ugrave; vous &ecirc;tes connect&eacute; &agrave; soundcloud.com, et vous le donnez &agrave; Kodi dans la fen&ecirc;tre <strong>Jeton OAuth</strong> de l'addon. Kodi le v&eacute;rifie aupr&egrave;s de SoundCloud avant de le garder.</p>
+  <p class="subtle" data-lang-en>The easiest way takes five steps and no technical manipulation: the browser extension below. Without it, see &ldquo;Without the extension&rdquo; further down.</p>
+  <p class="subtle" data-lang-fr>Le plus simple tient en cinq &eacute;tapes, sans manipulation technique : l'extension navigateur ci-dessous. Sans elle, voyez &laquo;&nbsp;Sans l'extension&nbsp;&raquo; plus bas.</p>
+</section>
 
 <section>
   <h2>
     <span class="step-num">1</span>
-    <span data-lang-en>Go to SoundCloud and sign in</span>
-    <span data-lang-fr>Allez sur SoundCloud et connectez-vous</span>
+    <span data-lang-en>Install the browser extension</span>
+    <span data-lang-fr>Installez l'extension navigateur</span>
   </h2>
-  <p data-lang-en>Open SoundCloud in Chrome or Firefox on your computer and sign in.</p>
-  <p data-lang-fr>Ouvrez SoundCloud dans Chrome ou Firefox sur votre ordinateur et connectez-vous.</p>
   <div class="center">
-    <a href="https://soundcloud.com/discover" target="_blank" rel="noopener" class="btn-soundcloud" data-lang-en>Open soundcloud.com &rarr;</a>
-    <a href="https://soundcloud.com/discover" target="_blank" rel="noopener" class="btn-soundcloud" data-lang-fr>Ouvrir soundcloud.com &rarr;</a>
+    <a href="soundcloud-token-extension.zip" class="btn" data-lang-en>&#11015; Download the extension</a>
+    <a href="soundcloud-token-extension.zip" class="btn" data-lang-fr>&#11015; T&eacute;l&eacute;charger l'extension</a>
   </div>
-  <p class="subtle" data-lang-en>Wait a few seconds for the page to fully load. Make sure your avatar appears top-right.</p>
-  <p class="subtle" data-lang-fr>Attendez quelques secondes que la page charge enti&egrave;rement. V&eacute;rifiez que votre avatar appara&icirc;t en haut &agrave; droite.</p>
+  <ul data-lang-en>
+    <li><strong>Firefox:</strong> open <code>about:debugging#/runtime/this-firefox</code> &rarr; <strong>Load Temporary Add-on&hellip;</strong> &rarr; pick the downloaded <code>.zip</code>. A key icon appears in the toolbar. It stays until Firefox restarts &mdash; enough to get a token; load it again the same way next time.</li>
+    <li><strong>Chrome / Edge / Brave:</strong> unzip the file into its own folder and keep that folder. Open <code>chrome://extensions</code>, switch on <strong>Developer mode</strong>, then <strong>Load unpacked</strong> &rarr; pick the folder. Pin the extension (puzzle-piece menu &rarr; pin) to see its icon.</li>
+  </ul>
+  <ul data-lang-fr>
+    <li><strong>Firefox :</strong> ouvrez <code>about:debugging#/runtime/this-firefox</code> &rarr; <strong>Charger un module compl&eacute;mentaire temporaire&hellip;</strong> &rarr; choisissez le <code>.zip</code> t&eacute;l&eacute;charg&eacute;. Une ic&ocirc;ne en forme de cl&eacute; appara&icirc;t dans la barre d'outils. Elle reste install&eacute;e jusqu'au red&eacute;marrage de Firefox &mdash; assez pour r&eacute;cup&eacute;rer un jeton ; rechargez-la de la m&ecirc;me fa&ccedil;on la prochaine fois.</li>
+    <li><strong>Chrome / Edge / Brave :</strong> d&eacute;compressez le fichier dans son propre dossier et gardez ce dossier. Ouvrez <code>chrome://extensions</code>, activez le <strong>Mode d&eacute;veloppeur</strong>, puis <strong>Charger l'extension non empaquet&eacute;e</strong> &rarr; choisissez le dossier. &Eacute;pinglez l'extension (menu en forme de pi&egrave;ce de puzzle &rarr; &eacute;pingler) pour voir son ic&ocirc;ne.</li>
+  </ul>
 </section>
 
 <section>
   <h2>
     <span class="step-num">2</span>
-    <span data-lang-en>Open the browser console</span>
-    <span data-lang-fr>Ouvrez la console du navigateur</span>
+    <span data-lang-en>Open SoundCloud</span>
+    <span data-lang-fr>Ouvrez SoundCloud</span>
   </h2>
-  <p data-lang-en>Press <kbd>F12</kbd> &mdash; click the <strong>Console</strong> tab.</p>
-  <p data-lang-fr>Appuyez sur <kbd>F12</kbd> &mdash; cliquez sur l'onglet <strong>Console</strong>.</p>
-
-  <div class="note">
-    <strong data-lang-en>Firefox warning about pasting:</strong>
-    <strong data-lang-fr>Avertissement Firefox sur le collage :</strong>
-    <span data-lang-en> on first paste, Firefox shows "Don't paste code here" and asks you to type <code>allow pasting</code>. Type it, press Enter, then paste the snippet. (Chrome shows a similar warning, also need to type <code>allow pasting</code>.)</span>
-    <span data-lang-fr> au premier collage, Firefox affiche un avertissement et vous demande de taper <code>allow pasting</code>. Tapez-le, Entr&eacute;e, puis collez le code. (Chrome affiche le m&ecirc;me avertissement, m&ecirc;me proc&eacute;dure.)</span>
+  <div class="center">
+    <a href="https://soundcloud.com/you/likes" target="_blank" rel="noopener" class="btn secondary" data-lang-en>Open soundcloud.com &rarr;</a>
+    <a href="https://soundcloud.com/you/likes" target="_blank" rel="noopener" class="btn secondary" data-lang-fr>Ouvrir soundcloud.com &rarr;</a>
   </div>
+  <p data-lang-en>Sign in if needed. The extension reads the token from the requests the site sends by itself. When its icon shows a green <strong>OK</strong> badge, the token has been captured and SoundCloud accepted it.</p>
+  <p data-lang-fr>Connectez-vous si besoin. L'extension lit le jeton dans les requ&ecirc;tes que le site envoie de lui-m&ecirc;me. Quand son ic&ocirc;ne affiche un badge vert <strong>OK</strong>, le jeton est r&eacute;cup&eacute;r&eacute; et SoundCloud l'a accept&eacute;.</p>
 </section>
 
 <section>
   <h2>
     <span class="step-num">3</span>
-    <span data-lang-en>Copy and paste this snippet</span>
-    <span data-lang-fr>Copiez et collez ce code</span>
+    <span data-lang-en>Open the OAuth token window in Kodi</span>
+    <span data-lang-fr>Ouvrez la fen&ecirc;tre Jeton OAuth dans Kodi</span>
   </h2>
-  <p data-lang-en>Click <strong>Copy snippet</strong>, then in the console: paste (<kbd>Ctrl+V</kbd> / <kbd>Cmd+V</kbd>) and press <kbd>Enter</kbd>.</p>
-  <p data-lang-fr>Cliquez sur <strong>Copier le code</strong>, puis dans la console : collez (<kbd>Ctrl+V</kbd> / <kbd>Cmd+V</kbd>) et appuyez sur <kbd>Entr&eacute;e</kbd>.</p>
-
-  <code id="snippet" class="snippet">// snippet will be inserted here</code>
-
-  <div class="center">
-    <button id="copy-btn" class="btn-copy" data-lang-en>&#128203; Copy snippet</button>
-    <button id="copy-btn-fr" class="btn-copy" data-lang-fr>&#128203; Copier le code</button>
-  </div>
-
-  <p data-lang-en><strong>You should see this in the console</strong> (one of the three cases):</p>
-  <p data-lang-fr><strong>Vous devriez voir l'un de ces trois cas dans la console :</strong></p>
-  <ol data-lang-en>
-    <li><strong>Best case</strong> &mdash; a popup appears in the page with your token and a Copy button. Also the token printed in green in the console.</li>
-    <li><strong>OK case</strong> &mdash; no popup, but the console prints <code>[SC] Token found: 2-...</code> in green. Copy from there.</li>
-    <li><strong>Failure case</strong> &mdash; console says <code>[SC] No token found</code>. SoundCloud keeps it out of reach for scripts &mdash; use the manual method below.</li>
-  </ol>
-  <ol data-lang-fr>
-    <li><strong>Meilleur cas</strong> &mdash; une popup appara&icirc;t dans la page avec votre jeton et un bouton Copy. Le jeton est aussi affich&eacute; en vert dans la console.</li>
-    <li><strong>Cas OK</strong> &mdash; pas de popup, mais la console affiche <code>[SC] Token found: 2-...</code> en vert. Copiez depuis l&agrave;.</li>
-    <li><strong>Cas d'&eacute;chec</strong> &mdash; la console affiche <code>[SC] No token found</code>. SoundCloud le cache des scripts &mdash; utilisez la m&eacute;thode manuelle ci-dessous.</li>
-  </ol>
+  <p data-lang-en>SoundCloud add-on settings &rarr; <strong>Account</strong> &rarr; <strong>Manage the OAuth token&hellip;</strong> The window shows the token currently saved and whether SoundCloud still accepts it. Leave it on <strong>Enter token</strong>.</p>
+  <p data-lang-fr>Param&egrave;tres de l'addon SoundCloud &rarr; <strong>Compte</strong> &rarr; <strong>G&eacute;rer le jeton OAuth&hellip;</strong> La fen&ecirc;tre affiche le jeton actuellement enregistr&eacute; et indique si SoundCloud l'accepte encore. Laissez-la sur <strong>Saisir le jeton</strong>.</p>
+  <figure class="shot">
+    <img src="screenshots/token-window.jpg" width="960" height="600" loading="lazy" alt="Fen&ecirc;tre Jeton OAuth dans Kodi, bouton Saisir le jeton s&eacute;lectionn&eacute; / OAuth token window in Kodi, Enter token selected">
+    <figcaption data-lang-en>The OAuth token window (French interface): saved token and its status, then the Enter token / Save / Delete / Close buttons.</figcaption>
+    <figcaption data-lang-fr>La fen&ecirc;tre Jeton OAuth : jeton enregistr&eacute; et son &eacute;tat, puis les boutons Saisir le jeton / Enregistrer / Supprimer / Fermer.</figcaption>
+  </figure>
 </section>
 
 <section>
   <h2>
     <span class="step-num">4</span>
-    <span data-lang-en>Paste into Kodi</span>
-    <span data-lang-fr>Collez dans Kodi</span>
+    <span data-lang-en>Send the token</span>
+    <span data-lang-fr>Envoyez le jeton</span>
   </h2>
-  <p data-lang-en>Kodi &rarr; SoundCloud addon settings &rarr; <code>Account &rarr; OAuth token</code> &rarr; paste. Click <strong>Test OAuth token</strong> to verify.</p>
-  <p data-lang-fr>Kodi &rarr; param&egrave;tres SoundCloud &rarr; <code>Compte &rarr; Jeton OAuth</code> &rarr; collez. Cliquez sur <strong>Tester le jeton</strong> pour v&eacute;rifier.</p>
-
-  <div class="success-note">
-    <strong data-lang-en>Privacy:</strong>
-    <strong data-lang-fr>Confidentialit&eacute; :</strong>
-    <span data-lang-en> the snippet runs entirely in your browser. Token never sent anywhere.</span>
-    <span data-lang-fr> le code s'ex&eacute;cute enti&egrave;rement dans votre navigateur. Le jeton n'est jamais envoy&eacute; quelque part.</span>
-  </div>
+  <h3 data-lang-en>Automatic: Send to Kodi</h3>
+  <h3 data-lang-fr>Automatique : Envoyer &agrave; Kodi</h3>
+  <p data-lang-en>Click the extension icon &rarr; <strong>Send to Kodi</strong> &rarr; Kodi's IP address (for example <code>192.168.1.20</code>), the user and password of Kodi's web server &rarr; <strong>Send to Kodi</strong>. The extension opens the window's keyboard and types the token in it.</p>
+  <p data-lang-fr>Cliquez sur l'ic&ocirc;ne de l'extension &rarr; <strong>Envoyer &agrave; Kodi</strong> &rarr; adresse IP de Kodi (par exemple <code>192.168.1.20</code>), utilisateur et mot de passe du serveur web de Kodi &rarr; <strong>Envoyer &agrave; Kodi</strong>. L'extension ouvre le clavier de la fen&ecirc;tre et y tape le jeton.</p>
+  <ul class="subtle" data-lang-en>
+    <li>Kodi needs <em>Settings &rarr; Services &rarr; Control &rarr; Allow remote control via HTTP</em>.</li>
+    <li>Use the IP address, not a name such as <code>kodi.local</code>.</li>
+    <li>Firefox: if the extension window closes when you allow it to contact Kodi, reopen it and click <strong>Send to Kodi</strong> again.</li>
+  </ul>
+  <ul class="subtle" data-lang-fr>
+    <li>Kodi doit avoir <em>Param&egrave;tres &rarr; Services &rarr; Contr&ocirc;le &rarr; Autoriser le contr&ocirc;le &agrave; distance via HTTP</em>.</li>
+    <li>Utilisez l'adresse IP, pas un nom comme <code>kodi.local</code>.</li>
+    <li>Firefox : si la fen&ecirc;tre de l'extension se ferme quand vous l'autorisez &agrave; contacter Kodi, rouvrez-la et cliquez de nouveau sur <strong>Envoyer &agrave; Kodi</strong>.</li>
+  </ul>
+  <h3 data-lang-en>By hand</h3>
+  <h3 data-lang-fr>&Agrave; la main</h3>
+  <p data-lang-en>Extension &rarr; <strong>Copy token</strong>, then in Kodi <strong>Enter token</strong> and paste it. Typing a long token with a TV remote is painful: a remote app such as Kore or Yatse can paste text from your phone into Kodi's keyboard.</p>
+  <p data-lang-fr>Extension &rarr; <strong>Copier le jeton</strong>, puis dans Kodi <strong>Saisir le jeton</strong> et collez-le. Taper un long jeton &agrave; la t&eacute;l&eacute;commande est p&eacute;nible : une application comme Kore ou Yatse permet de coller le texte depuis votre t&eacute;l&eacute;phone dans le clavier de Kodi.</p>
 </section>
 
 <section>
-  <h2 data-lang-en>Manual method (always works)</h2>
-  <h2 data-lang-fr>M&eacute;thode manuelle (marche toujours)</h2>
+  <h2>
+    <span class="step-num">5</span>
+    <span data-lang-en>Press Save</span>
+    <span data-lang-fr>Appuyez sur Enregistrer</span>
+  </h2>
+  <p data-lang-en>Kodi asks SoundCloud right away and shows the result in the window:</p>
+  <p data-lang-fr>Kodi interroge SoundCloud aussit&ocirc;t et affiche le r&eacute;sultat dans la fen&ecirc;tre :</p>
+  <div class="results" data-lang-en>
+    <div class="result"><b class="v">Valid</b> &mdash; signed in as <em>your name</em>, with your subscription (Free, Go, Go+). The token is saved and your home rows reload.</div>
+    <div class="result"><b class="r">Refused by SoundCloud</b> &mdash; expired or wrong token. It is <strong>not</strong> saved: sign in again on soundcloud.com and send the new token.</div>
+    <div class="result"><b class="w">Could not be checked</b> &mdash; SoundCloud unreachable or blocking the request. Kodi asks whether to save it anyway.</div>
+  </div>
+  <div class="results" data-lang-fr>
+    <div class="result"><b class="v">Valide</b> &mdash; connect&eacute; en tant que <em>votre nom</em>, avec votre abonnement (Free, Go, Go+). Le jeton est enregistr&eacute; et vos rang&eacute;es d'accueil se rechargent.</div>
+    <div class="result"><b class="r">Refus&eacute; par SoundCloud</b> &mdash; jeton expir&eacute; ou erron&eacute;. Il n'est <strong>pas</strong> enregistr&eacute; : reconnectez-vous sur soundcloud.com et renvoyez le nouveau jeton.</div>
+    <div class="result"><b class="w">V&eacute;rification impossible</b> &mdash; SoundCloud injoignable ou bloque la requ&ecirc;te. Kodi demande s'il faut l'enregistrer quand m&ecirc;me.</div>
+  </div>
+  <p class="subtle" data-lang-en>The last result is also shown in the add-on settings, under <strong>Account &rarr; Token status</strong>.</p>
+  <p class="subtle" data-lang-fr>Le dernier r&eacute;sultat est aussi affich&eacute; dans les param&egrave;tres de l'addon, sous <strong>Compte &rarr; &Eacute;tat du jeton</strong>.</p>
+  <figure class="shot">
+    <img src="screenshots/token-saved.jpg" width="960" height="600" loading="lazy" alt="Jeton valide et enregistr&eacute; / Token valid and saved">
+    <figcaption data-lang-en>After Save: &ldquo;Token valid and saved&rdquo;, with the account name and plan.</figcaption>
+    <figcaption data-lang-fr>Apr&egrave;s Enregistrer : &laquo;&nbsp;Jeton valide et enregistr&eacute;&nbsp;&raquo;, avec le nom du compte et l'abonnement.</figcaption>
+  </figure>
+</section>
 
-  <p data-lang-en>If the snippet didn't find the token (3rd case above), follow this procedure. It's the same workflow the snippet tries to automate, but done by hand &mdash; and it always works because the browser doesn't hide network headers from you.</p>
-  <p data-lang-fr>Si le code n'a pas trouv&eacute; le jeton (3e cas ci-dessus), suivez cette proc&eacute;dure. C'est le m&ecirc;me workflow que le code essaie d'automatiser, mais &agrave; la main &mdash; et &ccedil;a marche toujours parce que le navigateur ne cache pas les ent&ecirc;tes r&eacute;seau.</p>
+<details>
+  <summary data-lang-en>Without the extension</summary>
+  <summary data-lang-fr>Sans l'extension</summary>
 
+  <h3 data-lang-en>A &mdash; Network tab (most reliable)</h3>
+  <h3 data-lang-fr>A &mdash; Onglet R&eacute;seau (le plus fiable)</h3>
   <ol data-lang-en>
-    <li>On soundcloud.com (signed in), press <kbd>F12</kbd>.</li>
-    <li>Click the <strong>Network</strong> tab.</li>
-    <li>In the filter box, type <code>api-v2</code></li>
-    <li>Reload the page with <kbd>F5</kbd>.</li>
-    <li>Wait a few seconds, then click <strong>any</strong> request in the list (e.g. <code>me</code>, <code>featured-tracks</code>, <code>track_likes</code>, etc.).</li>
-    <li>In the panel on the right, look for the <strong>Headers</strong> section.</li>
-    <li>Scroll to find <strong>Request Headers</strong>.</li>
-    <li>Find the line:<br>
-      <code>Authorization: OAuth 2-XXXXXX-XXXXXXXX-XXXXXX</code></li>
-    <li>Copy <strong>only what comes after</strong> <code>OAuth&nbsp;</code> (the token itself, no <code>OAuth</code> prefix, no leading space).</li>
-    <li>Paste into Kodi addon settings &rarr; Account &rarr; OAuth token. Click <strong>Test OAuth token</strong>.</li>
+    <li>On soundcloud.com (signed in), press <kbd>F12</kbd> (Mac: <kbd>Cmd+Option+I</kbd>) and open the <strong>Network</strong> tab.</li>
+    <li>Type <code>api-v2</code> in the filter box, reload the page (<kbd>F5</kbd>) and wait a few seconds.</li>
+    <li>Click a <strong>GET</strong> or <strong>POST</strong> request with status <strong>200</strong>, for example <code>me</code> or <code>track_likes</code> (skip <strong>OPTIONS</strong> rows).</li>
+    <li>In <strong>Headers</strong> &rarr; <strong>Request Headers</strong>, find <code>Authorization: OAuth 2-XXXXXX-XXXXXXXX-XXXXXXXX</code> and copy <strong>only what follows</strong> <code>OAuth&nbsp;</code>.</li>
+    <li>In Kodi's OAuth token window: <strong>Enter token</strong>, paste, <strong>Save</strong>.</li>
   </ol>
-
   <ol data-lang-fr>
-    <li>Sur soundcloud.com (connect&eacute;), appuyez sur <kbd>F12</kbd>.</li>
-    <li>Cliquez sur l'onglet <strong>Network</strong>.</li>
-    <li>Dans le filtre, tapez <code>api-v2</code></li>
-    <li>Rechargez la page avec <kbd>F5</kbd>.</li>
-    <li>Attendez quelques secondes, puis cliquez sur <strong>n'importe quelle</strong> requ&ecirc;te (ex. <code>me</code>, <code>featured-tracks</code>, <code>track_likes</code>, etc.).</li>
-    <li>Dans le panneau de droite, cherchez la section <strong>Headers</strong>.</li>
-    <li>D&eacute;filez jusqu'&agrave; <strong>Request Headers</strong>.</li>
-    <li>Trouvez la ligne :<br>
-      <code>Authorization: OAuth 2-XXXXXX-XXXXXXXX-XXXXXX</code></li>
-    <li>Copiez <strong>uniquement ce qui suit</strong> <code>OAuth&nbsp;</code> (le jeton, sans le mot <code>OAuth</code>, sans espace au d&eacute;but).</li>
-    <li>Collez dans les param&egrave;tres Kodi &rarr; Compte &rarr; Jeton OAuth. Cliquez sur <strong>Tester le jeton</strong>.</li>
+    <li>Sur soundcloud.com (connect&eacute;), appuyez sur <kbd>F12</kbd> (Mac : <kbd>Cmd+Option+I</kbd>) et ouvrez l'onglet <strong>R&eacute;seau</strong>.</li>
+    <li>Tapez <code>api-v2</code> dans le champ de filtre, rechargez la page (<kbd>F5</kbd>) et attendez quelques secondes.</li>
+    <li>Cliquez une requ&ecirc;te <strong>GET</strong> ou <strong>POST</strong> au statut <strong>200</strong>, par exemple <code>me</code> ou <code>track_likes</code> (ignorez les lignes <strong>OPTIONS</strong>).</li>
+    <li>Dans <strong>En-t&ecirc;tes</strong> &rarr; <strong>En-t&ecirc;tes de la requ&ecirc;te</strong>, trouvez <code>Authorization: OAuth 2-XXXXXX-XXXXXXXX-XXXXXXXX</code> et copiez <strong>uniquement ce qui suit</strong> <code>OAuth&nbsp;</code>.</li>
+    <li>Dans la fen&ecirc;tre Jeton OAuth de Kodi : <strong>Saisir le jeton</strong>, collez, <strong>Enregistrer</strong>.</li>
   </ol>
 
-  <p class="subtle" data-lang-en><strong>Common mistake:</strong> don't copy the cookie named <code>oauth_token</code> (Application &rarr; Cookies). It looks similar but is rejected by the API. You want the <code>Authorization</code> request header, not the cookie.</p>
-  <p class="subtle" data-lang-fr><strong>Erreur courante :</strong> ne copiez pas le cookie nomm&eacute; <code>oauth_token</code> (Application &rarr; Cookies). Il ressemble mais est rejet&eacute; par l'API. Vous voulez l'ent&ecirc;te <code>Authorization</code>, pas le cookie.</p>
+  <h3 data-lang-en>B &mdash; Cookie</h3>
+  <h3 data-lang-fr>B &mdash; Cookie</h3>
+  <p data-lang-en><kbd>F12</kbd> &rarr; <strong>Storage</strong> (Firefox) or <strong>Application</strong> (Chrome / Edge) &rarr; <strong>Cookies</strong> &rarr; <code>https://soundcloud.com</code> &rarr; copy the value of <code>oauth_token</code>. Depending on how SoundCloud sets up your session, it may be refused: the Save button tells you at once.</p>
+  <p data-lang-fr><kbd>F12</kbd> &rarr; <strong>Stockage</strong> (Firefox) ou <strong>Application</strong> (Chrome / Edge) &rarr; <strong>Cookies</strong> &rarr; <code>https://soundcloud.com</code> &rarr; copiez la valeur de <code>oauth_token</code>. Selon la fa&ccedil;on dont SoundCloud g&egrave;re votre session, elle peut &ecirc;tre refus&eacute;e : le bouton Enregistrer vous le dit aussit&ocirc;t.</p>
+
+  <h3 data-lang-en>C &mdash; Python script (Firefox)</h3>
+  <h3 data-lang-fr>C &mdash; Script Python (Firefox)</h3>
+  <p data-lang-en><a href="https://github.com/TheWorms/kodi-addon-soundcloud/blob/main/scripts/get_soundcloud_token.py">get_soundcloud_token.py</a> reads the <code>oauth_token</code> cookie from your Firefox profile, checks it with SoundCloud, then copies it or types it into Kodi's OAuth token window (open on <strong>Enter token</strong>):</p>
+  <p data-lang-fr><a href="https://github.com/TheWorms/kodi-addon-soundcloud/blob/main/scripts/get_soundcloud_token.py">get_soundcloud_token.py</a> lit le cookie <code>oauth_token</code> dans votre profil Firefox, le v&eacute;rifie aupr&egrave;s de SoundCloud, puis le copie ou le tape dans la fen&ecirc;tre Jeton OAuth de Kodi (ouverte sur <strong>Saisir le jeton</strong>) :</p>
+  <pre>python3 get_soundcloud_token.py                 # copy / copier
+python3 get_soundcloud_token.py --kodi KODI_IP  # send to Kodi / envoyer &agrave; Kodi</pre>
+</details>
+
+<details>
+  <summary data-lang-en>Troubleshooting</summary>
+  <summary data-lang-fr>D&eacute;pannage</summary>
+  <ul data-lang-en>
+    <li><strong>Extension badge &ldquo;!&rdquo;</strong>: SoundCloud refused the token it saw (expired). Sign out and back in on soundcloud.com.</li>
+    <li><strong>Badge &ldquo;?&rdquo;</strong>: token seen but not confirmed yet. Browse soundcloud.com for a few seconds.</li>
+    <li><strong>&ldquo;The OAuth token window is not open&rdquo;</strong>: open it in Kodi (step 3), then click Send again.</li>
+    <li><strong>&ldquo;Select Enter token&rdquo;</strong>: in Kodi's window, move the focus back to <em>Enter token</em>.</li>
+    <li><strong>&ldquo;Cannot reach Kodi&rdquo;</strong>: check the IP address and that remote control via HTTP is enabled; wrong user or password gives a specific message.</li>
+    <li><strong>&ldquo;The keyboard open in Kodi is &hellip;&rdquo;</strong>: another keyboard is on screen; the extension refuses to type the token into anything else than the OAuth token field.</li>
+    <li><strong>Rows still look the same as Trending</strong>: the token is missing or refused &mdash; open the OAuth token window, it shows which.</li>
+  </ul>
+  <ul data-lang-fr>
+    <li><strong>Badge &laquo;&nbsp;!&nbsp;&raquo; sur l'extension</strong> : SoundCloud a refus&eacute; le jeton vu (expir&eacute;). D&eacute;connectez-vous puis reconnectez-vous sur soundcloud.com.</li>
+    <li><strong>Badge &laquo;&nbsp;?&nbsp;&raquo;</strong> : jeton vu mais pas encore confirm&eacute;. Naviguez quelques secondes sur soundcloud.com.</li>
+    <li><strong>&laquo;&nbsp;La fen&ecirc;tre du jeton OAuth n'est pas ouverte&nbsp;&raquo;</strong> : ouvrez-la dans Kodi (&eacute;tape 3), puis renvoyez.</li>
+    <li><strong>&laquo;&nbsp;Placez-vous sur Saisir le jeton&nbsp;&raquo;</strong> : dans la fen&ecirc;tre de Kodi, remettez le focus sur <em>Saisir le jeton</em>.</li>
+    <li><strong>&laquo;&nbsp;Kodi injoignable&nbsp;&raquo;</strong> : v&eacute;rifiez l'adresse IP et que le contr&ocirc;le &agrave; distance via HTTP est activ&eacute; ; un mauvais utilisateur ou mot de passe donne un message sp&eacute;cifique.</li>
+    <li><strong>&laquo;&nbsp;Le clavier ouvert dans Kodi est &hellip;&nbsp;&raquo;</strong> : un autre clavier est &agrave; l'&eacute;cran ; l'extension refuse de taper le jeton ailleurs que dans le champ Jeton OAuth.</li>
+    <li><strong>Les rang&eacute;es ressemblent toutes aux Tendances</strong> : le jeton manque ou est refus&eacute; &mdash; ouvrez la fen&ecirc;tre Jeton OAuth, elle indique lequel des deux.</li>
+  </ul>
+</details>
+
+<section>
+  <div class="ok-note" data-lang-en><strong>Privacy.</strong> The token stays on your devices. The extension only reads the <code>Authorization</code> header of requests that soundcloud.com sends to <code>api-v2.soundcloud.com</code>, keeps the token in memory (forgotten when the browser closes) and only contacts Kodi when you click Send. Kodi's remote control is plain HTTP: the token and Kodi's password then cross your local network unencrypted, as with any Kodi remote app. Treat the token like a password. Source code: <a href="https://github.com/TheWorms/kodi-addon-soundcloud/tree/main/tools/token-extension">tools/token-extension</a>.</div>
+  <div class="ok-note" data-lang-fr><strong>Confidentialit&eacute;.</strong> Le jeton reste sur vos appareils. L'extension lit uniquement l'en-t&ecirc;te <code>Authorization</code> des requ&ecirc;tes que soundcloud.com envoie &agrave; <code>api-v2.soundcloud.com</code>, garde le jeton en m&eacute;moire (oubli&eacute; &agrave; la fermeture du navigateur) et ne contacte Kodi que quand vous cliquez sur Envoyer. Le contr&ocirc;le &agrave; distance de Kodi est en HTTP simple : le jeton et le mot de passe de Kodi passent alors en clair sur votre r&eacute;seau local, comme avec toute application de t&eacute;l&eacute;commande Kodi. Traitez le jeton comme un mot de passe. Code source : <a href="https://github.com/TheWorms/kodi-addon-soundcloud/tree/main/tools/token-extension">tools/token-extension</a>.</div>
 </section>
 
 <footer>
@@ -268,210 +318,15 @@ body.lang-fr .lang-switch button[data-lang="fr"] { background: var(--border); co
 </footer>
 
 </div>
-
 <script>
-/*
- * The console snippet. Multi-strategy token discovery:
- *  1. Search cookies for a SoundCloud-format token (X-XXXXX-XXXXX-XXXXX)
- *  2. Search localStorage values for the same pattern
- *  3. Search sessionStorage values for the same pattern
- *  4. As a last resort, hook fetch + XHR (rarely works because
- *     SoundCloud cached fetch at startup) and trigger a /me call
- *
- * Verbose console output at every step so the user can see exactly what's
- * happening, even if the popup fails for some reason.
- */
-function snippetFn() {
-  var STYLE_TITLE = 'background:#ff5500;color:#000;padding:4px 8px;font-weight:bold;font-size:13px;';
-  var STYLE_OK = 'color:#4caf50;font-weight:bold;font-family:monospace;font-size:13px;';
-  var STYLE_WARN = 'color:#ff9800;font-weight:bold;';
-  var STYLE_INFO = 'color:#aaa;';
-  var TOKEN_RE = /\b[12]-\d+-\d+-[A-Za-z0-9_-]+/;
-  console.log('%c[SC] Token search starting...', STYLE_TITLE);
-
-  var found = null;
-  var source = null;
-
-  try {
-    var cookieMatch = (document.cookie || '').match(TOKEN_RE);
-    if (cookieMatch) { found = cookieMatch[0]; source = 'cookie'; }
-    console.log('%c[SC] Step 1/4 cookies: ' + (found ? 'HIT' : 'miss'), STYLE_INFO);
-  } catch (e) { console.log('[SC] cookie scan error:', e); }
-
-  if (!found) {
-    try {
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
-        var v = localStorage.getItem(k);
-        if (typeof v === 'string') {
-          var m = v.match(TOKEN_RE);
-          if (m) { found = m[0]; source = 'localStorage[' + k + ']'; break; }
-        }
-      }
-      console.log('%c[SC] Step 2/4 localStorage (' + localStorage.length + ' keys): ' + (found ? 'HIT' : 'miss'), STYLE_INFO);
-    } catch (e) { console.log('[SC] localStorage scan error:', e); }
-  }
-
-  if (!found) {
-    try {
-      for (var j = 0; j < sessionStorage.length; j++) {
-        var k2 = sessionStorage.key(j);
-        var v2 = sessionStorage.getItem(k2);
-        if (typeof v2 === 'string') {
-          var m2 = v2.match(TOKEN_RE);
-          if (m2) { found = m2[0]; source = 'sessionStorage[' + k2 + ']'; break; }
-        }
-      }
-      console.log('%c[SC] Step 3/4 sessionStorage (' + sessionStorage.length + ' keys): ' + (found ? 'HIT' : 'miss'), STYLE_INFO);
-    } catch (e) { console.log('[SC] sessionStorage scan error:', e); }
-  }
-
-  if (found) {
-    console.log('%c[SC] Token found: ' + found, STYLE_OK);
-    console.log('%c[SC] Source: ' + source, STYLE_INFO);
-    showResult(found, source);
-    return;
-  }
-
-  console.log('%c[SC] Step 4/4 hooking fetch+XHR and triggering /me...', STYLE_INFO);
-  var _t = null;
-  var _of = window.fetch;
-  var _ox = window.XMLHttpRequest.prototype.setRequestHeader;
-  function tryHeader(v) {
-    if (typeof v !== 'string') return;
-    var m = v.match(TOKEN_RE);
-    if (m && !_t) _t = m[0];
-  }
-  try {
-    window.fetch = function() {
-      try {
-        var a = arguments;
-        if (a[1] && a[1].headers) {
-          var h = a[1].headers;
-          if (h instanceof Headers) tryHeader(h.get('Authorization'));
-          else if (typeof h === 'object') tryHeader(h.Authorization || h.authorization);
-        }
-      } catch (e) {}
-      return _of.apply(this, arguments);
-    };
-    window.XMLHttpRequest.prototype.setRequestHeader = function(n, v) {
-      try { if (n && n.toLowerCase() === 'authorization') tryHeader(v); } catch (e) {}
-      return _ox.apply(this, arguments);
-    };
-  } catch (e) {}
-
-  try { fetch('https://api-v2.soundcloud.com/me/track_likes?limit=1', {credentials: 'include'}).catch(function(){}); } catch (e) {}
-
-  setTimeout(function() {
-    if (_t) {
-      console.log('%c[SC] Token found via hook: ' + _t, STYLE_OK);
-      console.log('%c[SC] Source: hooked fetch/XHR', STYLE_INFO);
-      showResult(_t, 'hooked fetch/XHR');
-    } else {
-      console.log('%c[SC] No token found in cookies/storage and hook did not catch any.', STYLE_WARN);
-      console.log('%c[SC] Use the manual Network tab method described on the helper page.', STYLE_WARN);
-      alert('SoundCloud token not found automatically.\n\nSoundCloud keeps the token in their app state, out of reach for scripts.\n\nPlease use the manual method:\n1. F12 > Network tab\n2. Filter: api-v2\n3. Reload page (F5)\n4. Click any request\n5. Request Headers > Authorization: OAuth XXX\n6. Copy the part after "OAuth "');
-    }
-  }, 1500);
-
-  function showResult(token, src) {
-    if (token && token.indexOf('OAuth ') === 0) token = token.substring(6);
-    try {
-      var ov = document.createElement('div');
-      ov.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:2147483647;display:flex;align-items:center;justify-content:center;font-family:system-ui,-apple-system,sans-serif;';
-      var pn = document.createElement('div');
-      pn.style.cssText = 'background:#242424;color:#f0f0f0;padding:32px;border-radius:12px;max-width:560px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.5);border:1px solid #333;';
-      var tt = document.createElement('h2');
-      tt.textContent = 'SoundCloud token found';
-      tt.style.cssText = 'font-size:20px;margin:0 0 16px 0;color:#ff5500;font-weight:600;';
-      pn.appendChild(tt);
-      var ds = document.createElement('p');
-      ds.textContent = 'Source: ' + (src || 'unknown') + '. Copy and paste into Kodi (Account > OAuth token):';
-      ds.style.cssText = 'margin:0 0 12px 0;color:#aaa;font-size:13px;';
-      pn.appendChild(ds);
-      var ta = document.createElement('textarea');
-      ta.readOnly = true;
-      ta.value = token;
-      ta.style.cssText = 'width:100%;font-family:monospace;font-size:13px;padding:12px;background:#0e0e0e;color:#f0f0f0;border:1px solid #444;border-radius:6px;resize:none;height:80px;word-break:break-all;box-sizing:border-box;';
-      pn.appendChild(ta);
-      var br = document.createElement('div');
-      br.style.cssText = 'display:flex;gap:8px;margin-top:16px;';
-      var cb = document.createElement('button');
-      cb.textContent = 'Copy to clipboard';
-      cb.style.cssText = 'flex:1;background:#ff5500;color:#000;border:0;padding:12px;border-radius:6px;font-weight:600;cursor:pointer;font-size:14px;';
-      cb.onclick = function() {
-        ta.select();
-        try {
-          document.execCommand('copy');
-          if (navigator.clipboard) navigator.clipboard.writeText(token).catch(function(){});
-          cb.textContent = 'Copied!';
-          cb.style.background = '#4caf50';
-        } catch (e) { cb.textContent = 'Select manually'; }
-      };
-      br.appendChild(cb);
-      var xb = document.createElement('button');
-      xb.textContent = 'Close';
-      xb.style.cssText = 'flex:0 0 100px;background:transparent;color:#aaa;border:1px solid #444;padding:12px;border-radius:6px;cursor:pointer;font-size:14px;';
-      xb.onclick = function() { ov.remove(); };
-      br.appendChild(xb);
-      pn.appendChild(br);
-      ov.appendChild(pn);
-      ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
-      document.body.appendChild(ov);
-      setTimeout(function() { ta.select(); }, 50);
-    } catch (e) {
-      console.log('[SC] popup failed, falling back to alert', e);
-      alert('SoundCloud token (source: ' + src + '):\n\n' + token + '\n\nCopy it into Kodi addon settings.');
-    }
-  }
+function setLang(lang) {
+  var fr = lang === 'fr';
+  document.body.classList.toggle('lang-fr', fr);
+  document.documentElement.lang = fr ? 'fr' : 'en';
+  document.title = fr ? 'Jeton SoundCloud pour Kodi' : 'SoundCloud token for Kodi';
 }
-
-(function() {
-  var src = '(' + snippetFn.toString() + ')();';
-  src = src.replace(/\s+/g, ' ').trim();
-
-  var sn = document.getElementById('snippet');
-  if (sn) sn.textContent = src;
-
-  function copyHandler(btn) {
-    return function() {
-      function flash(text) {
-        btn.classList.add('copied');
-        var old = btn.textContent;
-        btn.textContent = text;
-        setTimeout(function() { btn.classList.remove('copied'); btn.textContent = old; }, 2000);
-      }
-      try {
-        if (navigator.clipboard && window.isSecureContext) {
-          navigator.clipboard.writeText(src).then(function() { flash('\u2713 Copied!'); }).catch(function(){fallback();});
-          return;
-        }
-      } catch (e) {}
-      fallback();
-      function fallback() {
-        var ta = document.createElement('textarea');
-        ta.value = src;
-        ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
-        document.body.appendChild(ta);
-        ta.select();
-        try { document.execCommand('copy'); flash('\u2713 Copied!'); }
-        catch (e) { alert('Copy failed. Select the code manually and copy.'); }
-        document.body.removeChild(ta);
-      }
-    };
-  }
-  var b1 = document.getElementById('copy-btn');
-  var b2 = document.getElementById('copy-btn-fr');
-  if (b1) b1.addEventListener('click', copyHandler(b1));
-  if (b2) b2.addEventListener('click', copyHandler(b2));
-})();
-
-if (navigator.language && navigator.language.toLowerCase().startsWith('fr')) {
-  document.body.classList.add('lang-fr');
-  document.querySelectorAll('.lang-switch button').forEach(function(b) {
-    b.classList.remove('active');
-    if (b.dataset.lang === 'fr') b.classList.add('active');
-  });
+if (navigator.language && navigator.language.toLowerCase().indexOf('fr') === 0) {
+  setLang('fr');
 }
 </script>
 </body>

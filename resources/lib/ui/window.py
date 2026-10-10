@@ -24,6 +24,7 @@ Control IDs used here MUST match those in the XML file. They are listed
 at the top of the XML for reference.
 """
 import threading
+import time
 
 import xbmc
 import xbmcgui
@@ -1596,9 +1597,6 @@ ID_NAV_PLAYLISTS = 113
 ID_NAV_FOLLOWING = 114
 ID_NAV_SETTINGS = 115
 ID_NAV_STATIONS = 116
-# Side-menu entry that renews the OAuth token from inside the UI
-# (see _show_token) - sits right above the Settings button.
-ID_NAV_TOKEN = 117
 # (ID 116 was the legacy interface button — removed in 5.2.4; it is now
 # the "Stations" entry of the side menu.)
 
@@ -1629,6 +1627,18 @@ MARKER_REFRESH_DELAY = 0.2
 # property whenever the (playing, playlist position) pair actually
 # changes (see _MarkerWatchdog below).
 MARKER_WATCHDOG_POLL = 0.5
+# A single-track play (_play_track) marks its track before Kodi
+# reports playback: the hint is honoured for this many seconds even
+# while nothing plays yet. The watchdog re-syncs once it runs out, so
+# a play that stops or fails early does not leave the marker behind.
+MARKER_HINT_GRACE = 15
+# The skin compares each item's playing_marker with this HOME window
+# property. A bare Window.Property(...) inside a list item layout is
+# read from the topmost modal dialog when one is open (Kodi's
+# GUIInfoHelper::GetWindow): with the settings dialog on top it was
+# empty and matched every item WITHOUT a marker (playlists, users),
+# so a whole row showed the playing wave.
+MARKER_HOME_PROPERTY = "soundcloud.playing_marker"
 
 
 class _MarkerWatchdog(threading.Thread):
@@ -1666,7 +1676,9 @@ class _MarkerWatchdog(threading.Thread):
                         position = -1
                     key = ("play", position)
                 else:
-                    key = ("stop",)
+                    # Include "hint still in its grace period" so the
+                    # end of that period triggers one more sync.
+                    key = ("stop", self._window._marker_hint_pending())
                 if key == self._last_key:
                     continue
                 self._last_key = key
@@ -1728,6 +1740,9 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         # debounced playing-marker re-fill (timer thread), which
         # re-adds the cached ListItems - see _refresh_playing_markers.
         self._lists_lock = threading.Lock()
+        # Per container: did the last fill announce more results
+        # (next_href)? Used by _append_see_more.
+        self._list_more = {}
         # Debounce state for _schedule_playing_markers_refresh.
         self._marker_refresh_lock = threading.Lock()
         self._marker_refresh_timer = None
@@ -1818,6 +1833,13 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         # item exactly once.
         self._marker_hint = None
         self._sync_playing_marker_property()
+
+        # Remember which token the home rows were built with (see
+        # _check_live_settings).
+        try:
+            self._token_fp = self._token_fingerprint()
+        except Exception:
+            pass
 
         # Default page = home.
         self._show_home()
@@ -2000,6 +2022,28 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         if mp_mode != (self.getProperty("miniplayer") or "compact"):
             self.setProperty("miniplayer", mp_mode)
             self._apply_content_geometry(mp_mode == "off")
+
+        # OAuth token saved or deleted in Settings > Account > Manage
+        # the OAuth token (separate script process): reload the home
+        # rows so the personal ones (likes, history, mixed for you...)
+        # follow the new token without reopening the interface.
+        token_fp = self._token_fingerprint()
+        if token_fp != getattr(self, "_token_fp", token_fp):
+            self._token_fp = token_fp
+            # The token window ran in its own process: this
+            # interface's API object still holds the invalid-token
+            # latch and the cached profile of the previous token.
+            self.api.reset_auth_state()
+            if (self.getProperty("page") or "home") == "home":
+                self._show_home()
+        self._token_fp = token_fp
+
+    def _token_fingerprint(self):
+        """Short hash of the saved token (never the token itself)."""
+        import hashlib
+
+        token = self.api.settings.get_oauth_token() or ""
+        return hashlib.sha256(token.encode("utf-8")).hexdigest()[:16]
 
     def _play_startup_track(self, track_id, source=None):
         """
@@ -2222,6 +2266,10 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             return
         self._shutdown_done = True
         try:
+            xbmcgui.Window(10000).clearProperty(MARKER_HOME_PROPERTY)
+        except Exception:
+            pass
+        try:
             # Stops the marker-watchdog poll loop.
             self._closed = True
         except Exception:
@@ -2351,10 +2399,13 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             self._show_stations()
             return
         if control_id == ID_NAV_SETTINGS:
-            self.addon.openSettings()
-            return
-        if control_id == ID_NAV_TOKEN:
-            self._show_token()
+            # A fresh Addon instance loads the settings from disk: the
+            # long-lived self.addon keeps the copy read when the window
+            # opened, and Kodi writes that whole copy back when the
+            # settings dialog closes - which would undo values saved
+            # meanwhile by other processes (token window, plugin).
+            import xbmcaddon
+            xbmcaddon.Addon(self.addon.getAddonInfo("id")).openSettings()
             return
 
         # ----- Mini-player controls -----
@@ -2380,6 +2431,16 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
     # =====================================================================
     # Page rendering
     # =====================================================================
+
+    def _home_restore(self, control_id):
+        """Back target: the home page with the focus on control_id."""
+        def restore():
+            self._show_home()
+            try:
+                self.setFocusId(control_id)
+            except Exception:
+                pass
+        return restore
 
     def _push_nav_state(self):
         """
@@ -2476,6 +2537,7 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             try:
                 loader = getattr(self, loader_name)
                 loader(list_id, limit=limit)
+                self._append_see_more(list_id, row_type, limit)
             except Exception as e:
                 xbmc.log(
                     "plugin.audio.soundcloud::HomeWindow %s failed: %s" %
@@ -2628,11 +2690,7 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             self._load_trending(list_id, limit=limit)
             return
         try:
-            history = self.api.play_history(limit)
-            if history is None or not history.items:
-                self._load_trending(list_id, limit=limit)
-                return
-            collection = self._build_foryou_mix(history, limit)
+            collection = self._foryou_collection(limit)
             if collection is None or not collection.items:
                 self._load_trending(list_id, limit=limit)
                 return
@@ -2643,6 +2701,48 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 "failed: %s" % str(e),
                 xbmc.LOGERROR,
             )
+
+    # SoundCloud's own personalised shelf, used when the local mix
+    # cannot be built (empty history, related-tracks endpoint failing).
+    FORYOU_SHELF_KEYWORDS = (
+        "mixed for you", "mixed-for-you", "your mixes", "daily drops",
+    )
+
+    def _foryou_collection(self, limit):
+        """
+        Content of the "Mixed for you" row, in order of preference:
+        1. the local mix built from play-history seeds (related tracks
+           not already played);
+        2. SoundCloud's own "Mixed for you" shelf from /mixed-selections;
+        3. None - the caller falls back to trending.
+        The source used is logged so a duplicated-looking row can be
+        explained from kodi.log.
+        """
+        history = self.api.play_history(limit)
+        if history is not None and history.items:
+            mix = self._build_foryou_mix(history, limit)
+            if mix is not None and mix.items:
+                xbmc.log(
+                    "plugin.audio.soundcloud::HomeWindow foryou: local mix "
+                    "(%d tracks from %d history seeds)"
+                    % (len(mix.items), len(history.items)),
+                    xbmc.LOGINFO,
+                )
+                return mix
+        shelf = self.api.discover_section(self.FORYOU_SHELF_KEYWORDS)
+        if shelf is not None and shelf.items:
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow foryou: SoundCloud "
+                "shelf (%d items)" % len(shelf.items),
+                xbmc.LOGINFO,
+            )
+            return shelf
+        xbmc.log(
+            "plugin.audio.soundcloud::HomeWindow foryou: no history and no "
+            "personalised shelf - trending fallback",
+            xbmc.LOGINFO,
+        )
+        return None
 
     def _build_foryou_mix(self, history, limit):
         """
@@ -2772,18 +2872,14 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                     if history is not None and history.items:
                         return history
             elif row_type == "foryou":
-                # "Mixed for you" - built locally from play-history
-                # seeds (see _load_foryou) so the section differs from
-                # "Recently played" instead of falling back to the
-                # same trending list.
+                # "Mixed for you" - local mix from play-history seeds,
+                # then SoundCloud's own shelf (see _foryou_collection),
+                # so the section differs from "Recently played" instead
+                # of falling back to the same trending list.
                 if self.api.settings.get_oauth_token():
-                    history = self.api.play_history(limit)
-                    if history is not None and history.items:
-                        collection = self._build_foryou_mix(
-                            history, limit
-                        )
-                        if collection is not None and collection.items:
-                            return collection
+                    collection = self._foryou_collection(limit)
+                    if collection is not None and collection.items:
+                        return collection
             elif row_type == "based":
                 # "More of what you like" / "Based on what you like".
                 collection = self.api.discover_section(
@@ -2836,6 +2932,48 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 xbmc.LOGERROR,
             )
             return None
+
+    def _see_more_item(self, row_type):
+        """
+        "See more" pseudo-item ending a home row (both layouts): opens
+        the row's dedicated page (see _show_row_page). The tiles
+        layout draws it as an orange arrow card (isSeeMore).
+        """
+        see_more = xbmcgui.ListItem(
+            label=self.addon.getLocalizedString(30400)  # "See more"
+        )
+        see_more.setArt({
+            "thumb": "DefaultFolderForward.png",
+            "icon": "DefaultFolderForward.png",
+        })
+        see_more.setProperty("isSeeMore", "true")
+        see_more.setProperty("row_type", row_type)
+        return see_more
+
+    def _append_see_more(self, list_id, row_type, limit):
+        """
+        Tiles layout: end a home row with "See more" when it filled
+        its whole limit or SoundCloud announced more (next_href) - a
+        few items can be filtered out of a full page (blocked or
+        non-track entries), which used to hide the card.
+        """
+        with self._lists_lock:
+            items = self._lists.get(list_id)
+            if not items or items[-1][1].getProperty("isSeeMore") == "true":
+                return
+            if len(items) < limit and not self._list_more.get(list_id):
+                return
+            try:
+                control = self.getControl(list_id)
+                see_more = self._see_more_item(row_type)
+                control.addItem(see_more)
+                items.append((None, see_more))
+            except Exception as e:
+                xbmc.log(
+                    "plugin.audio.soundcloud::HomeWindow add_see_more "
+                    "(row %d) failed: %s" % (list_id, str(e)),
+                    xbmc.LOGWARNING,
+                )
 
     def _fill_home_sections(self, row_configs):
         """
@@ -2901,15 +3039,7 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 # item that opens the row's dedicated page (see
                 # _show_row_page).
                 if len(collection.items) >= limit:
-                    see_more = xbmcgui.ListItem(
-                        label=self.addon.getLocalizedString(30400)  # "See more"
-                    )
-                    see_more.setArt({
-                        "thumb": "DefaultFolderForward.png",
-                        "icon": "DefaultFolderForward.png",
-                    })
-                    see_more.setProperty("isSeeMore", "true")
-                    see_more.setProperty("row_type", row_type)
+                    see_more = self._see_more_item(row_type)
                     try:
                         control.addItem(see_more)
                         self._lists[ID_HOME_LIST].append((None, see_more))
@@ -3045,7 +3175,7 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
     def _show_row_page(self, row_type):
         """
         Dedicated page for one home row type, opened by the "See
-        more" item at the end of a home section (list layout).
+        more" item at the end of a home row (both layouts).
         Lists the row's content with the items-per-page limit and
         the standard "Next page" pagination when the collection has
         more results. The same fallbacks as the home sections apply
@@ -3100,6 +3230,8 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             except Exception:
                 pass
             self._lists[control_id] = []
+            self._list_more[control_id] = bool(
+                collection is not None and getattr(collection, "next_href", None))
 
             if collection is None or not collection.items:
                 return
@@ -3193,8 +3325,16 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             row_type = list_item.getProperty("row_type") or ""
             if row_type in ROW_TYPES:
                 self._push_nav_state()
+                # Back lands on the row (tiles) or the home list (list
+                # layout) the user came from, not on the hidden page
+                # container.
+                if self._nav_stack and self._nav_stack[-1] == self._show_home:
+                    self._nav_stack[-1] = self._home_restore(control_id)
                 self._show_row_page(row_type)
-                self.setFocusId(ID_PAGE_LIST_L)
+                if self.getProperty("layout") == "list":
+                    self.setFocusId(ID_PAGE_LIST_L)
+                else:
+                    self.setFocusId(ID_PAGE_LIST)
             return
 
         # Handle the synthetic "Next page" item: load the next batch
@@ -3424,8 +3564,9 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             # its position cannot identify the track: publish the
             # track id directly as the marker hint.
             hint = list_item.getProperty("soundcloud.track_id")
+            self._marker_hint_at = time.time()
             self._marker_hint = hint or None
-            self.setProperty("playing_marker", hint or "none")
+            self._publish_marker(hint)
             # Arm the sleep timer for this fresh playback.
             self._arm_sleep_timer()
         except Exception as e:
@@ -3539,67 +3680,6 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         self._fill_page_list(None)
         return False
 
-    def _show_token(self):
-        """
-        "OAuth token" side-menu button: guided token renewal without
-        leaving the interface. Shows the helper-page instructions,
-        lets the user paste the fresh token, saves it, clears the
-        invalid-token latch and the cached profile, verifies it
-        against /me and reloads the home content. A dead token
-        makes every personal row silently fall back to trending,
-        which is exactly what this button fixes.
-        """
-        dialog = xbmcgui.Dialog()
-        addon_name = self.addon.getAddonInfo("name")
-        # 1) How to get a token (helper page with the copy-paste
-        #    snippet) - also the context for the keyboard paste.
-        dialog.ok(addon_name, self.addon.getLocalizedString(30026))
-        # 2) Paste the token (empty input = cancel, no change).
-        token = dialog.input(self.addon.getLocalizedString(30021))
-        if not token or not token.strip():
-            return
-        # 3) Save it.
-        self.addon.setSetting("auth.oauth_token", token.strip())
-        # 4) Clear the invalid-token latch so get_me() retries, and
-        #    drop the /me profile cached for the previous token.
-        try:
-            self.api._token_invalid = False
-            self.api._last_invalid_token = None
-        except Exception:
-            pass
-        try:
-            self.api.cache.vfs.delete("api-me-profile")
-        except Exception:
-            pass
-        # 5) Verify against /me (network errors surface as None
-        #    or an exception - both are handled below).
-        try:
-            me = self.api.get_me()
-        except Exception as e:
-            dialog.ok(
-                addon_name,
-                self.addon.getLocalizedString(30245).format(str(e)),
-            )
-            return
-        if me and me.get("username"):
-            dialog.ok(
-                addon_name,
-                self.addon.getLocalizedString(30242).format(
-                    me["username"]
-                ),
-            )
-        else:
-            dialog.ok(
-                addon_name,
-                self.addon.getLocalizedString(30243).format("401"),
-            )
-        # 6) Reload the home content with the (possibly new) token.
-        self._show_home()
-        try:
-            self.setFocusId(ID_NAV_HOME)
-        except Exception:
-            pass
-
     def _notify(self, message):
         try:
             xbmcgui.Dialog().notification(
@@ -3613,37 +3693,54 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
 
     def _highlight_playing_track(self):
         """
-        Move the focus to the currently-playing track in whichever list
-        contains it. Called by _PlayerObserver when playback changes.
+        Bring the playing track into view in every list that holds it
+        (home rows, home list, page panel/list), so the row follows
+        the queue as it moves on. Called by _PlayerObserver right
+        after _sync_playing_marker_property.
 
-        We compare against the plugin:// URL we passed to the playlist;
-        when Kodi plays a track from our queue, getPlayingFile() returns
-        the same URL (after Kodi has resolved it back through us).
+        Matched by the playing-marker id (the SoundCloud track id the
+        skin uses for the orange markers and the cover wave). The old
+        match compared our plugin:// URL with getPlayingFile(), which
+        returns the RESOLVED stream URL for plugin playback - it never
+        matched, so the tiles never followed the queue - and it
+        stopped at the first list, often a hidden one.
+
+        The list that has the focus only follows when its selection
+        was on the previous playing track: a user browsing that list
+        is not yanked back to the playing track.
         """
+        marker = self.getProperty("playing_marker") or ""
+        previous = getattr(self, "_highlight_marker", None)
+        self._highlight_marker = marker
+        if not marker or marker == "none" or marker == previous:
+            return
         try:
-            playing = self._player_observer.getPlayingFile()
+            focused = self.getFocusId()
         except Exception:
-            return
-        if not playing:
-            return
-
-        # The playing file may be the resolved URL (api-v2.soundcloud.com/.../stream/hls)
-        # rather than our plugin:// URL — Kodi caches resolved URLs internally.
-        # Best signal we have: match by media_url substring.
-        for control_id, items in self._lists.items():
-            for idx, (play_url, list_item) in enumerate(items):
-                if play_url and play_url in playing:
-                    try:
-                        # Move focus to that position. setSelectedPosition
-                        # is the right call for xbmcgui.ControlList.
-                        self.getControl(control_id).selectItem(idx)
-                    except Exception as e:
-                        xbmc.log(
-                            "plugin.audio.soundcloud::HomeWindow highlight failed: %s" %
-                            str(e),
-                            xbmc.LOGDEBUG,
-                        )
-                    return
+            focused = None
+        for control_id, items in list(self._lists.items()):
+            target = -1
+            for idx, (_, list_item) in enumerate(items):
+                if list_item.getProperty("playing_marker") == marker:
+                    target = idx
+                    break
+            if target < 0:
+                continue
+            try:
+                control = self.getControl(control_id)
+                if control_id == focused and previous and previous != "none":
+                    current = control.getSelectedPosition()
+                    if not (0 <= current < len(items)) or (
+                            items[current][1].getProperty("playing_marker")
+                            != previous):
+                        continue
+                control.selectItem(target)
+            except Exception as e:
+                xbmc.log(
+                    "plugin.audio.soundcloud::HomeWindow highlight on "
+                    "control %d failed: %s" % (control_id, str(e)),
+                    xbmc.LOGDEBUG,
+                )
 
     def _schedule_playing_markers_refresh(self):
         """
@@ -3672,6 +3769,22 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 xbmc.LOGWARNING,
             )
 
+    def _publish_marker(self, value):
+        """Playing-marker id ("none" when nothing plays) for the skin."""
+        value = value or "none"
+        self.setProperty("playing_marker", value)
+        try:
+            xbmcgui.Window(10000).setProperty(MARKER_HOME_PROPERTY, value)
+        except Exception:
+            pass
+
+    def _marker_hint_pending(self):
+        """True while a single-track play is still starting."""
+        if not getattr(self, "_marker_hint", None):
+            return False
+        started = getattr(self, "_marker_hint_at", 0)
+        return (time.time() - started) < MARKER_HINT_GRACE
+
     def _sync_playing_marker_property(self):
         """
         Publish the id of the track that is actually playing as the
@@ -3695,10 +3808,16 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         """
         try:
             hint = getattr(self, "_marker_hint", None)
-            if hint:
-                self.setProperty("playing_marker", str(hint))
+            playing = self._player_observer.isPlayingAudio()
+            # The hint only describes the single track started by
+            # _play_track: keep it while that track plays (and during
+            # the few seconds before playback actually starts), drop it
+            # once playback has stopped or ended - otherwise the orange
+            # markers stayed on that track forever.
+            if hint and (playing or self._marker_hint_pending()):
+                self._publish_marker(str(hint))
                 return
-            if self._player_observer.isPlayingAudio():
+            if playing:
                 playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
                 position = playlist.getposition()
                 if 0 <= position < playlist.size():
@@ -3706,11 +3825,11 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                         "soundcloud.track_id"
                     )
                     if track_id:
-                        self.setProperty("playing_marker", track_id)
+                        self._publish_marker(track_id)
                         return
             # Nothing identifiable is playing - clear the markers.
             self._marker_hint = None
-            self.setProperty("playing_marker", "none")
+            self._publish_marker("none")
         except Exception as e:
             xbmc.log(
                 "plugin.audio.soundcloud::HomeWindow playing marker "

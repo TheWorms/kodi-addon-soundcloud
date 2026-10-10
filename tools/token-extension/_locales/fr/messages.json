@@ -1,0 +1,134 @@
+{
+  "extName": {
+    "message": "Jeton SoundCloud pour Kodi"
+  },
+  "extDescription": {
+    "message": "Récupère votre jeton OAuth SoundCloud dans les requêtes de soundcloud.com pour le copier, ou l'envoyer directement à l'addon SoundCloud de Kodi."
+  },
+  "statusVerified": {
+    "message": "Jeton récupéré et accepté par SoundCloud."
+  },
+  "statusCaptured": {
+    "message": "Jeton récupéré, pas encore confirmé. Naviguez quelques secondes sur soundcloud.com pour le confirmer."
+  },
+  "statusRejected": {
+    "message": "SoundCloud a refusé ce jeton (expiré ?). Reconnectez-vous sur soundcloud.com, puis rouvrez cette fenêtre."
+  },
+  "statusCookie": {
+    "message": "Trouvé dans le cookie oauth_token, non confirmé. Ouvrez soundcloud.com pour récupérer le jeton confirmé."
+  },
+  "statusNone": {
+    "message": "Pas encore de jeton. Ouvrez soundcloud.com en étant connecté : le jeton est récupéré automatiquement, puis rouvrez cette fenêtre."
+  },
+  "needPermission": {
+    "message": "L'extension a besoin d'accéder à soundcloud.com pour lire le jeton."
+  },
+  "btnGrant": {
+    "message": "Autoriser l'accès à soundcloud.com"
+  },
+  "btnOpen": {
+    "message": "Ouvrir SoundCloud"
+  },
+  "btnCopy": {
+    "message": "Copier le jeton"
+  },
+  "btnCopied": {
+    "message": "Copié !"
+  },
+  "btnCopyFailed": {
+    "message": "Copie impossible : sélectionnez le jeton et copiez-le"
+  },
+  "btnShow": {
+    "message": "Afficher"
+  },
+  "btnHide": {
+    "message": "Masquer"
+  },
+  "btnClear": {
+    "message": "Oublier"
+  },
+  "capturedFrom": {
+    "message": "Récupéré depuis"
+  },
+  "minutesAgo": {
+    "message": "il y a $COUNT$ min",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "kodiTitle": {
+    "message": "Envoyer à Kodi"
+  },
+  "kodiHelp": {
+    "message": "1. Dans Kodi : paramètres de l'addon SoundCloud > Compte > Gérer le jeton OAuth. Laissez la fenêtre sur « Saisir le jeton ». 2. Kodi doit avoir Paramètres > Services > Contrôle > « Autoriser le contrôle à distance via HTTP ». Firefox : si cette fenêtre se ferme quand vous autorisez l'accès, rouvrez-la et cliquez de nouveau sur Envoyer."
+  },
+  "kodiHost": {
+    "message": "Adresse IP de Kodi (ou IP:port)"
+  },
+  "kodiPort": {
+    "message": "Port"
+  },
+  "kodiUser": {
+    "message": "Utilisateur"
+  },
+  "kodiPassword": {
+    "message": "Mot de passe (non enregistré)"
+  },
+  "btnSend": {
+    "message": "Envoyer à Kodi"
+  },
+  "btnSendAnyway": {
+    "message": "C'est le bon champ, envoyer"
+  },
+  "kodiSending": {
+    "message": "Connexion à Kodi..."
+  },
+  "kodiNoKeyboard": {
+    "message": "Le clavier de Kodi ne s'est pas ouvert. Ouvrez-le avec « Saisir le jeton » dans la fenêtre du jeton OAuth, puis cliquez de nouveau sur Envoyer."
+  },
+  "kodiSent": {
+    "message": "Jeton envoyé. Dans Kodi, appuyez sur Enregistrer : la fenêtre indique aussitôt si SoundCloud l'accepte."
+  },
+  "kodiAuth": {
+    "message": "Kodi a refusé l'utilisateur ou le mot de passe (réglages du serveur web)."
+  },
+  "kodiUnreachable": {
+    "message": "Kodi injoignable. Vérifiez l'adresse et que le contrôle à distance via HTTP est activé."
+  },
+  "kodiPermDenied": {
+    "message": "L'autorisation de contacter Kodi a été refusée."
+  },
+  "kodiNeedHost": {
+    "message": "Saisissez d'abord l'adresse de Kodi."
+  },
+  "privacy": {
+    "message": "Le jeton reste dans la mémoire du navigateur et est oublié à sa fermeture. Il ne quitte le navigateur que si vous cliquez sur Envoyer à Kodi. Traitez-le comme un mot de passe."
+  },
+  "helpLink": {
+    "message": "Page d'aide"
+  },
+  "kodiWrongKeyboard": {
+    "message": "Le clavier ouvert dans Kodi est « $HEADING$ », pas le champ Jeton OAuth de l'addon. Rien n'a été envoyé.",
+    "placeholders": {
+      "heading": {
+        "content": "$1",
+        "example": "Search"
+      }
+    }
+  },
+  "kodiUnknownKeyboard": {
+    "message": "Un clavier est ouvert dans Kodi mais son titre est illisible. Vérifiez que c'est bien le champ Jeton OAuth de l'addon, puis confirmez."
+  },
+  "kodiBadHost": {
+    "message": "Adresse invalide : saisissez l'IP de Kodi, par ex. 192.168.1.20 ou 192.168.1.20:8080."
+  },
+  "kodiNoWindow": {
+    "message": "La fenêtre du jeton OAuth n'est pas ouverte dans Kodi. Ouvrez Paramètres de l'addon SoundCloud > Compte > Gérer le jeton OAuth, puis cliquez de nouveau sur Envoyer."
+  },
+  "kodiFocusEnter": {
+    "message": "Dans la fenêtre du jeton OAuth de Kodi, placez-vous sur « Saisir le jeton » (ou ouvrez son clavier), puis cliquez de nouveau sur Envoyer."
+  }
+}

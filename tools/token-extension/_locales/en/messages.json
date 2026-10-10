@@ -1,0 +1,134 @@
+{
+  "extName": {
+    "message": "SoundCloud token for Kodi"
+  },
+  "extDescription": {
+    "message": "Picks up your SoundCloud OAuth token from soundcloud.com's own requests so you can copy it, or send it straight to the Kodi SoundCloud addon."
+  },
+  "statusVerified": {
+    "message": "Token captured and accepted by SoundCloud."
+  },
+  "statusCaptured": {
+    "message": "Token captured, not confirmed yet. Browse soundcloud.com for a few seconds to confirm it."
+  },
+  "statusRejected": {
+    "message": "SoundCloud refused this token (expired?). Sign in again on soundcloud.com, then reopen this window."
+  },
+  "statusCookie": {
+    "message": "Found in the oauth_token cookie, not confirmed. Open soundcloud.com to capture the confirmed token."
+  },
+  "statusNone": {
+    "message": "No token yet. Open soundcloud.com while signed in: the token is picked up automatically, then reopen this window."
+  },
+  "needPermission": {
+    "message": "The extension needs access to soundcloud.com to read the token."
+  },
+  "btnGrant": {
+    "message": "Allow access to soundcloud.com"
+  },
+  "btnOpen": {
+    "message": "Open SoundCloud"
+  },
+  "btnCopy": {
+    "message": "Copy token"
+  },
+  "btnCopied": {
+    "message": "Copied!"
+  },
+  "btnCopyFailed": {
+    "message": "Copy failed: select the token and copy it"
+  },
+  "btnShow": {
+    "message": "Show"
+  },
+  "btnHide": {
+    "message": "Hide"
+  },
+  "btnClear": {
+    "message": "Forget"
+  },
+  "capturedFrom": {
+    "message": "Captured from"
+  },
+  "minutesAgo": {
+    "message": "$COUNT$ min ago",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "kodiTitle": {
+    "message": "Send to Kodi"
+  },
+  "kodiHelp": {
+    "message": "1. In Kodi: SoundCloud addon settings > Account > Manage the OAuth token. Leave the window on \"Enter token\". 2. Kodi needs Settings > Services > Control > \"Allow remote control via HTTP\". Firefox: if this window closes when you allow access, reopen it and click Send again."
+  },
+  "kodiHost": {
+    "message": "Kodi IP address (or IP:port)"
+  },
+  "kodiPort": {
+    "message": "Port"
+  },
+  "kodiUser": {
+    "message": "User"
+  },
+  "kodiPassword": {
+    "message": "Password (not saved)"
+  },
+  "btnSend": {
+    "message": "Send to Kodi"
+  },
+  "btnSendAnyway": {
+    "message": "It's the right field, send"
+  },
+  "kodiSending": {
+    "message": "Contacting Kodi..."
+  },
+  "kodiNoKeyboard": {
+    "message": "Kodi's keyboard did not open. Open it with \"Enter token\" in the OAuth token window, then click Send again."
+  },
+  "kodiSent": {
+    "message": "Token sent. In Kodi, press Save: the window shows at once whether SoundCloud accepts it."
+  },
+  "kodiAuth": {
+    "message": "Kodi refused the user name or password (web server settings)."
+  },
+  "kodiUnreachable": {
+    "message": "Cannot reach Kodi. Check the address and that remote control via HTTP is enabled."
+  },
+  "kodiPermDenied": {
+    "message": "Permission to contact Kodi was refused."
+  },
+  "kodiNeedHost": {
+    "message": "Enter Kodi's address first."
+  },
+  "privacy": {
+    "message": "The token stays in this browser's memory and is forgotten when the browser closes. It only leaves the browser when you click Send to Kodi. Treat it like a password."
+  },
+  "helpLink": {
+    "message": "Help page"
+  },
+  "kodiWrongKeyboard": {
+    "message": "The keyboard open in Kodi is \"$HEADING$\", not the addon's OAuth token field. Nothing was sent.",
+    "placeholders": {
+      "heading": {
+        "content": "$1",
+        "example": "Search"
+      }
+    }
+  },
+  "kodiUnknownKeyboard": {
+    "message": "A keyboard is open in Kodi but its title cannot be read. Check that it is the addon's OAuth token field, then confirm."
+  },
+  "kodiBadHost": {
+    "message": "Invalid address: type Kodi's IP, e.g. 192.168.1.20 or 192.168.1.20:8080."
+  },
+  "kodiNoWindow": {
+    "message": "The OAuth token window is not open in Kodi. Open SoundCloud addon settings > Account > Manage the OAuth token, then click Send again."
+  },
+  "kodiFocusEnter": {
+    "message": "In Kodi's OAuth token window, select \"Enter token\" (or open its keyboard), then click Send again."
+  }
+}

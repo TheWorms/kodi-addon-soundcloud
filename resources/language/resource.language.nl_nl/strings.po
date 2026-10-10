@@ -58,8 +58,8 @@ msgid "Paste your SoundCloud OAuth token here to access your likes, playlists, f
 msgstr "Plak hier je SoundCloud OAuth-token om toegang te krijgen tot je likes, afspeellijsten, volgenden en reposts. Zie \"Een token verkrijgen\" hieronder."
 
 msgctxt "#30024"
-msgid "OAuth token expired — open Settings > Account > How to get a token"
-msgstr "OAuth-token verlopen — open Instellingen > Account > Token verkrijgen"
+msgid "OAuth token refused — open Settings > Account > Manage the OAuth token"
+msgstr "OAuth-token geweigerd — open Instellingen > Account > OAuth-token beheren"
 
 msgctxt "#30025"
 msgid "You need to configure an OAuth token to access your profile. Opening settings now..."
@@ -604,3 +604,123 @@ msgstr "Wanneer een via een widget gestarte track eindigt, blijven de andere tra
 msgctxt "#30295"
 msgid "Stream interrupted — resuming…"
 msgstr "Stream onderbroken — hervatten…"
+
+msgctxt "#30410"
+msgid "Manage the OAuth token…"
+msgstr "OAuth-token beheren…"
+
+msgctxt "#30411"
+msgid "Opens the OAuth token window: enter the token by hand or send it with the browser extension, then Save. SoundCloud is asked right away whether it is valid, and only a valid token is kept."
+msgstr "Opent het OAuth-tokenvenster: voer het token handmatig in of stuur het met de browserextensie, en kies Opslaan. SoundCloud controleert direct of het geldig is; alleen een geldig token wordt bewaard."
+
+msgctxt "#30412"
+msgid "Token status"
+msgstr "Tokenstatus"
+
+msgctxt "#30413"
+msgid "Read-only: result of the last check made in the OAuth token window."
+msgstr "Alleen-lezen: resultaat van de laatste controle in het OAuth-tokenvenster."
+
+msgctxt "#30414"
+msgid "SoundCloud OAuth token"
+msgstr "SoundCloud OAuth-token"
+
+msgctxt "#30415"
+msgid "Saved token"
+msgstr "Opgeslagen token"
+
+msgctxt "#30416"
+msgid "New token"
+msgstr "Nieuw token"
+
+msgctxt "#30417"
+msgid "Enter token"
+msgstr "Token invoeren"
+
+msgctxt "#30418"
+msgid "Save"
+msgstr "Opslaan"
+
+msgctxt "#30419"
+msgid "Delete"
+msgstr "Verwijderen"
+
+msgctxt "#30420"
+msgid "Close"
+msgstr "Sluiten"
+
+msgctxt "#30421"
+msgid "No token saved."
+msgstr "Geen token opgeslagen."
+
+msgctxt "#30422"
+msgid "Checking with SoundCloud…"
+msgstr "Controle bij SoundCloud…"
+
+msgctxt "#30423"
+msgid "Valid - signed in as {0}"
+msgstr "Geldig - aangemeld als {0}"
+
+msgctxt "#30424"
+msgid "subscription: {0}"
+msgstr "abonnement: {0}"
+
+msgctxt "#30425"
+msgid "Refused by SoundCloud (HTTP {0}): expired or wrong token."
+msgstr "Geweigerd door SoundCloud (HTTP {0}): token verlopen of onjuist."
+
+msgctxt "#30426"
+msgid "Could not be checked ({0})."
+msgstr "Controle niet mogelijk ({0})."
+
+msgctxt "#30427"
+msgid "Press Save: SoundCloud checks the token first, and it is only kept if it is valid."
+msgstr "Druk op Opslaan: SoundCloud controleert het token eerst; het wordt alleen bewaard als het geldig is."
+
+msgctxt "#30428"
+msgid "Token valid and saved."
+msgstr "Token geldig en opgeslagen."
+
+msgctxt "#30429"
+msgid "The token was not saved."
+msgstr "Het token is niet opgeslagen."
+
+msgctxt "#30430"
+msgid "Enter a token first."
+msgstr "Voer eerst een token in."
+
+msgctxt "#30431"
+msgid "SoundCloud could not be reached ({0}). Save the token anyway, without checking it?"
+msgstr "SoundCloud is niet bereikbaar ({0}). Token toch opslaan zonder controle?"
+
+msgctxt "#30432"
+msgid "Delete the saved token? Your likes, playlists and listening history will no longer be available."
+msgstr "Opgeslagen token verwijderen? Je likes, afspeellijsten en luistergeschiedenis zijn dan niet meer beschikbaar."
+
+msgctxt "#30433"
+msgid "Token deleted."
+msgstr "Token verwijderd."
+
+msgctxt "#30434"
+msgid "Get the token with the browser extension \"SoundCloud token for Kodi\": keep this window open on \"Enter token\" and click Send to Kodi in the extension. Without the extension, follow the help page: theworms.github.io/kodi-addon-soundcloud"
+msgstr "Haal het token op met de browserextensie \"SoundCloud token for Kodi\": laat dit venster open op \"Token invoeren\" en klik in de extensie op Send to Kodi. Zonder extensie: hulppagina theworms.github.io/kodi-addon-soundcloud"
+
+msgctxt "#30435"
+msgid "Valid ({0}) - checked {1}"
+msgstr "Geldig ({0}) - gecontroleerd {1}"
+
+msgctxt "#30436"
+msgid "Refused by SoundCloud - checked {0}"
+msgstr "Geweigerd door SoundCloud - gecontroleerd {0}"
+
+msgctxt "#30437"
+msgid "Saved without check"
+msgstr "Opgeslagen zonder controle"
+
+msgctxt "#30438"
+msgid "No token"
+msgstr "Geen token"
+
+msgctxt "#30439"
+msgid "Unusual format: SoundCloud tokens look like 2-123456-123456789-AbCd…"
+msgstr "Ongebruikelijk formaat: SoundCloud-tokens zien eruit als 2-123456-123456789-AbCd…"

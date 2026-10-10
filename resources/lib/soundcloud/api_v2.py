@@ -1,6 +1,7 @@
 import hashlib
 import json
 import re
+import time
 import requests
 import urllib.parse
 import xbmc
@@ -117,10 +118,12 @@ class ApiV2(ApiInterface):
         # short-circuit to avoid the double round-trip (auth fail + retry
         # which also fails because /me requires a user). The user must
         # update the token in settings to recover.
+        current_token = self.settings.get_oauth_token()
+        self._rearm_if_token_changed(current_token)
         if getattr(self, "_token_invalid", False):
             return None
 
-        if not self.settings.get_oauth_token():
+        if not current_token:
             return None
 
         cache_key = "api-me-profile"
@@ -169,13 +172,22 @@ class ApiV2(ApiInterface):
     def play_history(self, limit=50):
         """
         Returns the authenticated user's recently played tracks
-        (/me/play-history). The entries wrap the track in a "track"
+        (/me/play-history/tracks - the endpoint soundcloud.com reads
+        for its "Listening history"; bare /me/play-history is only the
+        write/clear endpoint and returns no history, which made both
+        "Recently played" and "Mixed for you" silently fall back to the
+        same trending list). The entries wrap the track in a "track"
         key WITHOUT a "kind" field of their own, so they are unwrapped
         here before the generic mapper sees them. Returns None when
         the request fails (not logged in, expired token, ...).
         """
-        res = self._do_request("/me/play-history", {"limit": limit})
-        if not isinstance(res, dict) or "collection" not in res:
+        res = self._do_request("/me/play-history/tracks", {"limit": limit})
+        if not isinstance(res, dict) or not isinstance(res.get("collection"), list):
+            xbmc.log(
+                "plugin.audio.soundcloud::ApiV2() play history unavailable "
+                "(unexpected response)",
+                xbmc.LOGWARNING,
+            )
             return None
         tracks = [
             entry.get("track") for entry in res["collection"]
@@ -246,6 +258,105 @@ class ApiV2(ApiInterface):
                         "collection": category["tracks"]
                     })
         return None
+
+    def check_token(self, token):
+        """
+        Check a candidate OAuth token WITHOUT saving it: one GET /me with
+        that token. Returns a dict:
+          state    "valid" | "invalid" | "error"
+          http     HTTP status (None on network errors)
+          username, tier   when valid (tier: "free", "go_plus", ...)
+          error    short reason when state is "error"
+        Used by the token window so a token is only saved once
+        SoundCloud has accepted it.
+        """
+        result = {"state": "error", "http": None, "username": None,
+                  "tier": None, "error": None}
+        if not token:
+            result["state"] = "invalid"
+            return result
+        headers = {
+            "Accept": "application/json",
+            "Accept-Encoding": "gzip",
+            "User-Agent": self.api_user_agent,
+            "Authorization": "OAuth " + token,
+            "Origin": "https://soundcloud.com",
+            "Referer": "https://soundcloud.com/",
+        }
+        # SoundCloud occasionally answers a one-off 401 to a valid
+        # token (see _do_request): only a second 401 in a row counts as
+        # a refusal. A 403 comes from its anti-bot / region filters
+        # rather than from the token, so it means "could not check" -
+        # the window then offers to save the token anyway.
+        for attempt in (1, 2):
+            try:
+                r = requests.get(
+                    self.api_host + "/me",
+                    headers=headers,
+                    timeout=(5, getattr(self, "api_timeout", 15)),
+                )
+            except requests.exceptions.RequestException as e:
+                result["error"] = type(e).__name__
+                return result
+            if r.status_code != 401 or attempt == 2:
+                break
+            time.sleep(1)
+        result["http"] = r.status_code
+        if r.status_code == 401:
+            result["state"] = "invalid"
+            return result
+        if r.status_code != 200:
+            result["error"] = "HTTP %d" % r.status_code
+            return result
+        try:
+            me = r.json()
+        except ValueError:
+            result["error"] = "invalid JSON"
+            return result
+        if not isinstance(me, dict) or "id" not in me:
+            result["error"] = "unexpected answer"
+            return result
+        result["state"] = "valid"
+        result["username"] = me.get("username") or me.get("permalink")
+        product = (me.get("consumer_subscription") or {}).get("product") or {}
+        result["tier"] = product.get("id")
+        return result
+
+    def _rearm_if_token_changed(self, current_token):
+        """
+        If the token has changed since we last marked it invalid, reset
+        the flag so the new token gets a fresh chance. This way the user
+        doesn't have to restart Kodi after saving a new token.
+        """
+        if (
+            getattr(self, "_token_invalid", False)
+            and current_token
+            and current_token != getattr(self, "_last_invalid_token", None)
+        ):
+            xbmc.log(
+                "plugin.audio.soundcloud::ApiV2() OAuth token changed since "
+                "last 401 — re-enabling auth for this session",
+                xbmc.LOGINFO,
+            )
+            self._token_invalid = False
+            self._last_invalid_token = None
+            self._consecutive_401 = 0
+
+    def reset_auth_state(self):
+        """
+        Forget everything learned about the previous token: the
+        invalid-token latch, the 401 counter, the once-per-process
+        notification guard and the cached /me profile. Called after a
+        new token is saved so it gets a fresh chance immediately.
+        """
+        self._token_invalid = False
+        self._last_invalid_token = None
+        self._consecutive_401 = 0
+        ApiV2._auth_error_notified = False
+        try:
+            self.cache.vfs.delete("api-me-profile")
+        except Exception:
+            pass
 
     def like_track(self, track_id):
         """PUT /me/favorites/{id} — True on HTTP 2xx."""
@@ -338,22 +449,7 @@ class ApiV2(ApiInterface):
         # the user might have just edited it (Settings now creates a fresh
         # Addon() per call to bypass Kodi's in-memory caching).
         current_token = self.settings.get_oauth_token()
-
-        # If the token has changed since we last marked it invalid, reset
-        # the flag so the new token gets a fresh chance. This way the user
-        # doesn't have to restart Kodi after pasting a new token.
-        if (
-            getattr(self, "_token_invalid", False)
-            and current_token
-            and current_token != getattr(self, "_last_invalid_token", None)
-        ):
-            xbmc.log(
-                "plugin.audio.soundcloud::ApiV2() OAuth token changed since "
-                "last 401 — re-enabling auth for this session",
-                xbmc.LOGINFO,
-            )
-            self._token_invalid = False
-            self._last_invalid_token = None
+        self._rearm_if_token_changed(current_token)
 
         # Inject OAuth token when the user has configured one in the settings.
         # However, if we've previously seen the token rejected with 401, we
@@ -420,7 +516,14 @@ class ApiV2(ApiInterface):
             headers["Authorization"] = "OAuth " + oauth_token
 
         path = request_url
-        cache_key = hashlib.sha1((path + str(payload)).encode()).hexdigest()
+        # Personalised answers (/mixed-selections...) must not be served
+        # to another account after a token change: authenticated
+        # requests get a fingerprint of the token (never the token
+        # itself) in their cache key.
+        key_source = path + str(payload)
+        if oauth_token:
+            key_source += "|" + hashlib.sha256(oauth_token.encode()).hexdigest()[:16]
+        cache_key = hashlib.sha1(key_source.encode()).hexdigest()
 
         # Redact the token before logging the headers.
         log_headers = dict(headers)
@@ -537,7 +640,7 @@ class ApiV2(ApiInterface):
                 xbmc.log(
                     "plugin.audio.soundcloud::ApiV2() %d consecutive 401s — "
                     "disabling token for the rest of this session. Update it in "
-                    "Settings > Account > OAuth token to fix." %
+                    "Settings > Account > Manage the OAuth token to fix." %
                     self._consecutive_401,
                     xbmc.LOGWARNING,
                 )
