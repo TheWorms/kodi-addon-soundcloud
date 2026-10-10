@@ -1,6 +1,6 @@
 [Français](readme.md) &nbsp;|&nbsp; **English**
 
-# SoundCloud Add-on for [Kodi](https://github.com/xbmc/xbmc) — v5+ fork
+# SoundCloud Add-on for [Kodi](https://github.com/xbmc/xbmc)
 
 <!-- version:auto -->
 **Version : 5.9.6027**
