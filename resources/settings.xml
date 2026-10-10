@@ -34,7 +34,7 @@
                     <constraints>
                         <options>
                             <option label="30139">0</option>
-                            <option label="30181">1</option>
+                            <option label="30399">1</option>
                         </options>
                     </constraints>
                     <control type="spinner" format="string"/>
@@ -281,6 +281,20 @@
         <!-- ============================================================ -->
         <category id="account" label="30220" help="">
             <group id="1" label="30020">
+                <!-- Read-only display of the API client ID actually in
+                     use, placed above the OAuth token. Filled by
+                     plugin.py at every add-on start (custom override >
+                     24h cache > live extraction from soundcloud.com).
+                     The "infolabel" button format shows the stored
+                     value and does nothing when clicked: read-only. -->
+                <setting id="apiv2.client_id_info" type="string" label="30397" help="30398">
+                    <level>0</level>
+                    <default/>
+                    <constraints>
+                        <allowempty>true</allowempty>
+                    </constraints>
+                    <control type="button" format="infolabel"/>
+                </setting>
                 <setting id="auth.oauth_token" type="string" label="30021" help="30023">
                     <level>0</level>
                     <default/>

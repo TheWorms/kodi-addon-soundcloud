@@ -265,12 +265,12 @@ msgid "Mini-player"
 msgstr "Mini-player"
 
 msgctxt "#30138"
-msgid "Choose how the mini-player is shown at the bottom of the interface: the compact bar shows the cover and a progress bar, and Hidden gives the content the full screen height."
-msgstr "Choose how the mini-player is shown at the bottom of the interface: the compact bar shows the cover and a progress bar, and Hidden gives the content the full screen height."
+msgid "Show or hide the compact mini-player bar at the bottom of the interface. When hidden, the content lists use the full screen height."
+msgstr "Show or hide the compact mini-player bar at the bottom of the interface. When hidden, the content lists use the full screen height."
 
 msgctxt "#30139"
-msgid "Hidden"
-msgstr "Hidden"
+msgid "Hide"
+msgstr "Hide"
 
 msgctxt "#30140"
 msgid "Display only (no controls)"
@@ -793,4 +793,16 @@ msgstr "1 minute"
 msgctxt "#30396"
 msgid "2 minutes"
 msgstr "2 minutes"
+
+msgctxt "#30397"
+msgid "Client ID in use"
+msgstr "Client ID in use"
+
+msgctxt "#30398"
+msgid "Read-only: the API client ID currently used by the add-on (custom override, 24-hour cache, or extracted from soundcloud.com). Filled automatically and not editable here; the expert-level override stays in the Advanced group."
+msgstr "Read-only: the API client ID currently used by the add-on (custom override, 24-hour cache, or extracted from soundcloud.com). Filled automatically and not editable here; the expert-level override stays in the Advanced group."
+
+msgctxt "#30399"
+msgid "Show"
+msgstr "Show"
 

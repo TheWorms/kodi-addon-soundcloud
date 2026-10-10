@@ -60,6 +60,35 @@ def _purge_cache_once():
         )
 
 
+def _sync_client_id_info():
+    """
+    Keep the read-only "apiv2.client_id_info" display setting in sync
+    with the API client ID actually in use (Settings > Account, above
+    the OAuth token). The resolution order matches
+    ApiV2.api_client_id: custom override > 24h cache > live
+    extraction, so the ID is shown whether the user browses
+    anonymously or with an OAuth token (a token is sent INSTEAD of
+    the client ID, but the ID is still resolved and used for
+    anonymous fallback calls). Cheap while the 24h cache is warm; on
+    a cold cache the extraction runs at most once per day - and on
+    failure the previously stored value simply stays.
+    """
+    try:
+        current = settings.get("apiv2.client_id_info") or ""
+        resolved = api.api_client_id
+        if resolved != current:
+            addon.setSetting("apiv2.client_id_info", resolved)
+            xbmc.log(
+                "%s: client id info refreshed" % addon_id,
+                xbmc.LOGDEBUG,
+            )
+    except Exception as e:
+        xbmc.log(
+            "%s: client id info sync failed: %s" % (addon_id, str(e)),
+            xbmc.LOGWARNING,
+        )
+
+
 def run():
     import time as _t
     _t0 = _t.time()
@@ -75,6 +104,9 @@ def run():
 
     # One-shot cache purge — keeps the cache folder bounded.
     _purge_cache_once()
+
+    # Read-only client ID display (Settings > Account).
+    _sync_client_id_info()
 
     # Widget track click → open the full-screen UI playing that track.
     # Widget track items point at /?play_track=<id> (not /play/) since
