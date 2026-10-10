@@ -967,113 +967,148 @@
                 <ondown>354</ondown>
                 <scrolltime tween="sine" easing="out">300</scrolltime>
                 <!-- Row style follows the design demo: a dark card per
-                     track (#252525), cover 56x56, white title, grey
+                     track (#252525), cover 84x84, white title, grey
                      artist, grey duration right-aligned; the focused
                      row switches the card to #2E2E2E and the title to
-                     the accent orange. -->
-                <itemlayout width="1660" height="80">
+                     the accent orange. Rows are 110px tall for a less
+                     compact look. Section headers (property
+                     isSectionHeader) replace the card with an orange
+                     localized title. -->
+                <itemlayout width="1660" height="110">
                     <control type="group">
                         <left>0</left>
                         <top>0</top>
                         <width>1660</width>
-                        <height>80</height>
+                        <height>110</height>
                         <control type="image">
                             <left>0</left>
-                            <top>4</top>
+                            <top>0</top>
                             <width>1660</width>
-                            <height>72</height>
+                            <height>104</height>
                             <texture colordiffuse="FF252525">white.png</texture>
+                            <visible>!String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
                         <control type="image">
-                            <left>16</left>
-                            <top>12</top>
-                            <width>56</width>
-                            <height>56</height>
+                            <left>20</left>
+                            <top>10</top>
+                            <width>84</width>
+                            <height>84</height>
                             <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                             <aspectratio>scale</aspectratio>
+                            <visible>!String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
                         <control type="label">
-                            <left>88</left>
-                            <top>10</top>
-                            <width>1190</width>
-                            <height>36</height>
+                            <left>124</left>
+                            <top>14</top>
+                            <width>1150</width>
+                            <height>44</height>
                             <label>$INFO[ListItem.Label]</label>
-                            <font>font13</font>
+                            <font>font14</font>
                             <textcolor>FFFAFAFA</textcolor>
                             <aligny>center</aligny>
+                            <visible>!String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
                         <control type="label">
-                            <left>88</left>
-                            <top>44</top>
-                            <width>1190</width>
-                            <height>30</height>
+                            <left>124</left>
+                            <top>58</top>
+                            <width>1150</width>
+                            <height>34</height>
                             <label>$INFO[ListItem.Artist]</label>
-                            <font>font12</font>
+                            <font>font13</font>
                             <textcolor>FFA8A8A8</textcolor>
+                            <visible>!String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
                         <control type="label">
                             <left>1296</left>
                             <top>0</top>
                             <width>344</width>
-                            <height>80</height>
+                            <height>110</height>
                             <label>$INFO[ListItem.Duration]</label>
-                            <font>font12</font>
+                            <font>font13</font>
                             <textcolor>FFA8A8A8</textcolor>
                             <align>right</align>
                             <aligny>center</aligny>
+                            <visible>!String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                        </control>
+                        <control type="label">
+                            <left>20</left>
+                            <top>0</top>
+                            <width>1600</width>
+                            <height>110</height>
+                            <label>$INFO[ListItem.Label]</label>
+                            <font>font13_title</font>
+                            <textcolor>FFFF5500</textcolor>
+                            <aligny>center</aligny>
+                            <visible>String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
                     </control>
                 </itemlayout>
-                <focusedlayout width="1660" height="80">
+                <focusedlayout width="1660" height="110">
                     <control type="group">
                         <left>0</left>
                         <top>0</top>
                         <width>1660</width>
-                        <height>80</height>
+                        <height>110</height>
                         <control type="image">
                             <left>0</left>
-                            <top>4</top>
+                            <top>0</top>
                             <width>1660</width>
-                            <height>72</height>
+                            <height>104</height>
                             <texture colordiffuse="FF2E2E2E">white.png</texture>
+                            <visible>!String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
                         <control type="image">
-                            <left>16</left>
-                            <top>12</top>
-                            <width>56</width>
-                            <height>56</height>
+                            <left>20</left>
+                            <top>10</top>
+                            <width>84</width>
+                            <height>84</height>
                             <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                             <aspectratio>scale</aspectratio>
+                            <visible>!String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
                         <control type="label">
-                            <left>88</left>
-                            <top>10</top>
-                            <width>1190</width>
-                            <height>36</height>
+                            <left>124</left>
+                            <top>14</top>
+                            <width>1150</width>
+                            <height>44</height>
                             <label>$INFO[ListItem.Label]</label>
-                            <font>font13</font>
+                            <font>font14</font>
                             <textcolor>FFFF5500</textcolor>
                             <aligny>center</aligny>
+                            <visible>!String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
                         <control type="label">
-                            <left>88</left>
-                            <top>44</top>
-                            <width>1190</width>
-                            <height>30</height>
+                            <left>124</left>
+                            <top>58</top>
+                            <width>1150</width>
+                            <height>34</height>
                             <label>$INFO[ListItem.Artist]</label>
-                            <font>font12</font>
+                            <font>font13</font>
                             <textcolor>FFFAFAFA</textcolor>
+                            <visible>!String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
                         <control type="label">
                             <left>1296</left>
                             <top>0</top>
                             <width>344</width>
-                            <height>80</height>
+                            <height>110</height>
                             <label>$INFO[ListItem.Duration]</label>
-                            <font>font12</font>
+                            <font>font13</font>
                             <textcolor>FFA8A8A8</textcolor>
                             <align>right</align>
                             <aligny>center</aligny>
+                            <visible>!String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
+                        </control>
+                        <control type="label">
+                            <left>20</left>
+                            <top>0</top>
+                            <width>1600</width>
+                            <height>110</height>
+                            <label>$INFO[ListItem.Label]</label>
+                            <font>font13_title</font>
+                            <textcolor>FFFF5500</textcolor>
+                            <aligny>center</aligny>
+                            <visible>String.IsEqual(ListItem.Property(isSectionHeader),true)</visible>
                         </control>
                     </control>
                 </focusedlayout>
@@ -1120,106 +1155,106 @@
                 <onup>401</onup>
                 <ondown>401</ondown>
                 <scrolltime tween="sine" easing="out">300</scrolltime>
-                <itemlayout width="1660" height="80">
+                <itemlayout width="1660" height="110">
                     <control type="group">
                         <left>0</left>
                         <top>0</top>
                         <width>1660</width>
-                        <height>80</height>
+                        <height>110</height>
                         <control type="image">
                             <left>0</left>
-                            <top>4</top>
+                            <top>0</top>
                             <width>1660</width>
-                            <height>72</height>
+                            <height>104</height>
                             <texture colordiffuse="FF252525">white.png</texture>
                         </control>
                         <control type="image">
-                            <left>16</left>
-                            <top>12</top>
-                            <width>56</width>
-                            <height>56</height>
+                            <left>20</left>
+                            <top>10</top>
+                            <width>84</width>
+                            <height>84</height>
                             <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                             <aspectratio>scale</aspectratio>
                         </control>
                         <control type="label">
-                            <left>88</left>
-                            <top>10</top>
-                            <width>1190</width>
-                            <height>36</height>
+                            <left>124</left>
+                            <top>14</top>
+                            <width>1150</width>
+                            <height>44</height>
                             <label>$INFO[ListItem.Label]</label>
-                            <font>font13</font>
+                            <font>font14</font>
                             <textcolor>FFFAFAFA</textcolor>
                             <aligny>center</aligny>
                         </control>
                         <control type="label">
-                            <left>88</left>
-                            <top>44</top>
-                            <width>1190</width>
-                            <height>30</height>
+                            <left>124</left>
+                            <top>58</top>
+                            <width>1150</width>
+                            <height>34</height>
                             <label>$INFO[ListItem.Artist]</label>
-                            <font>font12</font>
+                            <font>font13</font>
                             <textcolor>FFA8A8A8</textcolor>
                         </control>
                         <control type="label">
                             <left>1296</left>
                             <top>0</top>
                             <width>344</width>
-                            <height>80</height>
+                            <height>110</height>
                             <label>$INFO[ListItem.Duration]</label>
-                            <font>font12</font>
+                            <font>font13</font>
                             <textcolor>FFA8A8A8</textcolor>
                             <align>right</align>
                             <aligny>center</aligny>
                         </control>
                     </control>
                 </itemlayout>
-                <focusedlayout width="1660" height="80">
+                <focusedlayout width="1660" height="110">
                     <control type="group">
                         <left>0</left>
                         <top>0</top>
                         <width>1660</width>
-                        <height>80</height>
+                        <height>110</height>
                         <control type="image">
                             <left>0</left>
-                            <top>4</top>
+                            <top>0</top>
                             <width>1660</width>
-                            <height>72</height>
+                            <height>104</height>
                             <texture colordiffuse="FF2E2E2E">white.png</texture>
                         </control>
                         <control type="image">
-                            <left>16</left>
-                            <top>12</top>
-                            <width>56</width>
-                            <height>56</height>
+                            <left>20</left>
+                            <top>10</top>
+                            <width>84</width>
+                            <height>84</height>
                             <texture fallback="cover-placeholder.png">$INFO[ListItem.Art(thumb)]</texture>
                             <aspectratio>scale</aspectratio>
                         </control>
                         <control type="label">
-                            <left>88</left>
-                            <top>10</top>
-                            <width>1190</width>
-                            <height>36</height>
+                            <left>124</left>
+                            <top>14</top>
+                            <width>1150</width>
+                            <height>44</height>
                             <label>$INFO[ListItem.Label]</label>
-                            <font>font13</font>
+                            <font>font14</font>
                             <textcolor>FFFF5500</textcolor>
                             <aligny>center</aligny>
                         </control>
                         <control type="label">
-                            <left>88</left>
-                            <top>44</top>
-                            <width>1190</width>
-                            <height>30</height>
+                            <left>124</left>
+                            <top>58</top>
+                            <width>1150</width>
+                            <height>34</height>
                             <label>$INFO[ListItem.Artist]</label>
-                            <font>font12</font>
+                            <font>font13</font>
                             <textcolor>FFFAFAFA</textcolor>
                         </control>
                         <control type="label">
                             <left>1296</left>
                             <top>0</top>
                             <width>344</width>
-                            <height>80</height>
+                            <height>110</height>
                             <label>$INFO[ListItem.Duration]</label>
-                            <font>font12</font>
+                            <font>font13</font>
                             <textcolor>FFA8A8A8</textcolor>
                             <align>right</align>
                             <aligny>center</aligny>

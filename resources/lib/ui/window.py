@@ -1343,6 +1343,8 @@ ID_PAGE_LIST = 400
 ID_PAGE_LIST_L = 401
 # Vertical list shown on the home page in the "list" layout.
 ID_HOME_LIST = 354
+# Max items per section of the sectioned home list ("list" layout).
+HOME_SECTION_LIMIT = 10
 # Genre chips shown on the home page above the list in the "list"
 # layout. Ids 360..367, one per GENRE_URNS entry, in the same order.
 ID_GENRE_CHIPS = (360, 361, 362, 363, 364, 365, 366, 367)
@@ -1951,41 +1953,30 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
         self.setProperty("subtitle", "")
         self.setProperty("page_empty", "false")
 
-        # In "list" layout the home page is a single vertical list of
-        # trending tracks (genre from the trending.genre setting)
-        # under a "Trending" header - the four home rows stay hidden.
-        # Clicking a track plays the whole list from that track.
+        # In "list" layout the home page is a vertical list with one
+        # section per configured home row (the same row1..4.type
+        # settings as the tiles layout): a non-clickable localized
+        # header, then the row's items. Rows set to "off" are skipped;
+        # when every row is off the list falls back to a single
+        # Trending section.
         if self.getProperty("layout") == "list":
             for idx in range(1, 5):
                 self.setProperty("row%d_visible" % idx, "false")
-            self.setProperty(
-                "title",
-                self.addon.getLocalizedString(ROW_TYPES["trending"]["title_strid"])
-            )
             self.setProperty("subtitle", self._trending_genre_label())
-            try:
-                self._load_trending(ID_HOME_LIST, limit=50)
-            except Exception as e:
-                xbmc.log(
-                    "plugin.audio.soundcloud::HomeWindow load_trending "
-                    "(list layout) failed: %s" % str(e),
-                    xbmc.LOGERROR,
-                )
-            if not self._lists.get(ID_HOME_LIST):
+            row_configs = self._row_configs()
+            if all(t == "off" for t in row_configs):
+                row_configs = ["trending"]
+            if not self._fill_home_sections(row_configs):
                 self.setProperty("page_empty", "true")
+            try:
+                self.setFocusId(ID_HOME_LIST)
+            except Exception:
+                pass
             return
 
-        # Read row config from settings. Each of the 4 rows has:
-        #   - row1.type, row2.type, row3.type, row4.type
-        # Defaults: likes / trending / playlists / following.
-        # A row set to "off" is hidden.
-        defaults = ["likes", "trending", "playlists", "following"]
-        row_configs = []
-        for i in range(1, 5):
-            t = self.settings.get("row%d.type" % i) or defaults[i - 1]
-            if t not in ROW_TYPES and t != "off":
-                t = defaults[i - 1]
-            row_configs.append(t)
+        # Read row config from settings (see _row_configs). Each of
+        # the 4 rows has a type setting; a row set to "off" is hidden.
+        row_configs = self._row_configs()
 
         list_ids = ID_ROW_LISTS
         for idx, row_type in enumerate(row_configs, start=1):
@@ -2015,6 +2006,21 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                     (loader_name, str(e)),
                     xbmc.LOGERROR,
                 )
+
+    def _row_configs(self):
+        """
+        Row types from settings (row1.type .. row4.type), each falling
+        back to its default (likes / trending / playlists / following)
+        when unset or unknown, or "off" when the user disabled it.
+        """
+        defaults = ["likes", "trending", "playlists", "following"]
+        configs = []
+        for i in range(1, 5):
+            t = self.settings.get("row%d.type" % i) or defaults[i - 1]
+            if t not in ROW_TYPES and t != "off":
+                t = defaults[i - 1]
+            configs.append(t)
+        return configs
 
     def _page_size(self):
         """Read items-per-page from settings, with a sensible default."""
@@ -2114,6 +2120,104 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 "plugin.audio.soundcloud::HomeWindow load_following failed: %s" % str(e),
                 xbmc.LOGERROR,
             )
+
+    def _fetch_home_section(self, row_type, limit):
+        """
+        Fetch the content of one configured home row for the sectioned
+        list layout of the home page. Mirrors the row loaders' fallback
+        behaviour (trending when logged out or without a user id).
+        Returns None when the fetch failed.
+        """
+        try:
+            if (row_type in ("likes", "playlists", "following")
+                    and self.api.settings.get_oauth_token()):
+                user_id = self.api.get_my_user_id()
+                if user_id:
+                    if row_type == "likes":
+                        return self.api.call(
+                            "/users/%d/track_likes?limit=%d" % (user_id, limit)
+                        )
+                    if row_type == "playlists":
+                        return self.api.call(
+                            "/users/%d/playlists_without_albums?limit=%d"
+                            % (user_id, limit)
+                        )
+                    return self.api.call(
+                        "/users/%d/followings?limit=%d" % (user_id, limit)
+                    )
+            # Trending, or the fallback for the other rows when the
+            # user is not logged in.
+            return self.api.charts({
+                "kind": "trending",
+                "genre": self._trending_genre(),
+                "limit": limit,
+            })
+        except Exception as e:
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow fetch_home_section "
+                "(%s) failed: %s" % (row_type, str(e)),
+                xbmc.LOGERROR,
+            )
+            return None
+
+    def _fill_home_sections(self, row_configs):
+        """
+        Fill the home list (354) with one section per configured home
+        row: a non-clickable localized header item (property
+        isSectionHeader=true) followed by the row's items. Returns True
+        when at least one track item was added.
+        """
+        try:
+            control = self.getControl(ID_HOME_LIST)
+        except Exception:
+            xbmc.log(
+                "plugin.audio.soundcloud::HomeWindow can't get control %d"
+                % ID_HOME_LIST,
+                xbmc.LOGWARNING,
+            )
+            return False
+
+        try:
+            control.reset()
+        except Exception:
+            pass
+        self._lists[ID_HOME_LIST] = []
+        self._next_href = None
+
+        addon_base = "plugin://" + self.addon.getAddonInfo("id")
+        limit = min(self._page_size(), HOME_SECTION_LIMIT)
+        added = 0
+        for row_type in row_configs:
+            if row_type == "off":
+                continue
+            collection = self._fetch_home_section(row_type, limit)
+            if collection is None or not collection.items:
+                continue
+            header = xbmcgui.ListItem(
+                label=self.addon.getLocalizedString(ROW_TYPES[row_type]["title_strid"])
+            )
+            header.setProperty("isSectionHeader", "true")
+            try:
+                control.addItem(header)
+                self._lists[ID_HOME_LIST].append((None, header))
+            except Exception as e:
+                xbmc.log(
+                    "plugin.audio.soundcloud::HomeWindow add_section_header "
+                    "failed: %s" % str(e),
+                    xbmc.LOGWARNING,
+                )
+            for item in collection.items:
+                try:
+                    play_url, list_item, _ = item.to_list_item(addon_base)
+                    control.addItem(list_item)
+                    self._lists[ID_HOME_LIST].append((play_url, list_item))
+                    added += 1
+                except Exception as e:
+                    xbmc.log(
+                        "plugin.audio.soundcloud::HomeWindow skip item: %s" % str(e),
+                        xbmc.LOGWARNING,
+                    )
+        return added > 0
 
     def _show_search(self):
         # For V2 step 1 we keep search simple: prompt for input, then show
@@ -2304,6 +2408,10 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             return
 
         play_url, list_item = items[position]
+
+        # Section headers in the home list are not clickable.
+        if list_item.getProperty("isSectionHeader") == "true":
+            return
 
         # Handle the synthetic "Next page" item: load the next batch
         # from the cached next_href and replace the current page contents.
