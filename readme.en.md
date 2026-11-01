@@ -1,3 +1,7 @@
+<!-- logo:start -->
+<p align="center"><img src="resources/icon.png" alt="Logo" width="160"></p>
+<!-- logo:end -->
+
 [Français](readme.md) &nbsp;|&nbsp; **English**
 
 # SoundCloud Add-on for [Kodi](https://github.com/xbmc/xbmc)
