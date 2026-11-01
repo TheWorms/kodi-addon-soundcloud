@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.audio.soundcloud" name="SoundCloud" version="6.0.2" provider-name="TheWorms">
+<addon id="plugin.audio.soundcloud" name="SoundCloud" version="6.0.3" provider-name="TheWorms">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.29.0"/>
@@ -48,7 +48,9 @@
         <website>https://soundcloud.com</website>
         <source>https://github.com/jaylinski/kodi-addon-soundcloud</source>
         <credits>jaylinski (original add-on), bromix, SLiX</credits>
-        <news>6.0.2 (2026-10-10) - tiles layout: "See more" at the end of the rows, full-height playing wave, rows follow the queue, playing wave no longer shown on a whole row while the settings are open
+        <news>6.0.3 (2026-11-01) - new add-on icon (Ver mascot)
+
+6.0.2 (2026-10-10) - tiles layout: "See more" at the end of the rows, full-height playing wave, rows follow the queue, playing wave no longer shown on a whole row while the settings are open
 
 TILES LAYOUT: the home rows now end with a "See more" card (orange arrow) when they are full or SoundCloud has more, like the sections of the list layout; it opens the row's own page (grid with Next page), and Back returns to the row. The playing wave on the tiles now dims the cover and bounces five orange bars over almost its whole height instead of a small chip at the bottom. The rows (and the page grid) follow the queue: when the next track starts, its tile is brought into view and marked. The old follow logic compared the plugin URL with the resolved stream URL Kodi reports, so it never matched; tracks are now matched by their SoundCloud id in every list, and a list you are browsing is not yanked back to the playing track.
 
