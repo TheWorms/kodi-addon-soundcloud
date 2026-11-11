@@ -7,7 +7,7 @@
 # Add-on SoundCloud pour [Kodi](https://github.com/xbmc/xbmc)
 
 <!-- version:auto -->
-**Version : 6.0.5**
+**Version : 6.0.6**
 <!-- /version:auto -->
 
 
