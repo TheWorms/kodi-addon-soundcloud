@@ -842,7 +842,7 @@ def run():
         # ("RunScript(" + addon_id + ")")` call ~500 lines earlier, which
         # then raises UnboundLocalError at runtime. The module-level value
         # is identical, so we just use it.
-        thumb_path = "special://home/addons/%s/resources/icon.png" % addon_id
+        thumb_path = "special://home/addons/%s/resources/icon-addon.png" % addon_id
         runscript = "RunScript(%s)" % addon_id
         fav_name = "SoundCloud"
 
