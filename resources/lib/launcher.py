@@ -55,6 +55,8 @@ _MAIN_VISIBLE = "Window.IsVisible(%s)" % MAIN_XML
 
 _local = None
 _lock = threading.Lock()
+# 6.0.8 : posé par splash_hide() du script, arrête le fil qui attend l'interface
+_done = threading.Event()
 
 
 class _Splash(xbmcgui.WindowXMLDialog):
@@ -72,11 +74,13 @@ def _service_alive():
     return xbmcgui.Window(10000).getProperty(PROP_ALIVE) == "1"
 
 
-def _wait(condition, expected, timeout):
-    """Wait until the Kodi condition takes the expected value."""
+def _wait(condition, expected, timeout, stop=None):
+    """Wait until the Kodi condition takes the expected value (or stop is set)."""
     monitor = xbmc.Monitor()
     deadline = time.time() + timeout
     while bool(xbmc.getCondVisibility(condition)) != expected:
+        if stop is not None and stop.is_set():
+            return False
         if time.time() >= deadline or monitor.waitForAbort(0.05):
             return False
     return True
@@ -151,6 +155,7 @@ def splash_hide():
     """Close the splash, whoever shows it. Safe to call several times, or
     with no splash on screen."""
     global _local
+    _done.set()
     try:
         if _service_alive():
             xbmcgui.Window(10000).setProperty(PROP_SPLASH, "hide")
@@ -167,13 +172,19 @@ def splash_hide():
 
 
 def _hide_when_covered():
-    if _wait(_MAIN_VISIBLE, True, 60.0):
+    # 6.0.8 : si le script a déjà fermé l'écran de chargement (l'interface ne
+    # s'est pas ouverte), le fil s'arrête tout de suite. Il attendait 60 s,
+    # Kodi gardait le script pendant ce temps, et son « hide » tardif pouvait
+    # fermer l'écran de chargement d'une nouvelle ouverture.
+    if _wait(_MAIN_VISIBLE, True, 60.0, stop=_done):
         xbmc.Monitor().waitForAbort(0.2)  # let Kodi draw the UI first
-    splash_hide()
+    if not _done.is_set():
+        splash_hide()
 
 
 def splash_hide_when_covered():
     """Call right before opening the UI (whose doModal blocks): the splash
     closes as soon as the UI covers it."""
+    _done.clear()
     threading.Thread(target=_hide_when_covered, name="soundcloud-splash",
                      daemon=True).start()
