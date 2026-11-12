@@ -7,7 +7,7 @@
 # SoundCloud Add-on for [Kodi](https://github.com/xbmc/xbmc)
 
 <!-- version:auto -->
-**Version : 6.0.6**
+**Version : 6.0.7**
 <!-- /version:auto -->
 
 <img align="right" src="https://github.com/xbmc/xbmc/raw/master/addons/webinterface.default/icon-128.png" alt="Kodi logo">
