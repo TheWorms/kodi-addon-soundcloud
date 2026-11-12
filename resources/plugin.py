@@ -4,6 +4,7 @@ from resources.lib.kodi.items import Items
 from resources.lib.kodi.search_history import SearchHistory
 from resources.lib.kodi.settings import Settings
 from resources.lib.kodi.vfs import VFS
+from resources.lib import launcher
 from resources.routes import *
 import os
 import sys
@@ -60,95 +61,6 @@ def _purge_cache_once():
         )
 
 
-_CLIENT_ID_FAIL_MARKER = "client-id-extract-failed"
-_CLIENT_ID_FAIL_TTL = 3600  # seconds
-
-
-def _sync_client_id_info():
-    """
-    Keep the read-only "apiv2.client_id_info" display setting in sync
-    with the API client ID actually in use (Settings > Account, above
-    the OAuth token). The resolution order matches
-    ApiV2.api_client_id: custom override > 24h cache > live
-    extraction, so the ID is shown whether the user browses
-    anonymously or with an OAuth token (a token is sent INSTEAD of
-    the client ID, but the ID is still resolved and used for
-    anonymous fallback calls).
-
-    Audit N3: this used to run BEFORE the routing on EVERY plugin
-    call - every /play/ of the queue, every widget refresh - which
-    forced a full client-ID extraction (soundcloud.com plus every JS
-    asset, each with network timeouts) whenever the 24h cache was
-    cold, and again on every call while the extraction kept failing
-    (no negative cache). It now runs once per UI open in the
-    background (_sync_client_id_info_bg), and a failed or empty
-    resolution is remembered for one hour so repeated calls don't
-    re-download the whole site before each failure.
-    """
-    try:
-        if _client_id_failed_recently():
-            return
-        current = settings.get("apiv2.client_id_info") or ""
-        resolved = api.api_client_id
-        if not resolved:
-            raise RuntimeError("client id resolution returned nothing")
-        if resolved != current:
-            addon.setSetting("apiv2.client_id_info", resolved)
-            xbmc.log(
-                "%s: client id info refreshed" % addon_id,
-                xbmc.LOGDEBUG,
-            )
-        _forget_client_id_failure()
-    except Exception as e:
-        _remember_client_id_failure()
-        xbmc.log(
-            "%s: client id info sync failed: %s" % (addon_id, str(e)),
-            xbmc.LOGWARNING,
-        )
-
-
-def _client_id_failed_recently():
-    """
-    True when a failed client-ID extraction is less than an hour old.
-    get_mtime raises on a missing marker file - that means "no recent
-    failure".
-    """
-    try:
-        import time
-        mtime = vfs_cache.get_mtime(_CLIENT_ID_FAIL_MARKER)
-        return (time.time() - mtime) < _CLIENT_ID_FAIL_TTL
-    except Exception:
-        return False
-
-
-def _remember_client_id_failure():
-    try:
-        vfs_cache.write(_CLIENT_ID_FAIL_MARKER, "1")
-    except Exception:
-        pass
-
-
-def _forget_client_id_failure():
-    try:
-        vfs_cache.delete(_CLIENT_ID_FAIL_MARKER)
-    except Exception:
-        pass
-
-
-def _sync_client_id_info_bg():
-    """
-    Run _sync_client_id_info on a daemon thread so the (potentially
-    slow) client-ID resolution never delays a UI launch: the plugin
-    call returns at once and the read-only display setting updates a
-    moment later.
-    """
-    import threading
-
-    threading.Thread(
-        target=_sync_client_id_info, daemon=True
-    ).start()
-
-
 def run():
     import time as _t
     _t0 = _t.time()
@@ -179,19 +91,12 @@ def run():
             "play_track=%s source=%s" % (track_id, track_source or "-"),
             xbmc.LOGINFO,
         )
-        home_signal = xbmcgui.Window(10000)
-        home_signal.setProperty("soundcloud.splash", "show")
-        # Client ID display syncs in the background, not on this
-        # latency-critical click path (audit N3).
-        _sync_client_id_info_bg()
         runscript_args = "play_track=%s" % track_id
         if track_source:
             runscript_args += ",source=%s" % track_source
-        xbmc.executebuiltin(
-            "RunScript(%s,%s)" % (addon_id, runscript_args)
-        )
-        xbmcplugin.endOfDirectory(handle, succeeded=False, cacheToDisc=False)
-        xbmc.executebuiltin("ReplaceWindow(home)")
+        # Home screen under the UI, then the script entry point
+        # (resources/lib/launcher.py).
+        launcher.hand_off(handle, runscript_args)
         return
 
     if path == PATH_ROOT:
@@ -206,7 +111,6 @@ def run():
                 "Window.IsActive(addonbrowser)",
                 "Window.IsVisible(addonbrowser)",
                 "Window.IsActive(MyMusicNav.xml)",
-                "Window.IsActive(musicfiles)",
                 "Window.IsActive(filemanager)",
                 "Container.Content(addons)",
                 "System.HasAddon(skin.arcticzephyr2)",
@@ -224,98 +128,14 @@ def run():
                 xbmc.LOGINFO,
             )
 
-            # Heuristic to distinguish "user clicked the addon" from
-            # "skin home widget is fetching content":
-            #
-            # - User clicks: Kodi opened MyMusicNav.xml (Music > Add-ons)
-            #   or addonbrowser to host the plugin call. These windows
-            #   are visible during the call.
-            # - Widget fetch: the active window stays "home" (the user is
-            #   on the Kodi/skin home screen and the widget panel is
-            #   loading content in the background).
-            #
-            # We log everything so it's easy to debug skin-specific cases.
-            diag_active_window = xbmc.getInfoLabel("System.CurrentWindow")
-            is_user_browsing = (
-                xbmc.getCondVisibility("Window.IsActive(MyMusicNav.xml)")
-                or xbmc.getCondVisibility("Window.IsActive(musicfiles)")
-                or xbmc.getCondVisibility("Window.IsActive(addonbrowser)")
-                or xbmc.getCondVisibility("Window.IsActive(filemanager)")
-            )
-            is_widget_call = not is_user_browsing
-
-            if not is_widget_call:
-                # User-initiated open: launch the full-screen UI.
-                #
-                # Step 1: signal the background service to show the
-                # splash window. If the service is running, it picks
-                # up this signal within ~50ms and shows the splash.
-                # If the service is disabled (or hasn't been started
-                # because the user just enabled it without restarting
-                # Kodi), the signal is harmless and script.py will
-                # fall back to creating its own splash later.
-                home_signal = xbmcgui.Window(10000)
-
-                # Detect "enabled but not running" — set a sentinel
-                # property that the service clears on its first poll.
-                # If the property is still there when plugin.py runs,
-                # it means the service hasn't seen a single poll yet,
-                # which on a running service shouldn't happen. We use
-                # this to nudge the user about the required restart.
-                service_setting = settings.get("service.preload")
-                service_alive = home_signal.getProperty(
-                    "soundcloud.service.alive"
-                ) == "1"
-                if service_setting == "true" and not service_alive:
-                    # User enabled the service but it's not running.
-                    # Show a one-shot notification (gated by another
-                    # property so we don't spam on every click).
-                    if home_signal.getProperty(
-                        "soundcloud.restart.notified"
-                    ) != "1":
-                        xbmcgui.Dialog().notification(
-                            "SoundCloud",
-                            addon.getLocalizedString(30292),
-                            xbmcgui.NOTIFICATION_INFO,
-                            5000,
-                        )
-                        home_signal.setProperty(
-                            "soundcloud.restart.notified", "1"
-                        )
-
-                home_signal.setProperty("soundcloud.splash", "show")
-                # Client ID display syncs in the background, off the
-                # UI launch path (audit N3).
-                _sync_client_id_info_bg()
-
-                # Step 2: launch script.py via RunScript. Python's
-                # process scheduler will let it start in parallel with
-                # the music-browser cleanup below.
-                xbmc.executebuiltin("RunScript(" + addon_id + ")")
-                xbmc.log(
-                    "plugin.audio.soundcloud::plugin.py timing T+%dms "
-                    "after RunScript() call" %
-                    int((_t.time() - _t0) * 1000),
-                    xbmc.LOGDEBUG,
-                )
-
-                # Step 3: tell Kodi this plugin call returns no items
-                # (so the music browser doesn't try to populate itself
-                # with a non-existent listing).
-                xbmcplugin.endOfDirectory(
-                    handle, succeeded=False, cacheToDisc=False
-                )
-
-                # Step 4: replace the music browser with home. The
-                # service's splash, if it succeeded in showing, will
-                # be on top of home and stays visible.
-                xbmc.executebuiltin("ReplaceWindow(home)")
-                xbmc.log(
-                    "plugin.audio.soundcloud::plugin.py timing T+%dms "
-                    "plugin.py exiting (service should be showing splash)" %
-                    int((_t.time() - _t0) * 1000),
-                    xbmc.LOGDEBUG,
-                )
+            # User click or widget fetch? A user click is hosted by
+            # Kodi's file browser (Add-ons, Music > Add-ons, a plugin://
+            # shortcut); a widget fetch comes from the home screen or a
+            # skin hub. addon.py normally hands user clicks over before
+            # we even get here (launcher.user_open, same test); this is
+            # the fallback if that early path failed.
+            if launcher.user_open():
+                launcher.hand_off(handle)
                 return
 
             # Widget call: return the flat directory of widget shortcuts
@@ -352,11 +172,7 @@ def run():
             # Explicit launcher: clicked from the root directory listing.
             # Launches the full-screen UI as a separate Kodi script so
             # the directory handler returns cleanly.
-            xbmcplugin.endOfDirectory(handle, succeeded=False, cacheToDisc=False)
-            # Client ID display syncs in the background, off the UI
-            # launch path (audit N3).
-            _sync_client_id_info_bg()
-            xbmc.executebuiltin("RunScript(" + addon_id + ")")
+            launcher.hand_off(handle)
             return
         else:
             xbmc.log(addon_id + ": Invalid root action", xbmc.LOGERROR)

@@ -8,18 +8,15 @@ Boot strategy
 -------------
 The expensive part of our boot is importing resources.lib.ui.window
 (1700+ lines plus transitive imports). On ARM (ODROID-N2Plus etc.)
-this takes ~870ms cold.
+this takes ~870ms cold, hidden behind a splash.
 
-If the background service is enabled (default), it has already shown
-a splash window for us BEFORE we even started — plugin.py set the
-"soundcloud.splash" = "show" property on Kodi's home window, and the
-service picked it up within ~50ms. In that case, all we do is the
-heavy imports, then signal "hide splash" right before opening home.
-
-If the service is disabled (user setting), we fall back to the old
-behaviour: create and show our own splash in this process. Slower
-because we can't show the splash until our process has been Python-
-cold-started (~150ms after the click), but still better than nothing.
+Order (see resources/lib/launcher.py): the home screen goes under the
+UI first (Kodi refuses to change windows while a dialog such as the
+splash is up), then the splash shows - hosted by the background
+service when it runs, by this process otherwise - and the UI opens ON
+TOP of the splash, which closes only once the UI covers the screen.
+Nothing is ever visible between the splash and the UI, and closing the
+UI lands straight on the home screen.
 """
 import os
 import sys
@@ -31,7 +28,6 @@ import xbmcgui
 import xbmcvfs
 
 GUARD_PROPERTY = "soundcloud.ui.open"
-SPLASH_PROPERTY = "soundcloud.splash"
 
 
 def _t(t0, label):
@@ -42,15 +38,6 @@ def _t(t0, label):
         (elapsed, label),
         xbmc.LOGINFO,
     )
-
-
-class _SplashWindow(xbmcgui.WindowXMLDialog):
-    """
-    Fallback splash used when the background service is disabled.
-    Same XML, same look — just opened from this process instead of
-    the service's process.
-    """
-    pass
 
 
 if __name__ == "__main__":
@@ -65,6 +52,7 @@ if __name__ == "__main__":
     startup_track_source = None
     token_mode = False
     from_settings = False
+    handed_off = False
     for _arg in sys.argv[1:]:
         if not isinstance(_arg, str):
             continue
@@ -76,6 +64,8 @@ if __name__ == "__main__":
             token_mode = True
         elif _arg.strip() == "from_settings":
             from_settings = True
+        elif _arg.strip() == "handoff":
+            handed_off = True
 
     if token_mode:
         # RunScript(plugin.audio.soundcloud,token[,from_settings]):
@@ -126,40 +116,28 @@ if __name__ == "__main__":
     addon = xbmcaddon.Addon()
     addon_path = addon.getAddonInfo("path")
 
-    # Check whether the background service is enabled. Defaults to
-    # DISABLED — users must opt in via Settings > Account >
-    # "Background service (faster open)" and then restart Kodi. If
-    # disabled, we use our in-process splash like before (slower but
-    # zero background memory).
-    service_enabled = addon.getSetting("service.preload") == "true"
-    fallback_splash = None
+    from resources.lib import launcher
 
-    if not service_enabled:
-        # Service-less fallback: create and show splash from this
-        # process (old 5.9.6010+ behaviour).
-        try:
-            fallback_splash = _SplashWindow(
-                "script-soundcloud-splash.xml", addon_path, "default", "1080i"
-            )
-            fallback_splash.show()
-            _t(t0, "fallback splash shown (service disabled)")
-        except Exception as e:
-            xbmc.log(
-                "plugin.audio.soundcloud::script.py fallback splash failed: %s"
-                % str(e),
-                xbmc.LOGWARNING,
-            )
-            fallback_splash = None
-    else:
-        _t(t0, "service mode: splash should already be visible from service")
+    launcher.go_home(handed_off)
+    launcher.splash_show(addon_path)
+    _t(t0, "splash requested")
+
+    # Background service enabled in the settings but not running: it
+    # only starts with Kodi. One notification per Kodi session.
+    if (addon.getSetting("service.preload") == "true"
+            and home_window.getProperty(launcher.PROP_ALIVE) != "1"
+            and home_window.getProperty("soundcloud.restart.notified") != "1"):
+        xbmcgui.Dialog().notification(
+            "SoundCloud", addon.getLocalizedString(30292),
+            xbmcgui.NOTIFICATION_INFO, 5000)
+        home_window.setProperty("soundcloud.restart.notified", "1")
 
     try:
         addon_profile_path = xbmcvfs.translatePath(addon.getAddonInfo("profile"))
         _t(t0, "addon profile resolved")
 
-        # The heavy imports — these are what take ~870ms on cold start.
-        # The splash (either the service's or our fallback) is already
-        # on screen so the user doesn't see this delay.
+        # The heavy imports — these are what take ~870ms on cold start,
+        # behind the splash.
         from resources.lib.kodi.settings import Settings
         from resources.lib.kodi.vfs import VFS
         from resources.lib.kodi.cache import Cache
@@ -173,23 +151,14 @@ if __name__ == "__main__":
         api = ApiV2(settings, xbmc.getLanguage(xbmc.ISO_639_1), cache)
         _t(t0, "API/settings/cache constructed")
 
-        # Close whichever splash is up, just before opening home.
-        if service_enabled:
-            # Signal the service to close its splash. It polls every
-            # 50ms so the splash disappears within ~50ms after this.
-            home_window.setProperty(SPLASH_PROPERTY, "hide")
-            _t(t0, "signaled service to hide splash")
-        elif fallback_splash is not None:
-            try:
-                fallback_splash.close()
-                _t(t0, "fallback splash closed")
-            except Exception as e:
-                xbmc.log(
-                    "plugin.audio.soundcloud::script.py fallback splash close failed: %s"
-                    % str(e),
-                    xbmc.LOGWARNING,
-                )
+        # Client ID display setting, refreshed in the background
+        # (audit N3).
+        from resources.lib.kodi import client_id_info
+        client_id_info.sync_bg(addon, settings, api, vfs_cache)
 
+        # The UI opens on top of the splash; the splash closes once
+        # covered (closing it first showed the home screen meanwhile).
+        launcher.splash_hide_when_covered()
         _t(t0, "calling open_home()")
         open_home(
             api=api,
@@ -200,14 +169,6 @@ if __name__ == "__main__":
         )
         _t(t0, "open_home() returned (UI closed)")
     finally:
-        # Cleanup. The service should already have closed its splash
-        # at this point, but defensively signal "hide" again in case
-        # something went wrong on the exception path.
-        if service_enabled:
-            home_window.setProperty(SPLASH_PROPERTY, "hide")
-        if fallback_splash is not None:
-            try:
-                fallback_splash.close()
-            except Exception:
-                pass
+        # Splash still up if the UI never opened (error, guard).
+        launcher.splash_hide()
         home_window.clearProperty(GUARD_PROPERTY)
