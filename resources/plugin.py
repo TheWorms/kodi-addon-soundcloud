@@ -3,6 +3,7 @@ from resources.lib.kodi.cache import Cache
 from resources.lib.kodi.items import Items
 from resources.lib.kodi.search_history import SearchHistory
 from resources.lib.kodi.settings import Settings
+from resources.lib.kodi import stream
 from resources.lib.kodi.vfs import VFS
 from resources.lib import launcher
 from resources.routes import *
@@ -217,6 +218,9 @@ def run():
             resolved_url = api.resolve_media_url(media_url)
             if resolved_url:
                 item = xbmcgui.ListItem(path=resolved_url)
+                # SoundCloud's AAC HLS streams are played by VideoPlayer
+                # (Kodi's audio player PAPlayer crashes on them).
+                stream.prepare_item(item, resolved_url, media_url)
                 xbmcplugin.setResolvedUrl(handle, succeeded=True, listitem=item)
             else:
                 # Media URL has expired (HLS URLs are short-lived) or the
@@ -796,9 +800,10 @@ def _add_song_sort_methods(handle):
 
 
 def resolve_list_item(handle, list_item):
-    resolved_url = api.resolve_media_url(list_item.getProperty("mediaUrl"))
+    media_url = list_item.getProperty("mediaUrl")
+    resolved_url = api.resolve_media_url(media_url)
     if resolved_url:
-        list_item.setPath(resolved_url)
+        stream.prepare_item(list_item, resolved_url, media_url)
         xbmcplugin.setResolvedUrl(handle, succeeded=True, listitem=list_item)
     else:
         # Same defensive handling as the play handler — let Kodi skip the

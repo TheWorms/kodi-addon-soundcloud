@@ -29,6 +29,7 @@ import time
 import xbmc
 import xbmcgui
 
+from resources.lib.kodi import stream
 from resources.lib.soundcloud.api_collection import ApiCollection
 
 
@@ -3558,7 +3559,7 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
             if not resolved:
                 self._notify(self.addon.getLocalizedString(30126))
                 return
-            list_item.setPath(resolved)
+            stream.prepare_item(list_item, resolved, media_url)
             xbmc.Player().play(resolved, list_item)
             # Single-track playback bypasses the Kodi playlist, so
             # its position cannot identify the track: publish the

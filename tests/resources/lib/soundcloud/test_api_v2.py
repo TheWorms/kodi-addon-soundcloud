@@ -672,3 +672,51 @@ class ApiV2HistoryAndTokenTestCase(TestCase):
     def test_clean_token(self):
         self.assertEqual(Settings.clean_token('  "OAuth 2-1-2-ab\u200bc"\n'), "2-1-2-abc")
         self.assertIsNone(Settings.clean_token("   "))
+
+
+class TranscodingChoiceTestCase(TestCase):
+    """Late 2026: most tracks only offer AAC in HLS (no MP3, no Opus)."""
+
+    AAC_ONLY = [
+        {"url": "https://x/abr", "preset": "abr_sq", "snipped": False,
+         "format": {"protocol": "hls", "mime_type": "audio/mpegurl"}},
+        {"url": "https://x/aac96", "preset": "aac_96k", "snipped": False,
+         "format": {"protocol": "hls", "mime_type": "audio/mp4; codecs=\"mp4a.40.2\""}},
+        {"url": "https://x/aac160", "preset": "aac_160k", "snipped": False,
+         "format": {"protocol": "hls", "mime_type": "audio/mp4; codecs=\"mp4a.40.2\""}},
+    ]
+
+    def setUp(self):
+        self.api = ApiV2(settings=Settings(MagicMock()), lang="en", cache=MagicMock())
+
+    def _pick(self, transcodings, setting="2", auth=None):
+        self.api.settings.get = Mock(return_value=setting)
+        item = {"media": {"transcodings": transcodings}}
+        if auth:
+            item["track_authorization"] = auth
+        return self.api._extract_media_url(item)
+
+    def test_aac_only_picks_highest_bitrate(self):
+        self.assertEqual(self._pick(self.AAC_ONLY), "https://x/aac160")
+
+    def test_configured_format_still_wins(self):
+        mp3 = {"url": "https://x/mp3", "preset": "mp3_1_0", "snipped": False,
+               "format": {"protocol": "progressive", "mime_type": "audio/mpeg"}}
+        self.assertEqual(self._pick(self.AAC_ONLY + [mp3]), "https://x/mp3")
+
+    def test_full_track_before_preview(self):
+        snipped = dict(self.AAC_ONLY[2], url="https://x/preview", snipped=True, preset="aac_256k")
+        self.assertEqual(self._pick([snipped, self.AAC_ONLY[1]]), "https://x/aac96")
+
+    def test_encrypted_only_as_last_resort(self):
+        enc = {"url": "https://x/enc", "preset": "aac_256k", "snipped": False,
+               "format": {"protocol": "cbc-encrypted-hls", "mime_type": "audio/mp4"}}
+        self.assertEqual(self._pick([enc, self.AAC_ONLY[0]]), "https://x/abr")
+        self.assertEqual(self._pick([enc]), "https://x/enc")
+
+    def test_unknown_setting_does_not_crash(self):
+        self.assertEqual(self._pick(self.AAC_ONLY, setting="9"), "https://x/aac160")
+
+    def test_track_authorization_appended(self):
+        url = self._pick(self.AAC_ONLY, auth="a.b/c")
+        self.assertEqual(url, "https://x/aac160?track_authorization=a.b%2Fc")

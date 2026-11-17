@@ -748,15 +748,20 @@ class ApiV2(ApiInterface):
             return None
 
         setting = self.settings.get("audio.format")
+        preferred = self.settings.AUDIO_FORMATS.get(setting)
         chosen = None
-        for codec in transcodings:
-            if self._is_preferred_codec(codec["format"], self.settings.AUDIO_FORMATS[setting]):
-                chosen = codec
-                break
+        if preferred:
+            for codec in transcodings:
+                if self._is_preferred_codec(codec.get("format") or {}, preferred):
+                    chosen = codec
+                    break
 
         if chosen is None:
-            # Fallback to first transcoding
-            chosen = transcodings[0]
+            # The configured format is missing - since late 2026 most
+            # tracks only come as AAC in HLS (aac_160k, aac_96k, abr_sq),
+            # without MP3 or Opus. Take the best playable transcoding
+            # instead of blindly the first one.
+            chosen = max(transcodings, key=self._transcoding_rank)
 
         url = chosen.get("url")
         if not url:
@@ -998,8 +1003,44 @@ class ApiV2(ApiInterface):
 
     @staticmethod
     def _is_preferred_codec(codec, setting):
-        return codec["mime_type"] == setting["mime_type"] and \
-               codec["protocol"] == setting["protocol"]
+        return codec.get("mime_type") == setting["mime_type"] and \
+               codec.get("protocol") == setting["protocol"]
+
+    @staticmethod
+    def _transcoding_rank(codec):
+        """
+        Sort key for the fallback transcoding choice (highest wins).
+
+        Full tracks before 30-second previews ("snipped"); plain MP3 over
+        HTTP first (Kodi's audio player reads it, gapless), then AAC HLS
+        by bitrate (aac_160k > aac_96k), MP3 and Opus HLS, the adaptive
+        master playlist (abr_*) last. Encrypted HLS needs DRM keys the
+        add-on does not have: never picked unless nothing else exists.
+        """
+        fmt = codec.get("format") or {}
+        protocol = (fmt.get("protocol") or "").lower()
+        mime = (fmt.get("mime_type") or "").lower()
+        preset = (codec.get("preset") or "").lower()
+
+        if "encrypted" in protocol:
+            kind = 0
+        elif protocol == "progressive" and "mpeg" in mime:
+            kind = 60
+        elif protocol == "hls" and "mp4" in mime:
+            kind = 50
+        elif protocol == "hls" and mime == "audio/mpeg":
+            kind = 40
+        elif protocol == "hls" and "opus" in mime:
+            kind = 30
+        elif protocol == "hls":
+            kind = 20  # abr_* master playlist (audio/mpegurl) or unknown
+        else:
+            kind = 10
+
+        match = re.search(r"(\d+)k", preset)
+        bitrate = int(match.group(1)) if match else 0
+        full = 0 if codec.get("snipped") else 1
+        return (full, kind, bitrate)
 
     @staticmethod
     def _sanitize_url(url):
