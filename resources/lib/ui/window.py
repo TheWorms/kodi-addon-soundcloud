@@ -3560,7 +3560,8 @@ class SoundCloudHomeWindow(xbmcgui.WindowXMLDialog):
                 self._notify(self.addon.getLocalizedString(30126))
                 return
             stream.prepare_item(list_item, resolved, media_url)
-            xbmc.Player().play(resolved, list_item)
+            # The path may now be the local relay's URL, not `resolved`.
+            xbmc.Player().play(list_item.getPath(), list_item)
             # Single-track playback bypasses the Kodi playlist, so
             # its position cannot identify the track: publish the
             # track id directly as the marker hint.

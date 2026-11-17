@@ -1,6 +1,6 @@
 import sys
 from unittest import TestCase
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 sys.modules.setdefault("xbmc", MagicMock())
 sys.modules.setdefault("xbmcaddon", MagicMock())
@@ -20,22 +20,30 @@ class StreamTestCase(TestCase):
         self.assertFalse(stream.is_hls_url(None))
         self.assertFalse(stream.is_hls_url(""))
 
-    def test_hls_goes_to_videoplayer_without_inputstream(self):
+    @patch.object(stream, "relay_port", return_value=40123)
+    def test_hls_goes_through_the_relay(self, _port):
         item = MagicMock()
-        self.assertTrue(stream.prepare_item(item, HLS, HLS_MEDIA))
-        item.setPath.assert_called_once_with(HLS)
-        # audio/aacp: Kodi's player rules send it to VideoPlayer, whose
-        # FFmpeg HLS reader handles SoundCloud's fMP4 segments.
-        item.setMimeType.assert_called_once_with("audio/aacp")
+        self.assertEqual(stream.prepare_item(item, HLS, HLS_MEDIA), "relay")
+        url = item.setPath.call_args_list[-1].args[0]
+        self.assertTrue(url.startswith("http://127.0.0.1:40123/stream?u="))
+        self.assertIn("playback.media-streaming.soundcloud.cloud", url)
+        self.assertNotIn("&expires", url)  # the playlist URL is quoted whole
+        item.setMimeType.assert_called_once_with("audio/mp4")
         item.setContentLookup.assert_called_once_with(False)
-        # No inputstream add-on: inputstream.adaptive takes a bare media
-        # playlist for video and fails.
         item.setProperty.assert_not_called()
 
-    def test_progressive_left_to_kodi(self):
+    @patch.object(stream, "relay_port", return_value=0)
+    def test_without_relay_falls_back_to_videoplayer(self, _port):
         item = MagicMock()
-        self.assertFalse(stream.prepare_item(
-            item, MP3, "https://api-v2.soundcloud.com/m/stream/progressive"))
+        self.assertEqual(stream.prepare_item(item, HLS, HLS_MEDIA), "videoplayer")
+        item.setPath.assert_called_once_with(HLS)
+        item.setMimeType.assert_called_once_with("audio/aacp")
+        item.setProperty.assert_not_called()
+
+    @patch.object(stream, "relay_port", return_value=40123)
+    def test_progressive_left_to_kodi(self, _port):
+        item = MagicMock()
+        self.assertEqual(stream.prepare_item(
+            item, MP3, "https://api-v2.soundcloud.com/m/stream/progressive"), "")
         item.setPath.assert_called_once_with(MP3)
         item.setMimeType.assert_not_called()
-        item.setProperty.assert_not_called()

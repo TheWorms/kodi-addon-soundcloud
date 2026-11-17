@@ -5,29 +5,32 @@ Since late 2026 SoundCloud only serves most tracks as AAC in HLS
 (fragmented MP4 segments: presets aac_160k / aac_96k, plus the abr_*
 master playlist); the MP3 and Opus transcodings are gone.
 
-Kodi gives an item queued in the music playlist to its audio player,
-PAPlayer, which reads these playlists badly: no sound, each track
-skipped after a few seconds ("Error reading samples"), the decoder
-sometimes reporting dozens of channels, and Kodi crashing (segfault in
-the audio decoder thread, seen on CoreELEC 21.3).
+Kodi's music player (PAPlayer) reads these playlists badly: no sound,
+each track skipped after a few seconds, Kodi crashing in the audio
+decoder (CoreELEC 21.3). inputstream.adaptive takes a bare media
+playlist for video and fails. VideoPlayer plays them, but Kodi then
+treats the music as a video (no screensaver) and seeking freezes.
 
-inputstream.adaptive is no way out either: given a bare media playlist
-(no master playlist naming the codec) it assumes a video track and
-fails ("No suitable Track atom found in stream").
-
-VideoPlayer, Kodi's main player, reads the same playlists with its
-built-in HLS reader (FFmpeg) like any .m3u8 link. Kodi's player rules
-send internet streams with the audio/aacp MIME type to VideoPlayer, so
-HLS items carry that MIME type. Progressive (plain HTTP) streams keep
-going to PAPlayer as before.
+6.0.10: the add-on service runs a local relay (hls_relay.py) that
+serves the playlist as ONE continuous MP4 file (duration and seek
+index included) on 127.0.0.1, which PAPlayer plays like any .m4a:
+seeking, screensaver, gapless queueing and the music OSD all behave as
+with the old MP3 streams. When the relay is not running (service not
+started yet), HLS items fall back to VideoPlayer (audio/aacp MIME type,
+Kodi's player rules send it there), as in 6.0.9.
 """
 
 import urllib.parse
 
 import xbmc
+import xbmcgui
 
+# Home window property where service.py publishes the relay's port.
+RELAY_PORT_PROPERTY = "soundcloud.relay_port"
+RELAY_PATH = "/stream"  # no extension: see hls_relay.RELAY_PATH
+RELAY_MIME = "audio/mp4"
 # MIME type that makes Kodi pick VideoPlayer instead of PAPlayer.
-PLAYER_MIME = "audio/aacp"
+VIDEOPLAYER_MIME = "audio/aacp"
 _LOG_PREFIX = "plugin.audio.soundcloud::stream "
 
 
@@ -43,15 +46,42 @@ def is_hls_url(url):
     return path.endswith(".m3u8") or path.endswith("/stream/hls")
 
 
+def relay_port():
+    """Port of the service's relay, or 0 when it is not running."""
+    try:
+        return int(xbmcgui.Window(10000).getProperty(RELAY_PORT_PROPERTY) or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def relay_url(port, playlist_url):
+    return "http://127.0.0.1:%d%s?u=%s" % (
+        port, RELAY_PATH, urllib.parse.quote(playlist_url, safe=""))
+
+
 def prepare_item(list_item, resolved_url, media_url=None):
     """
-    Points list_item at resolved_url and, for HLS, makes Kodi play it
-    with VideoPlayer. Returns True when the item was marked as HLS.
+    Points list_item at the URL Kodi should play. HLS goes through the
+    local relay (music player) or, without it, to VideoPlayer. Returns
+    "relay", "videoplayer" or "" (plain stream, left to Kodi).
     """
     list_item.setPath(resolved_url)
-    if not (is_hls_url(resolved_url) or is_hls_url(media_url)):
-        return False
-    list_item.setMimeType(PLAYER_MIME)
+    hls = is_hls_url(resolved_url) or is_hls_url(media_url)
+    if not (hls and resolved_url.startswith("http")):
+        return ""
+
+    port = relay_port()
+    if port:
+        list_item.setPath(relay_url(port, resolved_url))
+        list_item.setMimeType(RELAY_MIME)
+        list_item.setContentLookup(False)
+        xbmc.log(_LOG_PREFIX + "HLS stream relayed to the music player", xbmc.LOGINFO)
+        return "relay"
+
+    list_item.setMimeType(VIDEOPLAYER_MIME)
     list_item.setContentLookup(False)
-    xbmc.log(_LOG_PREFIX + "HLS stream handed to VideoPlayer", xbmc.LOGINFO)
-    return True
+    xbmc.log(
+        _LOG_PREFIX + "relay not running: HLS stream handed to VideoPlayer",
+        xbmc.LOGWARNING,
+    )
+    return "videoplayer"

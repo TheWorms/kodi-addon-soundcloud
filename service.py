@@ -45,7 +45,6 @@ doesn't perceive any delay, slow enough that the CPU cost is
 negligible (an idle ARM Cortex-A73 spends <0.1% on this loop).
 """
 import os
-import sys
 import threading
 
 import xbmc
@@ -54,6 +53,7 @@ import xbmcgui
 
 
 PROPERTY_SPLASH = "soundcloud.splash"
+RELAY_PORT_PROPERTY = "soundcloud.relay_port"
 POLL_INTERVAL_SECONDS = 0.05
 
 
@@ -287,11 +287,56 @@ def _run_service():
     )
 
 
-if __name__ == "__main__":
-    if not _service_enabled():
+def _start_relay():
+    """
+    Local relay serving SoundCloud's AAC HLS playlists as one continuous
+    MP4 file for Kodi's music player (see resources/lib/kodi/hls_relay.py).
+    Runs whatever the "service.preload" setting says: playback needs it.
+    Returns the relay, or None when it could not start (playback then
+    falls back to VideoPlayer).
+    """
+    home = xbmcgui.Window(10000)
+    home.clearProperty(RELAY_PORT_PROPERTY)
+    try:
+        from resources.lib.kodi import hls_relay
+
+        relay = hls_relay.Relay(log=lambda msg: xbmc.log(
+            "plugin.audio.soundcloud::service.py " + msg, xbmc.LOGINFO))
+        port = relay.start()
+        home.setProperty(RELAY_PORT_PROPERTY, str(port))
         xbmc.log(
-            "plugin.audio.soundcloud::service.py disabled by user setting, exiting",
+            "plugin.audio.soundcloud::service.py stream relay on 127.0.0.1:%d" % port,
             xbmc.LOGINFO,
         )
-        sys.exit(0)
-    _run_service()
+        return relay
+    except Exception as e:
+        xbmc.log(
+            "plugin.audio.soundcloud::service.py stream relay failed to start: %s" % e,
+            xbmc.LOGWARNING,
+        )
+        return None
+
+
+def _stop_relay(relay):
+    xbmcgui.Window(10000).clearProperty(RELAY_PORT_PROPERTY)
+    if relay is not None:
+        try:
+            relay.stop()
+        except Exception:
+            pass
+
+
+if __name__ == "__main__":
+    _relay = _start_relay()
+    try:
+        if _service_enabled():
+            _run_service()
+        else:
+            xbmc.log(
+                "plugin.audio.soundcloud::service.py splash preload disabled by "
+                "user setting, only the stream relay runs",
+                xbmc.LOGINFO,
+            )
+            xbmc.Monitor().waitForAbort()
+    finally:
+        _stop_relay(_relay)

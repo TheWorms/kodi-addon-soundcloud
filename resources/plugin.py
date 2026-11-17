@@ -218,8 +218,8 @@ def run():
             resolved_url = api.resolve_media_url(media_url)
             if resolved_url:
                 item = xbmcgui.ListItem(path=resolved_url)
-                # SoundCloud's AAC HLS streams are played by VideoPlayer
-                # (Kodi's audio player PAPlayer crashes on them).
+                # SoundCloud's AAC HLS streams go through the service's
+                # local relay (one continuous MP4 for the music player).
                 stream.prepare_item(item, resolved_url, media_url)
                 xbmcplugin.setResolvedUrl(handle, succeeded=True, listitem=item)
             else:
